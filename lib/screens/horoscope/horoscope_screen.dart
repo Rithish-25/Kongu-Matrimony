@@ -301,11 +301,11 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
   Widget _buildAdvancedSearchForm(BuildContext context, ThemeData theme, List<Profile> allProfiles) {
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.all(AppConstants.spacingM),
+      padding: const EdgeInsets.only(left: AppConstants.spacingM, right: AppConstants.spacingM, top: 10.0, bottom: 24.0),
       child: Column(
         children: [
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: AppConstants.spacingS),
+            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: 6.0),
             decoration: BoxDecoration(
               color: Colors.white,
               borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
@@ -378,21 +378,21 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
               ],
             ),
           ),
-          const SizedBox(height: AppConstants.spacingL),
+          const SizedBox(height: 12),
 
           // Search button
           PrimaryButton(
             text: 'Search Now',
-            height: 46,
+            height: 44,
             icon: const Icon(Icons.search_rounded, color: Colors.white, size: 18),
             onPressed: () => _performAdvancedSearch(allProfiles),
           ),
-          const SizedBox(height: AppConstants.spacingS),
+          const SizedBox(height: 4),
           Row(
             children: [
               Expanded(
                 child: SizedBox(
-                  height: 46,
+                  height: 44,
                   child: OutlinedButton(
                     onPressed: _resetFilters,
                     style: OutlinedButton.styleFrom(
@@ -409,7 +409,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
               const SizedBox(width: AppConstants.spacingM),
               Expanded(
                 child: SizedBox(
-                  height: 46,
+                  height: 44,
                   child: ElevatedButton(
                     onPressed: () {
                       setState(() {
@@ -453,7 +453,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     required ValueChanged<String?> onChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -473,7 +473,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
             child: DropdownButtonFormField<String>(
               value: value,
               decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
                   borderSide: const BorderSide(color: AppColors.border),
@@ -510,7 +510,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
 
   Widget _buildKootamSearchField(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -530,7 +530,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
             child: GestureDetector(
               onTap: () => _showKootamSearchDialog(context),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   borderRadius: BorderRadius.circular(12),
@@ -756,7 +756,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     required ValueChanged<String?> onEndChanged,
   }) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -779,7 +779,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
                   child: DropdownButtonFormField<String>(
                     value: startValue,
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: const BorderSide(color: AppColors.border),
@@ -812,7 +812,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
                   child: DropdownButtonFormField<String>(
                     value: endValue,
                     decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: const BorderSide(color: AppColors.border),
@@ -962,7 +962,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
 
   Widget _buildLocationSearchField(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      padding: const EdgeInsets.symmetric(vertical: 5.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.center,
         children: [
@@ -982,7 +982,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
             child: GestureDetector(
               onTap: () => _showLocationSearchDialog(context),
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: AppColors.background,
                   borderRadius: BorderRadius.circular(12),
