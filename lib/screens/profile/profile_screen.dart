@@ -38,7 +38,7 @@ class ProfileScreen extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: AppConstants.spacingL),
+                const SizedBox(height: 10),
                 GestureDetector(
                   onTap: () => _showChangeAvatarDialog(
                     context,
@@ -49,8 +49,8 @@ class ProfileScreen extends StatelessWidget {
                     alignment: Alignment.bottomRight,
                     children: [
                       Container(
-                        width: 100,
-                        height: 100,
+                        width: 130,
+                        height: 130,
                         decoration: BoxDecoration(
                           color: Colors.white,
                           shape: BoxShape.circle,
@@ -63,14 +63,14 @@ class ProfileScreen extends StatelessWidget {
                         ),
                       ),
                       Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(8),
                         decoration: const BoxDecoration(
                           color: AppColors.primary,
                           shape: BoxShape.circle,
                         ),
                         child: const Icon(
                           Icons.camera_alt,
-                          size: 14,
+                          size: 18,
                           color: Colors.white,
                         ),
                       ),
