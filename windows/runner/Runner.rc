@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.kongumatrimony" "\0"
-            VALUE "FileDescription", "kongu_matrimony" "\0"
+            VALUE "FileDescription", "Kongu Matrimony" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
             VALUE "InternalName", "kongu_matrimony" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.kongumatrimony. All rights reserved." "\0"
             VALUE "OriginalFilename", "kongu_matrimony.exe" "\0"
-            VALUE "ProductName", "kongu_matrimony" "\0"
+            VALUE "ProductName", "Kongu Matrimony" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END
