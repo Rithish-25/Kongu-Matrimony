@@ -373,16 +373,61 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
           // Search button
           PrimaryButton(
             text: 'Search Now',
-            icon: const Icon(Icons.search_rounded, color: Colors.white, size: 20),
+            height: 46,
+            icon: const Icon(Icons.search_rounded, color: Colors.white, size: 18),
             onPressed: () => _performAdvancedSearch(allProfiles),
           ),
           const SizedBox(height: AppConstants.spacingS),
-          SizedBox(
-            width: double.infinity,
-            child: OutlinedButton(
-              onPressed: _resetFilters,
-              child: const Text('Reset Filters'),
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: SizedBox(
+                  height: 46,
+                  child: OutlinedButton(
+                    onPressed: _resetFilters,
+                    style: OutlinedButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      textStyle: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    child: const Text('Reset Filters'),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppConstants.spacingM),
+              Expanded(
+                child: SizedBox(
+                  height: 46,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      setState(() {
+                        if (_searchResults.isEmpty) {
+                          _initializeDefaultSearch();
+                        } else {
+                          _showResults = true;
+                        }
+                      });
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.secondary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
+                      ),
+                      textStyle: GoogleFonts.poppins(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    child: const Text('Close'),
+                  ),
+                ),
+              ),
+            ],
           ),
         ],
       ),
