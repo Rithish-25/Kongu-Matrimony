@@ -33,6 +33,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
   String _selectedKoottam = 'Any';
   String _selectedEducation = 'Any';
   String _selectedOccupation = 'Any';
+  String _selectedLocation = 'Any';
 
 
 
@@ -91,6 +92,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       if (_selectedCaste != 'Any' && !profile.subsect.toLowerCase().contains(_selectedCaste.toLowerCase())) return false;
 
       if (_selectedKoottam != 'Any' && profile.koottam != _selectedKoottam) return false;
+      if (_selectedLocation != 'Any' && profile.location != _selectedLocation) return false;
       if (!_matchesEducation(profile)) return false;
       if (!_matchesOccupation(profile)) return false;
 
@@ -112,6 +114,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     }
     if (_selectedMaritalStatus != 'Any') activeFilters.add('Status: $_selectedMaritalStatus');
     if (_selectedKoottam != 'Any') activeFilters.add('Koottam: $_selectedKoottam');
+    if (_selectedLocation != 'Any') activeFilters.add('Location: $_selectedLocation');
     if (_selectedReligion != 'Any') activeFilters.add('Religion: $_selectedReligion');
     if (_selectedCaste != 'Any') activeFilters.add('Caste: $_selectedCaste');
     if (_selectedEducation != 'Any') activeFilters.add('Education: $_selectedEducation');
@@ -187,6 +190,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       _selectedKoottam = 'Any';
       _selectedEducation = 'Any';
       _selectedOccupation = 'Any';
+      _selectedLocation = 'Any';
       _showResults = false;
       _searchResults = [];
       _activeFilterSummary = '';
@@ -228,6 +232,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       if (_selectedCaste != 'Any' && !profile.subsect.toLowerCase().contains(_selectedCaste.toLowerCase())) return false;
 
       if (_selectedKoottam != 'Any' && profile.koottam != _selectedKoottam) return false;
+      if (_selectedLocation != 'Any' && profile.location != _selectedLocation) return false;
       if (!_matchesEducation(profile)) return false;
       if (!_matchesOccupation(profile)) return false;
 
@@ -250,6 +255,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       }
       if (_selectedMaritalStatus != 'Any') activeFilters.add('Status: $_selectedMaritalStatus');
       if (_selectedKoottam != 'Any') activeFilters.add('Koottam: $_selectedKoottam');
+      if (_selectedLocation != 'Any') activeFilters.add('Location: $_selectedLocation');
       if (_selectedReligion != 'Any') activeFilters.add('Religion: $_selectedReligion');
       if (_selectedCaste != 'Any') activeFilters.add('Caste: $_selectedCaste');
       if (_selectedEducation != 'Any') activeFilters.add('Education: $_selectedEducation');
@@ -365,6 +371,10 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
                     if (val != null) setState(() => _selectedOccupation = val);
                   },
                 ),
+                const Divider(color: AppColors.border, height: 1),
+
+                // Location Select (Search Dialog)
+                _buildLocationSearchField(context),
               ],
             ),
           ),
@@ -839,7 +849,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
         // Results Info header
         Container(
           width: double.infinity,
-          padding: const EdgeInsets.all(AppConstants.spacingM),
+          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: 10),
           decoration: const BoxDecoration(
             color: Colors.white,
             border: Border(bottom: BorderSide(color: AppColors.border)),
@@ -890,7 +900,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
                 ],
               ),
               if (_activeFilterSummary.isNotEmpty) ...[
-                const SizedBox(height: 6),
+                const SizedBox(height: 4),
                 Text(
                   _activeFilterSummary,
                   style: GoogleFonts.poppins(
@@ -947,6 +957,238 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
                 ),
         ),
       ],
+    );
+  }
+
+  Widget _buildLocationSearchField(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10.0),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          SizedBox(
+            width: 100,
+            child: Text(
+              'Location',
+              style: GoogleFonts.poppins(
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textSecondary,
+              ),
+            ),
+          ),
+          const SizedBox(width: 8),
+          Expanded(
+            child: GestureDetector(
+              onTap: () => _showLocationSearchDialog(context),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      _selectedLocation,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const Icon(
+                      Icons.keyboard_arrow_down_rounded,
+                      color: AppColors.secondaryDark,
+                      size: 20,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showLocationSearchDialog(BuildContext context) {
+    final List<String> defaultLocations = ['Any', 'Coimbatore', 'Erode', 'Tiruppur', 'Salem', 'Namakkal'];
+    final List<String> otherLocations = [
+      'Karur',
+      'Dindigul',
+      'Trichy',
+      'Madurai',
+      'Chennai',
+      'Bangalore',
+      'Dharmapuri',
+      'Krishnagiri',
+      'Pollachi',
+      'Udumalaipettai',
+      'Gobichettipalayam',
+    ];
+
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        String searchQuery = '';
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            final List<String> filteredDefaults = defaultLocations
+                .where((item) => item.toLowerCase().contains(searchQuery.toLowerCase()))
+                .toList();
+
+            final List<String> filteredOthers = otherLocations
+                .where((item) => item.toLowerCase().contains(searchQuery.toLowerCase()))
+                .toList();
+
+            return AlertDialog(
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              title: Text(
+                'Select Location',
+                style: GoogleFonts.poppins(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 16,
+                  color: AppColors.primary,
+                ),
+              ),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: 350,
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    TextField(
+                      decoration: InputDecoration(
+                        hintText: 'Search Location...',
+                        hintStyle: GoogleFonts.poppins(fontSize: 13),
+                        prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.textSecondary),
+                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        enabledBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.border),
+                        ),
+                        focusedBorder: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(12),
+                          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                        ),
+                      ),
+                      style: GoogleFonts.poppins(fontSize: 13),
+                      onChanged: (val) {
+                        setStateDialog(() {
+                          searchQuery = val;
+                        });
+                      },
+                    ),
+                    const SizedBox(height: 12),
+                    Expanded(
+                      child: ListView(
+                        shrinkWrap: true,
+                        children: [
+                          if (filteredDefaults.isNotEmpty) ...[
+                            Padding(
+                              padding: const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 4.0),
+                              child: Text(
+                                searchQuery.isEmpty ? 'Default Locations' : 'Matches in Defaults',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                            ...filteredDefaults.map((item) => ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                                  title: Text(
+                                    item,
+                                    style: GoogleFonts.poppins(fontSize: 13),
+                                  ),
+                                  dense: true,
+                                  trailing: _selectedLocation == item
+                                      ? const Icon(Icons.check, color: AppColors.primary, size: 18)
+                                      : null,
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedLocation = item;
+                                    });
+                                    Navigator.of(dialogContext).pop();
+                                  },
+                                )),
+                          ],
+                          if (filteredOthers.isNotEmpty) ...[
+                            const Divider(),
+                            Padding(
+                              padding: const EdgeInsets.only(top: 4.0, bottom: 4.0, left: 4.0),
+                              child: Text(
+                                searchQuery.isEmpty ? 'Other Locations' : 'Matches in Others',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ),
+                            ...filteredOthers.map((item) => ListTile(
+                                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
+                                  title: Text(
+                                    item,
+                                    style: GoogleFonts.poppins(fontSize: 13),
+                                  ),
+                                  dense: true,
+                                  trailing: _selectedLocation == item
+                                      ? const Icon(Icons.check, color: AppColors.primary, size: 18)
+                                      : null,
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedLocation = item;
+                                    });
+                                    Navigator.of(dialogContext).pop();
+                                  },
+                                )),
+                          ],
+                          if (filteredDefaults.isEmpty && filteredOthers.isEmpty)
+                            Padding(
+                              padding: const EdgeInsets.all(16.0),
+                              child: Center(
+                                child: Text(
+                                  'No Location found',
+                                  style: GoogleFonts.poppins(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                ),
+                              ),
+                            ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(dialogContext).pop(),
+                  child: Text(
+                    'Cancel',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

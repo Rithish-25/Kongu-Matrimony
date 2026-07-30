@@ -44,17 +44,6 @@ class _MainLayoutState extends State<MainLayout> {
     });
   }
 
-  void _goBack() {
-    if (_tabHistory.isEmpty) {
-      return;
-    }
-
-    setState(() {
-      _navigationForward = false;
-      _currentIndex = _tabHistory.removeLast();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -78,23 +67,13 @@ class _MainLayoutState extends State<MainLayout> {
                   color: AppColors.primary,
                 ),
                 onPressed: () {
-                  if (_currentIndex == 1 && (_horoscopeKey.currentState?.handleBackPress() ?? false)) {
-                    return;
-                  }
-                  _goBack();
+                  _navigateToTab(0);
                 },
               )
             : null,
       ),
       body: WillPopScope(
         onWillPop: () async {
-          // Check if current screen can handle back press internally
-          if (_currentIndex == 1) {
-            if (_horoscopeKey.currentState?.handleBackPress() ?? false) {
-              return false;
-            }
-          }
-
           // If not on Home tab, go to Home and consume the back event
           if (_currentIndex != 0) {
             setState(() {
