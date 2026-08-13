@@ -61,7 +61,7 @@ class _MainLayoutState extends State<MainLayout> {
                         : 'Profile',
         leading: _currentIndex != 0
             ? IconButton(
-                icon: Icon(
+                icon: const Icon(
                   Icons.arrow_back,
                   size: 22,
                   color: AppColors.primary,

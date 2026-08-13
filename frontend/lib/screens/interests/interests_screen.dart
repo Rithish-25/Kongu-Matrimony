@@ -278,6 +278,7 @@ class InboxListCard extends StatelessWidget {
           coverImageUrl: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&auto=format&fit=crop&q=80',
           horoscopeStar: 'Anusham',
           horoscopeRasi: 'Viruchigam',
+          horoscopePaatham: '4',
           subsect: 'Kongu Vellalar Gounder',
           isPremium: false,
           isFavourite: false,
@@ -341,15 +342,7 @@ class InboxListCard extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.id,
-                    style: GoogleFonts.poppins(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textLight,
-                    ),
-                  ),
+
                   const SizedBox(height: 4),
                   Text(
                     item.message,

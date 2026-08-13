@@ -13,6 +13,7 @@ class ProfileCard extends StatelessWidget {
   final VoidCallback? onFavoriteToggle;
   final Function(String action)?
   onInterestAction; // 'accept' or 'reject' or 'cancel'
+  final bool showLastActive;
 
   const ProfileCard({
     super.key,
@@ -21,6 +22,7 @@ class ProfileCard extends StatelessWidget {
     this.onViewProfile,
     this.onFavoriteToggle,
     this.onInterestAction,
+    this.showLastActive = true,
   });
 
   @override
@@ -52,8 +54,8 @@ class ProfileCard extends StatelessWidget {
                     Hero(
                       tag: 'profile-image-${profile.id}-${cardType.name}',
                       child: Container(
-                        width: 85,
-                        height: 85,
+                        width: 95,
+                        height: 95,
                         decoration: BoxDecoration(
                           borderRadius: BorderRadius.circular(10),
                           color: AppColors.border.withValues(alpha: 0.3),
@@ -79,30 +81,34 @@ class ProfileCard extends StatelessWidget {
                       Text(
                         profile.name,
                         style: GoogleFonts.poppins(
-                          fontSize: 13,
+                          fontSize: 15.5,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 1),
-
-                      // ID & Last Active
-                      Text(
-                        '${profile.id.toUpperCase()} | Last active at 07:15 am',
-                        style: GoogleFonts.poppins(
-                          fontSize: 9,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
                       const SizedBox(height: 4),
 
-                      // Wrapped Inline specs: age, height, subsect, job, koottam, location
+                      // ID & Last Active
+                      if (showLastActive) ...[
+                        Text(
+                          'Last active at 07:15 am',
+                          style: GoogleFonts.poppins(
+                            fontSize: 11,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                      ] else ...[
+                        const SizedBox(height: 12),
+                      ],
+
+                      // Wrapped Inline specs: age, height, job, koottam, location
                       Text(
-                        '${profile.age} yrs | ${profile.heightText} | ${profile.subsect} | ${profile.occupation} | ${profile.koottam} | ${profile.location}',
+                        '${profile.age} yrs | ${profile.heightText} | ${profile.occupation} | ${profile.koottam} | ${profile.location}',
                         style: GoogleFonts.poppins(
-                          fontSize: 9.5,
+                          fontSize: 12.5,
                           height: 1.3,
                           color: AppColors.textSecondary.withValues(
                             alpha: 0.85,
@@ -143,14 +149,14 @@ class ProfileCard extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.textSecondary,
                   side: const BorderSide(color: AppColors.border, width: 1.2),
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
                 child: const Text(
                   'Decline',
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -161,14 +167,14 @@ class ProfileCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
                 child: const Text(
                   'Accept',
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -184,14 +190,14 @@ class ProfileCard extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.error,
                   side: const BorderSide(color: AppColors.error, width: 1.2),
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
                 child: const Text(
                   'Cancel Interest',
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -202,14 +208,14 @@ class ProfileCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
                 child: const Text(
                   'View Profile',
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -226,15 +232,15 @@ class ProfileCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
                 ),
-                icon: const Icon(Icons.visibility_outlined, size: 14),
+                icon: const Icon(Icons.visibility_outlined, size: 16),
                 label: const Text(
                   'View',
-                  style: TextStyle(fontSize: 11, fontWeight: FontWeight.bold),
+                  style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
@@ -264,7 +270,7 @@ class ProfileCard extends StatelessWidget {
                           : AppColors.primary,
                   foregroundColor:
                       (isSent || isAccepted) ? Colors.grey[600] : Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 10),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(20),
                   ),
@@ -273,14 +279,14 @@ class ProfileCard extends StatelessWidget {
                   isAccepted
                       ? Icons.done_all
                       : (isSent ? Icons.check : Icons.favorite),
-                  size: 14,
+                  size: 16,
                 ),
                 label: Text(
                   isAccepted
                       ? 'Interest Accepted'
                       : (isSent ? 'Interest Sent' : 'Express Interest'),
                   style: const TextStyle(
-                    fontSize: 11,
+                    fontSize: 13,
                     fontWeight: FontWeight.bold,
                   ),
                 ),

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'registration_draft.dart';
 
 class UserProfileState {
   final String displayName;
@@ -44,6 +45,7 @@ class Profile {
   final String coverImageUrl;
   final String horoscopeStar;
   final String horoscopeRasi;
+  final String horoscopePaatham;
   final String subsect; // Community details
   final bool isPremium;
   bool isFavourite;
@@ -64,6 +66,7 @@ class Profile {
     required this.coverImageUrl,
     required this.horoscopeStar,
     required this.horoscopeRasi,
+    required this.horoscopePaatham,
     required this.subsect,
     this.isPremium = false,
     this.isFavourite = false,
@@ -85,6 +88,7 @@ class Profile {
     String? coverImageUrl,
     String? horoscopeStar,
     String? horoscopeRasi,
+    String? horoscopePaatham,
     String? subsect,
     bool? isPremium,
     bool? isFavourite,
@@ -105,6 +109,7 @@ class Profile {
       coverImageUrl: coverImageUrl ?? this.coverImageUrl,
       horoscopeStar: horoscopeStar ?? this.horoscopeStar,
       horoscopeRasi: horoscopeRasi ?? this.horoscopeRasi,
+      horoscopePaatham: horoscopePaatham ?? this.horoscopePaatham,
       subsect: subsect ?? this.subsect,
       isPremium: isPremium ?? this.isPremium,
       isFavourite: isFavourite ?? this.isFavourite,
@@ -205,6 +210,7 @@ class ProfileDatabase {
           'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=80',
       horoscopeStar: 'Anusham',
       horoscopeRasi: 'Viruchigam',
+      horoscopePaatham: '2',
       subsect: 'Kongu Vellalar Gounder',
       isPremium: true,
       isFavourite: false,
@@ -228,6 +234,7 @@ class ProfileDatabase {
           'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&auto=format&fit=crop&q=80',
       horoscopeStar: 'Rohini',
       horoscopeRasi: 'Rishabam',
+      horoscopePaatham: '3',
       subsect: 'Kongu Vellalar Gounder',
       isPremium: true,
       isFavourite: false,
@@ -251,6 +258,7 @@ class ProfileDatabase {
           'https://images.unsplash.com/photo-1582560475093-ba66accbc424?w=800&auto=format&fit=crop&q=80',
       horoscopeStar: 'Uthiradam',
       horoscopeRasi: 'Dhanusu',
+      horoscopePaatham: '1',
       subsect: 'Kongu Vellalar Gounder',
       isPremium: false,
       isFavourite: false,
@@ -274,6 +282,7 @@ class ProfileDatabase {
           'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=800&auto=format&fit=crop&q=80',
       horoscopeStar: 'Karthigai',
       horoscopeRasi: 'Mesham',
+      horoscopePaatham: '4',
       subsect: 'Kongu Vellalar Gounder',
       isPremium: true,
       isFavourite: false,
@@ -297,6 +306,7 @@ class ProfileDatabase {
           'https://images.unsplash.com/photo-1519741497674-611481863552?w=800&auto=format&fit=crop&q=80',
       horoscopeStar: 'Aswini',
       horoscopeRasi: 'Mesham',
+      horoscopePaatham: '2',
       subsect: 'Kongu Vellalar Gounder',
       isPremium: false,
       isFavourite: false,
@@ -320,6 +330,7 @@ class ProfileDatabase {
           'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?w=800&auto=format&fit=crop&q=80',
       horoscopeStar: 'Mirugaseerisham',
       horoscopeRasi: 'Rishabam',
+      horoscopePaatham: '3',
       subsect: 'Kongu Vellalar Gounder',
       isPremium: true,
       isFavourite: false,
@@ -343,6 +354,7 @@ class ProfileDatabase {
           'https://images.unsplash.com/photo-1582560475093-ba66accbc424?w=800&auto=format&fit=crop&q=80',
       horoscopeStar: 'Poosam',
       horoscopeRasi: 'Katagam',
+      horoscopePaatham: '1',
       subsect: 'Kongu Vellalar Gounder',
       isPremium: false,
       isFavourite: false,
@@ -366,6 +378,7 @@ class ProfileDatabase {
           'https://images.unsplash.com/photo-1469371670807-013ccf25f16a?w=800&auto=format&fit=crop&q=80',
       horoscopeStar: 'Revathi',
       horoscopeRasi: 'Meenam',
+      horoscopePaatham: '4',
       subsect: 'Kongu Vellalar Gounder',
       isPremium: true,
       isFavourite: false,
@@ -465,6 +478,8 @@ class ProfileDatabase {
       await prefs.remove(_kInterests);
       await prefs.setBool(_kIsLoggedIn, false);
       _isLoggedIn = false;
+      await RegistrationDraft.clearProfileDetails();
+      await RegistrationDraft.clearDraft();
     } catch (_) {}
 
     // Reset to default in-memory state

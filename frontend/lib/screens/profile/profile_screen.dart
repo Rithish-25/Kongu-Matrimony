@@ -7,6 +7,8 @@ import '../../core/navigation/app_page_route.dart';
 import '../../widgets/membership_card/membership_card.dart';
 import '../premium/premium_screen.dart';
 import '../auth/login_screen.dart';
+import '../../core/assets/registration_draft.dart';
+import '../register/register_flow.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -14,14 +16,6 @@ class ProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final mockAvatars = [
-      'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=500&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=500&auto=format&fit=crop&q=80',
-      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=500&auto=format&fit=crop&q=80',
-    ];
-
     return Scaffold(
       body: ValueListenableBuilder<UserProfileState>(
         valueListenable: ProfileDatabase.userProfileNotifier,
@@ -39,42 +33,18 @@ class ProfileScreen extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 const SizedBox(height: 10),
-                GestureDetector(
-                  onTap: () => _showChangeAvatarDialog(
-                    context,
-                    mockAvatars,
-                    userProfile.profileImageUrl,
-                  ),
-                  child: Stack(
-                    alignment: Alignment.bottomRight,
-                    children: [
-                      Container(
-                        width: 130,
-                        height: 130,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          shape: BoxShape.circle,
-                          border: Border.all(color: AppColors.primary, width: 3),
-                          boxShadow: AppConstants.softShadow,
-                          image: DecorationImage(
-                            image: NetworkImage(userProfile.profileImageUrl),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(
-                          Icons.camera_alt,
-                          size: 18,
-                          color: Colors.white,
-                        ),
-                      ),
-                    ],
+                Container(
+                  width: 130,
+                  height: 130,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: AppColors.primary, width: 3),
+                    boxShadow: AppConstants.softShadow,
+                    image: DecorationImage(
+                      image: NetworkImage(userProfile.profileImageUrl),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingS),
@@ -108,10 +78,23 @@ class ProfileScreen extends StatelessWidget {
                   title: 'Account Settings',
                   options: [
                     _ProfileOption(
-                      icon: Icons.badge_outlined,
-                      title: 'Change Name',
-                      subtitle: 'Update your display name',
-                      onTap: () => _showChangeNameDialog(context, userProfile.displayName),
+                      icon: Icons.edit_note_outlined,
+                      title: 'Edit Profile',
+                      subtitle: 'Update your profile details',
+                      onTap: () async {
+                        final data = await RegistrationDraft.loadProfileDetails();
+                        if (context.mounted) {
+                          Navigator.of(context).push(
+                            appPageRoute(
+                              RegisterFlow(
+                                initialStep: 0,
+                                initialData: data,
+                                isEditing: true,
+                              ),
+                            ),
+                          );
+                        }
+                      },
                     ),
                     _ProfileOption(
                       icon: Icons.workspace_premium_outlined,
@@ -236,128 +219,8 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  void _showChangeAvatarDialog(
-    BuildContext context,
-    List<String> avatars,
-    String currentAvatar,
-  ) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          backgroundColor: Colors.white,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
-          ),
-          title: Text(
-            'Select Profile Avatar',
-            style: GoogleFonts.poppins(
-              fontWeight: FontWeight.bold,
-              fontSize: 16,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          content: SizedBox(
-            width: double.maxFinite,
-            child: GridView.builder(
-              shrinkWrap: true,
-              itemCount: avatars.length,
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                crossAxisSpacing: 10,
-                mainAxisSpacing: 10,
-              ),
-              itemBuilder: (context, index) {
-                final avatar = avatars[index];
-                final isSelected = avatar == currentAvatar;
 
-                return GestureDetector(
-                  onTap: () async {
-                      await ProfileDatabase.updateUserProfile(imageUrl: avatar);
-                      Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Profile image updated successfully!'),
-                          duration: Duration(milliseconds: 1200),
-                        ),
-                      );
-                    },
-                  child: Container(
-                    decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      border: Border.all(
-                        color: isSelected ? AppColors.primary : Colors.grey[300]!,
-                        width: isSelected ? 3 : 1,
-                      ),
-                      image: DecorationImage(
-                        image: NetworkImage(avatar),
-                        fit: BoxFit.cover,
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: Text(
-                'Cancel',
-                style: GoogleFonts.poppins(color: AppColors.textSecondary),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
-  void _showChangeNameDialog(BuildContext context, String currentName) {
-    final controller = TextEditingController(text: currentName);
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return AlertDialog(
-          title: Text(
-            'Change Name',
-            style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
-          ),
-          content: TextField(
-            controller: controller,
-            decoration: const InputDecoration(
-              hintText: 'Enter your name',
-            ),
-            textInputAction: TextInputAction.done,
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(dialogContext).pop(),
-              child: const Text('Cancel'),
-            ),
-            TextButton(
-              onPressed: () async {
-                final updatedName = controller.text.trim();
-                if (updatedName.isEmpty) {
-                  return;
-                }
-                await ProfileDatabase.updateUserProfile(displayName: updatedName);
-                Navigator.of(dialogContext).pop();
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('Name updated successfully.'),
-                    duration: Duration(milliseconds: 1200),
-                  ),
-                );
-              },
-              child: const Text('Save'),
-            ),
-          ],
-        );
-      },
-    );
-  }
 
   void _showLogoutDialog(BuildContext context) {
     showDialog(

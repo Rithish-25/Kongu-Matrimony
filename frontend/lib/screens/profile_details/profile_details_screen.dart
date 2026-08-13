@@ -263,7 +263,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                   ),
                   const SizedBox(height: 4),
                   Text(
-                    '${widget.profile.age} Yrs, ${widget.profile.heightText}, ${widget.profile.subsect}, ${widget.profile.occupation}, ${widget.profile.location}',
+                    '${widget.profile.age} Yrs, ${widget.profile.heightText}, ${widget.profile.occupation}, ${widget.profile.location}',
                     style: GoogleFonts.poppins(
                       fontSize: 11,
                       fontWeight: FontWeight.w500,
@@ -311,26 +311,13 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              Text(
-                profile.name.split(' ').first,
-                style: GoogleFonts.poppins(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.primary,
-                ),
-              ),
-              Text(
-                'ID: KM-${profile.id.toUpperCase()} 🪐',
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textLight,
-                ),
-              ),
-            ],
+          Text(
+            profile.name.split(' ').first,
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
           ),
           const SizedBox(height: 4),
           Text(
@@ -396,7 +383,6 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
         'Profession',
         profile.occupation,
       ),
-      _DetailRowItem(Icons.family_restroom, 'Sub-Sect', profile.subsect),
       _DetailRowItem(
         Icons.star_border,
         'Koottam (Clan)',
@@ -516,6 +502,13 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     child: _buildHoroscopeSpec(
                       'Star (Natchathiram)',
                       profile.horoscopeStar,
+                    ),
+                  ),
+                  Container(width: 1, height: 40, color: AppColors.border),
+                  Expanded(
+                    child: _buildHoroscopeSpec(
+                      'Paatham',
+                      profile.horoscopePaatham,
                     ),
                   ),
                   Container(width: 1, height: 40, color: AppColors.border),

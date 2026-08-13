@@ -14,7 +14,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final items = [
+    const items = [
       _NavigationItem(
         icon: Icons.home_outlined,
         activeIcon: Icons.home_rounded,
@@ -179,7 +179,7 @@ class _NavigationItem {
   final IconData activeIcon;
   final String label;
 
-  _NavigationItem({
+  const _NavigationItem({
     required this.icon,
     required this.activeIcon,
     required this.label,

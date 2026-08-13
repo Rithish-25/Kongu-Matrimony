@@ -3,7 +3,9 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
 import '../../core/assets/mock_data.dart';
+import '../../core/assets/registration_draft.dart';
 import '../main_layout.dart';
+import '../register/register_flow.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -34,25 +36,57 @@ class _LoginScreenState extends State<LoginScreen> {
     // Simulate authentication delay
     await Future.delayed(const Duration(milliseconds: 700));
 
+    final enteredMobile = _mobileController.text.trim();
+
+    final profileDetails = await RegistrationDraft.loadProfileDetails();
+    var registeredMobile = profileDetails['mobile'];
+    var registeredName = profileDetails['name'] ?? 'User';
+
+    if (registeredMobile == null || enteredMobile != registeredMobile) {
+      final draftData = await RegistrationDraft.loadDraftData();
+      final draftMobile = draftData['mobile'];
+      if (draftMobile != null && enteredMobile == draftMobile) {
+        registeredMobile = draftMobile;
+        registeredName = draftData['name'] ?? 'User';
+        await RegistrationDraft.saveProfileDetails(draftData);
+      }
+    }
+
+    if (enteredMobile != registeredMobile) {
+      setState(() => _loading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Mobile number not registered. Please register first!'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
+
     // Save the name to the mock user state and mark logged in
-    await ProfileDatabase.updateUserProfile(displayName: 'User');
+    await ProfileDatabase.updateUserProfile(displayName: registeredName);
     await ProfileDatabase.login();
 
     // Navigate to MainLayout with a slide+fade transition
-    Navigator.of(context).pushReplacement(PageRouteBuilder(
-      transitionDuration: const Duration(milliseconds: 500),
-      pageBuilder: (context, animation, secondaryAnimation) => const MainLayout(),
-      transitionsBuilder: (context, animation, secondaryAnimation, child) {
-        final offsetAnimation = Tween<Offset>(begin: const Offset(0.25, 0), end: Offset.zero)
-            .chain(CurveTween(curve: Curves.easeOutCubic))
-            .animate(animation);
-        final fade = CurvedAnimation(parent: animation, curve: Curves.easeIn);
-        return SlideTransition(
-          position: offsetAnimation,
-          child: FadeTransition(opacity: fade, child: child),
-        );
-      },
-    ));
+    if (mounted) {
+      Navigator.of(context).pushReplacement(PageRouteBuilder(
+        transitionDuration: const Duration(milliseconds: 500),
+        pageBuilder: (context, animation, secondaryAnimation) => const MainLayout(),
+        transitionsBuilder: (context, animation, secondaryAnimation, child) {
+          final offsetAnimation = Tween<Offset>(begin: const Offset(0.25, 0), end: Offset.zero)
+              .chain(CurveTween(curve: Curves.easeOutCubic))
+              .animate(animation);
+          final fade = CurvedAnimation(parent: animation, curve: Curves.easeIn);
+          return SlideTransition(
+            position: offsetAnimation,
+            child: FadeTransition(opacity: fade, child: child),
+          );
+        },
+      ));
+    }
 
     setState(() => _loading = false);
   }
@@ -99,7 +133,7 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ),
                   ),
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 20),
                   
                   // Welcome Header
                   Text(
@@ -120,11 +154,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: AppColors.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: 32),
+                  const SizedBox(height: 24),
 
                   // Login Form Card
                   Container(
-                    padding: const EdgeInsets.all(24),
+                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
                     decoration: BoxDecoration(
                       color: const Color(0xE5FFFFFF),
                       borderRadius: BorderRadius.circular(28),
@@ -255,20 +289,18 @@ class _LoginScreenState extends State<LoginScreen> {
                             obscureText: true,
                             textInputAction: TextInputAction.done,
                             validator: (val) {
-                              if (val == null || val.isEmpty) return 'Please enter password';
-                              if (val.length < 6) return 'Password must be at least 6 characters';
                               return null;
                             },
                           ),
-                          const SizedBox(height: 24),
+                           const SizedBox(height: 18),
 
-                          // Premium Login Button
-                          Container(
-                            width: double.infinity,
-                            height: 54,
-                            decoration: BoxDecoration(
-                              gradient: AppColors.primaryGradient,
-                              borderRadius: BorderRadius.circular(16),
+                           // Premium Login Button
+                           Container(
+                             width: double.infinity,
+                             height: 48,
+                             decoration: BoxDecoration(
+                               gradient: AppColors.primaryGradient,
+                               borderRadius: BorderRadius.circular(12),
                               boxShadow: [
                                 BoxShadow(
                                   color: const Color(0x4C7A102A),
@@ -283,10 +315,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                 backgroundColor: Colors.transparent,
                                 foregroundColor: Colors.white,
                                 shadowColor: Colors.transparent,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(16),
-                                ),
-                                padding: EdgeInsets.zero,
+                                 shape: RoundedRectangleBorder(
+                                   borderRadius: BorderRadius.circular(12),
+                                 ),
+                                 padding: EdgeInsets.zero,
                               ),
                               child: _loading
                                   ? const SizedBox(
@@ -307,6 +339,69 @@ class _LoginScreenState extends State<LoginScreen> {
                                     ),
                             ),
                           ),
+                           const SizedBox(height: 16),
+                           Text(
+                             'New Member? Join Now',
+                             style: GoogleFonts.plusJakartaSans(
+                               fontSize: 13,
+                               fontWeight: FontWeight.w600,
+                               color: AppColors.textSecondary,
+                             ),
+                           ),
+                           const SizedBox(height: 12),
+                           Container(
+                             width: double.infinity,
+                             height: 44,
+                             decoration: BoxDecoration(
+                               gradient: AppColors.primaryGradient,
+                               borderRadius: BorderRadius.circular(12),
+                               boxShadow: [
+                                 BoxShadow(
+                                   color: const Color(0x4C7A102A),
+                                   blurRadius: 16,
+                                   offset: const Offset(0, 6),
+                                 ),
+                               ],
+                             ),
+                             child: ElevatedButton(
+                                onPressed: () async {
+                                  final hasDraft = await RegistrationDraft.hasDraft();
+                                  int initialStep = 0;
+                                  Map<String, String> initialData = {};
+                                  if (hasDraft) {
+                                    initialStep = await RegistrationDraft.loadDraftStep();
+                                    initialData = await RegistrationDraft.loadDraftData();
+                                  }
+                                  if (context.mounted) {
+                                    Navigator.of(context).push(
+                                      MaterialPageRoute(
+                                        builder: (context) => RegisterFlow(
+                                          initialStep: initialStep,
+                                          initialData: initialData,
+                                        ),
+                                      ),
+                                    );
+                                  }
+                                },
+                               style: ElevatedButton.styleFrom(
+                                 backgroundColor: Colors.transparent,
+                                 foregroundColor: Colors.white,
+                                 shadowColor: Colors.transparent,
+                                 shape: RoundedRectangleBorder(
+                                   borderRadius: BorderRadius.circular(12),
+                                 ),
+                                 padding: EdgeInsets.zero,
+                               ),
+                               child: Text(
+                                 'Register',
+                                 style: GoogleFonts.plusJakartaSans(
+                                   fontSize: 14,
+                                   fontWeight: FontWeight.bold,
+                                   letterSpacing: 0.5,
+                                 ),
+                               ),
+                             ),
+                           ),
                         ],
                       ),
                     ),

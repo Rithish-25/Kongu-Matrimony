@@ -938,6 +938,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
                       child: ProfileCard(
                         profile: profile,
                         cardType: ProfileCardType.standard,
+                        showLastActive: false,
                         onFavoriteToggle: () {
                           ProfileDatabase.toggleFavorite(profile.id);
                         },
