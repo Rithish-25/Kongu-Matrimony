@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
 import '../../core/constants/constants.dart';
 import '../../core/assets/mock_data.dart';
+import '../../core/localization/app_language.dart';
 import '../../widgets/appbar/custom_app_bar.dart';
 
 class ProfileDetailsScreen extends StatefulWidget {
@@ -31,9 +32,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   @override
   void initState() {
     super.initState();
-    // Get all current profiles
     _profiles = ProfileDatabase.currentProfiles;
-    // Find the initial index of the selected profile
     _initialIndex = _profiles.indexWhere((p) => p.id == widget.profile.id);
     if (_initialIndex == -1) {
       _profiles = [widget.profile, ..._profiles];
@@ -47,7 +46,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
       if (activePage != _lastActivePage) {
         setState(() {
           _lastActivePage = activePage;
-          _currentImageIndex = 0; // reset image slide to first image on page change
+          _currentImageIndex = 0;
         });
       }
       setState(() {
@@ -67,117 +66,210 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
     final theme = Theme.of(context);
 
     return Scaffold(
-      appBar: const CustomAppBar(title: 'Profile Details', isMainScreen: false),
-      body: PageView.builder(
-        controller: _pageController,
-        itemCount: _profiles.length,
-        physics: const BouncingScrollPhysics(),
-        itemBuilder: (context, index) {
-          final profile = _profiles[index];
-          
-          // Swipe card tilting & custom animation matching the Tinder/curved drawings
-          double offset = _currentPage - index;
-          double angle = -offset * 0.15; // rotate
-          double translationX = -offset * MediaQuery.of(context).size.width;
-          double translationY = offset.abs() * 40; // curve downward slightly
-          double scale = 1.0 - (offset.abs() * 0.05).clamp(0.0, 0.1);
-          
-          final transformMatrix = Matrix4.translationValues(translationX, translationY, 0.0)
-            ..rotateZ(angle)
-            ..scaleByDouble(scale, scale, 1.0, 1.0);
-          return Transform(
-            transform: transformMatrix,
-            child: _buildProfileContent(context, theme, profile),
+      backgroundColor: Colors.white,
+      appBar: CustomAppBar(
+        title: _profiles[_lastActivePage].name,
+        isMainScreen: false,
+        showNotification: true,
+      ),
+      body: ValueListenableBuilder<AppLanguage>(
+        valueListenable: AppLanguageController.notifier,
+        builder: (context, lang, _) {
+          return PageView.builder(
+            controller: _pageController,
+            itemCount: _profiles.length,
+            physics: const BouncingScrollPhysics(),
+            itemBuilder: (context, index) {
+              final profile = _profiles[index];
+              final currentProfileState = ProfileDatabase.currentProfiles.firstWhere(
+                (p) => p.id == profile.id,
+                orElse: () => profile,
+              );
+              final isFav = currentProfileState.isFavourite;
+              final interest = currentProfileState.interestStatus;
+
+              final profileImages = [
+                currentProfileState.profileImageUrl,
+              ];
+
+              final scrollOffset = _pageScrollOffsets[profile.id] ?? 0.0;
+
+              return Stack(
+                children: [
+                  NotificationListener<ScrollNotification>(
+                    onNotification: (notification) {
+                      if (notification is ScrollUpdateNotification) {
+                        setState(() {
+                          _pageScrollOffsets[profile.id] = notification.metrics.pixels;
+                        });
+                      }
+                      return false;
+                    },
+                    child: SingleChildScrollView(
+                      physics: const BouncingScrollPhysics(),
+                      child: Stack(
+                        children: [
+                          Transform.translate(
+                            offset: Offset(0, scrollOffset),
+                            child: _buildImageHeader(context, currentProfileState, profileImages, isFav),
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: [
+                              const SizedBox(height: 420),
+                              _buildWaveBannerOverlay(currentProfileState),
+                              Container(
+                                color: Colors.white,
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: AppConstants.spacingM,
+                                  vertical: AppConstants.spacingM,
+                                ),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    _buildSectionCard(
+                                      title: AppLanguageController.text('basic_information'),
+                                      icon: Icons.person_outline_rounded,
+                                      items: [
+                                        _GridItem(AppLanguageController.text('name'), profile.name),
+                                        _GridItem(
+                                          AppLanguageController.text('gender'),
+                                          profile.gender.toLowerCase() == 'female'
+                                              ? AppLanguageController.text('female')
+                                              : AppLanguageController.text('male'),
+                                        ),
+                                        _GridItem(
+                                          AppLanguageController.text('marital_status'),
+                                          profile.maritalStatus.contains('Never')
+                                              ? AppLanguageController.text('single_never_married')
+                                              : profile.maritalStatus,
+                                        ),
+                                        _GridItem(AppLanguageController.text('dob'), profile.dob),
+                                        _GridItem(AppLanguageController.text('age'), '${profile.age} ${AppLanguageController.text('yrs')}'),
+                                        _GridItem(AppLanguageController.text('mobile'), profile.mobile),
+                                        _GridItem(AppLanguageController.text('email'), profile.email),
+                                      ],
+                                    ),
+                                    const SizedBox(height: AppConstants.spacingL),
+                                    _buildSectionCard(
+                                      title: AppLanguageController.text('physical_attributes'),
+                                      icon: Icons.accessibility_new_rounded,
+                                      items: [
+                                        _GridItem(AppLanguageController.text('height'), profile.heightText),
+                                        _GridItem(AppLanguageController.text('weight'), profile.weightText),
+                                        _GridItem(AppLanguageController.text('blood_group'), profile.bloodGroup),
+                                        _GridItem(AppLanguageController.text('complexion'), profile.complexion),
+                                        _GridItem(AppLanguageController.text('body_type'), profile.bodyType),
+                                        _GridItem(AppLanguageController.text('disability'), profile.disability),
+                                      ],
+                                    ),
+                                    const SizedBox(height: AppConstants.spacingL),
+                                    _buildHoroscopeCard(theme, profile),
+                                    const SizedBox(height: AppConstants.spacingL),
+                                    _buildSectionCard(
+                                      title: AppLanguageController.text('habits_lifestyle'),
+                                      icon: Icons.restaurant_rounded,
+                                      items: [
+                                        _GridItem(
+                                          AppLanguageController.text('eating_habits'),
+                                          profile.eatingHabits == 'Vegetarian'
+                                              ? AppLanguageController.text('vegetarian')
+                                              : AppLanguageController.text('non_vegetarian'),
+                                        ),
+                                        _GridItem(AppLanguageController.text('smoking_habits'), profile.smokingHabits),
+                                        _GridItem(AppLanguageController.text('drinking_habits'), profile.drinkingHabits),
+                                        _GridItem(AppLanguageController.text('hobbies'), profile.hobbies),
+                                      ],
+                                    ),
+                                    const SizedBox(height: AppConstants.spacingL),
+                                    _buildSectionCard(
+                                      title: AppLanguageController.text('family_details'),
+                                      icon: Icons.family_restroom_rounded,
+                                      items: [
+                                        _GridItem(AppLanguageController.text('koottam'), profile.koottam),
+                                        _GridItem(AppLanguageController.text('subsect'), profile.subsect),
+                                        _GridItem(AppLanguageController.text('father_occupation'), profile.fatherOccupation),
+                                        _GridItem(AppLanguageController.text('mother_occupation'), profile.motherOccupation),
+                                        _GridItem(AppLanguageController.text('brothers'), profile.brothersCount),
+                                        _GridItem(AppLanguageController.text('sisters'), profile.sistersCount),
+                                        _GridItem(AppLanguageController.text('ancestral_origin'), profile.ancestralOrigin),
+                                      ],
+                                    ),
+                                    const SizedBox(height: AppConstants.spacingL),
+                                    _buildSectionCard(
+                                      title: AppLanguageController.text('education_professional'),
+                                      icon: Icons.school_outlined,
+                                      items: [
+                                        _GridItem(AppLanguageController.text('education'), profile.education),
+                                        _GridItem(AppLanguageController.text('education_detail'), profile.educationDetail),
+                                        _GridItem(AppLanguageController.text('occupation'), profile.occupation),
+                                        _GridItem(AppLanguageController.text('employed_in'), profile.employedIn),
+                                        _GridItem(AppLanguageController.text('annual_income'), profile.annualIncome),
+                                        _GridItem(AppLanguageController.text('work_location'), profile.workLocation),
+                                      ],
+                                    ),
+                                    const SizedBox(height: AppConstants.spacingL),
+                                    _buildSectionCard(
+                                      title: AppLanguageController.text('location_contact'),
+                                      icon: Icons.location_on_outlined,
+                                      items: [
+                                        _GridItem(AppLanguageController.text('native_place'), profile.nativePlace),
+                                        _GridItem(AppLanguageController.text('city'), profile.city),
+                                        _GridItem(AppLanguageController.text('district'), profile.district),
+                                        _GridItem(AppLanguageController.text('state'), profile.state),
+                                        _GridItem(AppLanguageController.text('country'), profile.country),
+                                      ],
+                                    ),
+                                    const SizedBox(height: AppConstants.spacingL),
+                                    _buildSectionCard(
+                                      title: AppLanguageController.text('partner_expectations'),
+                                      icon: Icons.tune_rounded,
+                                      items: [
+                                        _GridItem(AppLanguageController.text('pref_age'), profile.prefAgeRange),
+                                        _GridItem(AppLanguageController.text('pref_height'), profile.prefHeightRange),
+                                        _GridItem(AppLanguageController.text('pref_education'), profile.prefEducation),
+                                        _GridItem(AppLanguageController.text('pref_occupation'), profile.prefOccupation),
+                                        _GridItem(AppLanguageController.text('pref_location'), profile.prefLocation),
+                                      ],
+                                    ),
+                                    const SizedBox(height: AppConstants.spacingL),
+                                    _buildTextCard(
+                                      title: AppLanguageController.text('about_bio'),
+                                      icon: Icons.person_pin_rounded,
+                                      content: profile.bio,
+                                    ),
+                                    const SizedBox(height: AppConstants.spacingL),
+                                    _buildTextCard(
+                                      title: AppLanguageController.text('partner_expectations'),
+                                      icon: Icons.favorite_border_rounded,
+                                      content: profile.partnerExpectations,
+                                    ),
+                                    const SizedBox(height: 120),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: _buildBottomActionBar(
+                      context,
+                      currentProfileState,
+                      interest,
+                    ),
+                  ),
+                ],
+              );
+            },
           );
         },
       ),
-    );
-  }
-
-  Widget _buildProfileContent(BuildContext context, ThemeData theme, Profile profile) {
-    final profileImages = [
-      profile.profileImageUrl,
-    ];
-
-    return ValueListenableBuilder<List<Profile>>(
-      valueListenable: ProfileDatabase.notifier,
-      builder: (context, profiles, _) {
-        final currentProfileState = profiles.firstWhere(
-          (p) => p.id == profile.id,
-          orElse: () => profile,
-        );
-        final isFav = currentProfileState.isFavourite;
-        final interest = currentProfileState.interestStatus;
-
-        final scrollOffset = _pageScrollOffsets[profile.id] ?? 0.0;
-
-        return Stack(
-          children: [
-            // Unified scroll container enabling horizontal page swiping anywhere on the screen
-            NotificationListener<ScrollNotification>(
-              onNotification: (notification) {
-                if (notification.depth == 0) {
-                  setState(() {
-                    _pageScrollOffsets[profile.id] = notification.metrics.pixels;
-                  });
-                }
-                return false;
-              },
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Stack(
-                  children: [
-                    // Background Image Header - dynamically offset to counteract vertical scrolling
-                    Transform.translate(
-                      offset: Offset(0, scrollOffset),
-                      child: _buildImageHeader(context, currentProfileState, profileImages, isFav),
-                    ),
-
-                    // Details content placed in front of the image
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        // Spacer and favorite button overlaying the image
-                        const SizedBox(height: 420), // Spacing to show the image below
-                        _buildWaveBannerOverlay(currentProfileState),
-                        Container(
-                          color: AppColors.background,
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: AppConstants.spacingM,
-                            vertical: AppConstants.spacingM,
-                          ),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              _buildBasicDetailsCard(theme, currentProfileState),
-                              const SizedBox(height: AppConstants.spacingL),
-                              _buildPersonalDetailsCard(theme, currentProfileState),
-                              const SizedBox(height: AppConstants.spacingL),
-                              _buildHoroscopeCard(theme, currentProfileState),
-                              const SizedBox(height: 120),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            Positioned(
-              bottom: 0,
-              left: 0,
-              right: 0,
-              child: _buildBottomActionBar(
-                context,
-                currentProfileState,
-                interest,
-              ),
-            ),
-          ],
-        );
-      },
     );
   }
 
@@ -187,14 +279,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
       child: Container(
         width: double.infinity,
         decoration: const BoxDecoration(
-          gradient: LinearGradient(
-            colors: [
-              Color(0xDA7A102A),
-              AppColors.primary,
-            ],
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-          ),
+          gradient: AppColors.primaryGradient,
         ),
         padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
         child: Column(
@@ -371,24 +456,15 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
     );
   }
 
-  // Basic Details Premium Card
-  Widget _buildBasicDetailsCard(ThemeData theme, Profile profile) {
-    final detailItems = [
-      _GridItem('Marital Status', 'Never Married'),
-      _GridItem('Mother Tongue', 'Tamil'),
-      _GridItem('Height', profile.heightText),
-      _GridItem('Weight', '58 kg'),
-      _GridItem('Physical Status', 'Normal'),
-      _GridItem('Body Type', 'Average'),
-      _GridItem('Eating Habits', 'Vegetarian'),
-    ];
-
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required List<_GridItem> items,
+  }) {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(
-          0xFFFDFBF8,
-        ), // Soft cream/champagne highlight background
+        color: const Color(0xFFFAFAFA),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border, width: 0.8),
         boxShadow: [
@@ -403,41 +479,46 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            profile.name.split(' ').first,
-            style: GoogleFonts.poppins(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            'Basic Details',
-            style: GoogleFonts.poppins(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: AppColors.secondaryDark,
-            ),
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Icon(icon, size: 18, color: AppColors.primary),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
           const SizedBox(height: AppConstants.spacingM),
           const Divider(color: AppColors.border, height: 1),
           const SizedBox(height: AppConstants.spacingM),
-
-          // Render details in a clean line-by-line list
           ListView.separated(
             shrinkWrap: true,
             padding: EdgeInsets.zero,
             physics: const NeverScrollableScrollPhysics(),
-            itemCount: detailItems.length,
-            separatorBuilder:
-                (context, index) =>
-                    const Divider(color: AppColors.divider, height: 20),
+            itemCount: items.length,
+            separatorBuilder: (context, index) =>
+                const Divider(color: AppColors.divider, height: 18),
             itemBuilder: (context, index) {
-              final item = detailItems[index];
+              final item = items[index];
               return Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                crossAxisAlignment: CrossAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     item.label,
@@ -451,7 +532,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     child: Text(
                       item.value,
                       style: GoogleFonts.poppins(
-                        fontSize: 13,
+                        fontSize: 12.5,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
@@ -467,92 +548,67 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
     );
   }
 
-  // Personal & Professional Details Card
-  Widget _buildPersonalDetailsCard(ThemeData theme, Profile profile) {
-    final details = [
-      _DetailRowItem(Icons.school_outlined, 'Education', profile.education),
-      _DetailRowItem(
-        Icons.work_outline_rounded,
-        'Profession',
-        profile.occupation,
-      ),
-      _DetailRowItem(
-        Icons.star_border,
-        'Koottam (Clan)',
-        '${profile.koottam} Koottam',
-      ),
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          children: [
-            const Icon(
-              Icons.description_outlined,
-              color: AppColors.primary,
-              size: 20,
-            ),
-            const SizedBox(width: 8),
-            Text(
-              'Personal & Professional Details',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: AppConstants.spacingS),
-        Container(
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            border: Border.all(color: AppColors.border),
+  Widget _buildTextCard({
+    required String title,
+    required IconData icon,
+    required String content,
+  }) {
+    return Container(
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: const Color(0xFFFAFAFA),
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(color: AppColors.border, width: 0.8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.015),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
-          child: ListView.separated(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: details.length,
-            separatorBuilder:
-                (context, index) =>
-                    const Divider(color: AppColors.border, height: 1),
-            itemBuilder: (context, index) {
-              final d = details[index];
-              return Padding(
-                padding: const EdgeInsets.all(AppConstants.spacingM),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(d.icon, size: 18, color: AppColors.textSecondary),
-                    const SizedBox(width: AppConstants.spacingM),
-                    Text(
-                      d.label,
-                      style: GoogleFonts.poppins(
-                        fontSize: 12,
-                        color: AppColors.textSecondary,
-                      ),
-                    ),
-                    const SizedBox(width: AppConstants.spacingM),
-                    Expanded(
-                      child: Text(
-                        d.value,
-                        style: GoogleFonts.poppins(
-                          fontSize: 12,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                        textAlign: TextAlign.right,
-                      ),
-                    ),
-                  ],
+        ],
+      ),
+      padding: const EdgeInsets.all(AppConstants.spacingM),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-              );
-            },
+                child: Icon(icon, size: 18, color: AppColors.primary),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  title,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+            ],
           ),
-        ),
-      ],
+          const SizedBox(height: AppConstants.spacingM),
+          const Divider(color: AppColors.border, height: 1),
+          const SizedBox(height: AppConstants.spacingM),
+          Text(
+            content.trim().isEmpty ? 'Not specified' : content,
+            style: GoogleFonts.poppins(
+              fontSize: 13,
+              height: 1.6,
+              color: AppColors.textPrimary,
+            ),
+          ),
+        ],
+      ),
     );
   }
 
@@ -569,10 +625,15 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
               size: 20,
             ),
             const SizedBox(width: 8),
-            Text(
-              'Horoscope Details',
-              style: theme.textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.bold,
+            Expanded(
+              child: Text(
+                AppLanguageController.text('religious_horoscope'),
+                style: theme.textTheme.titleMedium?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
               ),
             ),
           ],
@@ -593,21 +654,21 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                 children: [
                   Expanded(
                     child: _buildHoroscopeSpec(
-                      'Star (Natchathiram)',
+                      AppLanguageController.text('star'),
                       profile.horoscopeStar,
                     ),
                   ),
                   Container(width: 1, height: 40, color: AppColors.border),
                   Expanded(
                     child: _buildHoroscopeSpec(
-                      'Paatham',
+                      AppLanguageController.text('paatham'),
                       profile.horoscopePaatham,
                     ),
                   ),
                   Container(width: 1, height: 40, color: AppColors.border),
                   Expanded(
                     child: _buildHoroscopeSpec(
-                      'Rasi (Moon Sign)',
+                      AppLanguageController.text('rasi'),
                       profile.horoscopeRasi,
                     ),
                   ),
@@ -635,7 +696,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     size: 18,
                   ),
                   label: Text(
-                    'View Horoscope',
+                    AppLanguageController.text('view_horoscope'),
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
@@ -1132,12 +1193,4 @@ class ProfileWaveClipper extends CustomClipper<Path> {
 
   @override
   bool shouldReclip(CustomClipper<Path> oldClipper) => false;
-}
-
-class _DetailRowItem {
-  final IconData icon;
-  final String label;
-  final String value;
-
-  _DetailRowItem(this.icon, this.label, this.value);
 }

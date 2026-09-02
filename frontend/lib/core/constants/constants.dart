@@ -17,10 +17,10 @@ class AppConstants {
   static const double borderRadiusSmall = 12.0;
   static const double buttonRadius = 16.0;
 
-  // Shadow styles (Soft, Premium)
+  // Shadow styles (Soft, Premium, Neutral)
   static List<BoxShadow> softShadow = [
     BoxShadow(
-      color: const Color(0x1A3B1018),
+      color: const Color(0x0F000000),
       blurRadius: 18.0,
       offset: const Offset(0, 8),
     ),
@@ -28,7 +28,7 @@ class AppConstants {
 
   static List<BoxShadow> cardShadow = [
     BoxShadow(
-      color: const Color(0x147A102A),
+      color: const Color(0x0A000000),
       blurRadius: 24.0,
       offset: const Offset(0, 12),
     ),
@@ -36,7 +36,7 @@ class AppConstants {
 
   static List<BoxShadow> goldShadow = [
     BoxShadow(
-      color: const Color(0x26D4A937),
+      color: const Color(0x0A000000),
       blurRadius: 16.0,
       offset: const Offset(0, 8),
     ),

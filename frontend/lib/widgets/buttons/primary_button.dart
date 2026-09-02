@@ -35,7 +35,7 @@ class PrimaryButton extends StatelessWidget {
       child: ElevatedButton(
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.transparent,
-          foregroundColor: isGold ? AppColors.textPrimary : Colors.white,
+          foregroundColor: Colors.white,
           shadowColor: Colors.transparent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
@@ -56,7 +56,7 @@ class PrimaryButton extends StatelessWidget {
                 child: Text(
                   text,
                   style: theme.textTheme.titleMedium?.copyWith(
-                    color: isGold ? AppColors.textPrimary : Colors.white,
+                    color: Colors.white,
                     fontWeight: FontWeight.w700,
                     letterSpacing: 0.3,
                   ),

@@ -279,7 +279,7 @@ class _Page1PersonalState extends State<Page1Personal> {
             border: Border.all(color: const Color(0xFFECE5DD), width: 1.2),
             boxShadow: [
               BoxShadow(
-                color: const Color(0x0A7A102A),
+                color: Colors.black.withValues(alpha: 0.04),
                 blurRadius: 20,
                 offset: const Offset(0, 8),
               ),
@@ -539,7 +539,7 @@ class _Page1PersonalState extends State<Page1Personal> {
             borderRadius: BorderRadius.circular(16),
             boxShadow: [
               BoxShadow(
-                color: const Color(0x337A102A),
+                color: Colors.black.withValues(alpha: 0.12),
                 blurRadius: 10,
                 offset: const Offset(0, 4),
               ),

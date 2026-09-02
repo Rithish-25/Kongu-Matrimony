@@ -72,17 +72,9 @@ class EmptyStateWidget extends StatelessWidget {
                     height: 96,
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(32),
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color(0xFF9E1D3B),
-                          Color(0xFF7A102A),
-                          Color(0xFF4A0818),
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
+                      gradient: AppColors.primaryGradient,
                       border: Border.all(
-                        color: const Color(0xFFF3CF7A),
+                        color: AppColors.secondary,
                         width: 2.2,
                       ),
                       boxShadow: [
@@ -92,7 +84,7 @@ class EmptyStateWidget extends StatelessWidget {
                           offset: const Offset(0, 12),
                         ),
                         BoxShadow(
-                          color: const Color(0xFFD4A937).withValues(alpha: 0.25),
+                          color: AppColors.secondary.withValues(alpha: 0.25),
                           blurRadius: 16,
                           offset: const Offset(0, 4),
                         ),
@@ -142,7 +134,7 @@ class EmptyStateWidget extends StatelessWidget {
                         shape: BoxShape.circle,
                         color: Colors.white,
                         border: Border.all(
-                          color: const Color(0xFFE5C065),
+                          color: AppColors.secondary,
                           width: 1.8,
                         ),
                         boxShadow: [
@@ -156,7 +148,7 @@ class EmptyStateWidget extends StatelessWidget {
                       child: const Icon(
                         Icons.auto_awesome,
                         size: 15,
-                        color: Color(0xFFB48312),
+                        color: AppColors.secondaryDark,
                       ),
                     ),
                   ),
@@ -185,7 +177,7 @@ class EmptyStateWidget extends StatelessWidget {
                       child: const Icon(
                         Icons.favorite_rounded,
                         size: 12,
-                        color: Color(0xFFE11D48),
+                        color: AppColors.primary,
                       ),
                     ),
                   ),

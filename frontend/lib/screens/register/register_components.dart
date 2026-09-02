@@ -40,10 +40,10 @@ class RegisterComponents {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFECE5DD), width: 1.2),
+        border: Border.all(color: const Color(0xFFE5E7EB), width: 1.2),
         boxShadow: [
           BoxShadow(
-            color: const Color(0x0A7A102A),
+            color: Colors.black.withValues(alpha: 0.04),
             blurRadius: 20,
             offset: const Offset(0, 8),
           ),
@@ -98,10 +98,10 @@ class RegisterComponents {
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           filled: true,
-          fillColor: const Color(0xFFFAF8F5),
+          fillColor: const Color(0xFFFAFAFA),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFECE5DD)),
+            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -153,10 +153,10 @@ class RegisterComponents {
           ),
           contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
           filled: true,
-          fillColor: const Color(0xFFFAF8F5),
+          fillColor: const Color(0xFFFAFAFA),
           enabledBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFECE5DD)),
+            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
           ),
           focusedBorder: OutlineInputBorder(
             borderRadius: BorderRadius.circular(12),
@@ -232,7 +232,7 @@ class RegisterComponents {
                     ),
                     selected: isSelected,
                     selectedColor: AppColors.primary,
-                    backgroundColor: const Color(0xFFFAF8F5),
+                    backgroundColor: const Color(0xFFFAFAFA),
                     shadowColor: Colors.transparent,
                     selectedShadowColor: Colors.transparent,
                     elevation: 0,
@@ -240,7 +240,7 @@ class RegisterComponents {
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                       side: BorderSide(
-                        color: isSelected ? AppColors.primary : const Color(0xFFECE5DD),
+                        color: isSelected ? AppColors.primary : const Color(0xFFE5E7EB),
                         width: isSelected ? 1.5 : 1,
                       ),
                     ),

@@ -208,7 +208,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
               elevation: 0,
               scrolledUnderElevation: 0,
               leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+                icon: const Icon(Icons.arrow_back, color: AppColors.appBarPrimary),
                 onPressed: () => Navigator.of(context).pop(),
               ),
               title: Container(
@@ -227,7 +227,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
                       style: GoogleFonts.cinzel(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
+                        color: AppColors.appBarPrimary,
                         letterSpacing: 1.2,
                       ),
                     ),
@@ -236,7 +236,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
                       style: GoogleFonts.cinzel(
                         fontSize: 15,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.secondaryDark,
+                        color: AppColors.appBarSecondaryDark,
                         letterSpacing: 1.2,
                       ),
                     ),
@@ -455,7 +455,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: const Color(0x337A102A),
+                    color: Colors.black.withValues(alpha: 0.12),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),

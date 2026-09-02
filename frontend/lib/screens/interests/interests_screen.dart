@@ -33,7 +33,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
         return DefaultTabController(
           length: 2,
           child: Scaffold(
-            backgroundColor: AppColors.background,
+            backgroundColor: Colors.white,
             appBar: PreferredSize(
               preferredSize: const Size.fromHeight(52),
               child: Container(
@@ -415,9 +415,9 @@ class InboxListCard extends StatelessWidget {
                       begin: Alignment.topLeft,
                       end: Alignment.bottomRight,
                       colors: [
-                        Color(0xFFF3CF7A),
-                        Color(0xFFD4A937),
-                        Color(0xFF9E1D3B),
+                        Color(0xFF64748B),
+                        Color(0xFF475569),
+                        Color(0xFF1E293B),
                       ],
                     ),
                     boxShadow: [

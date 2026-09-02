@@ -59,18 +59,6 @@ class _MainLayoutState extends State<MainLayout> {
                     : _currentIndex == 3
                         ? 'Interests'
                         : 'Profile',
-        leading: _currentIndex != 0
-            ? IconButton(
-                icon: const Icon(
-                  Icons.arrow_back,
-                  size: 22,
-                  color: AppColors.primary,
-                ),
-                onPressed: () {
-                  _navigateToTab(0);
-                },
-              )
-            : null,
       ),
       body: WillPopScope(
         onWillPop: () async {

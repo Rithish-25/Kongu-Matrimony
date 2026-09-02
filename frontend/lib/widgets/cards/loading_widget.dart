@@ -40,9 +40,9 @@ class _LoadingWidgetState extends State<LoadingWidget>
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(24),
           border: Border.all(color: AppColors.border),
-          boxShadow: const [
+          boxShadow: [
             BoxShadow(
-              color: Color(0x147A102A),
+              color: Colors.black.withValues(alpha: 0.05),
               blurRadius: 24,
               offset: Offset(0, 10),
             ),

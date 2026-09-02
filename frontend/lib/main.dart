@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'core/theme/theme.dart';
 import 'core/assets/mock_data.dart';
+import 'core/localization/app_language.dart';
 import 'screens/main_layout.dart';
 import 'screens/auth/login_screen.dart';
 
@@ -13,7 +14,8 @@ Future<void> main() async {
   // Preserve splash screen during initialization
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  // Load persisted mock user state before launching the app
+  // Load persisted language preference & mock user state before launching the app
+  await AppLanguageController.init();
   await ProfileDatabase.init();
 
   // Set orientation lock to Portrait Up (Android-only compliance requested)

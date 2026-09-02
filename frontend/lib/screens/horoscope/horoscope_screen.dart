@@ -4,9 +4,9 @@ import '../../core/colors/colors.dart';
 import '../../core/constants/constants.dart';
 import '../../core/assets/mock_data.dart';
 import '../../core/navigation/app_page_route.dart';
+import '../../core/localization/app_language.dart';
 
 import '../../widgets/cards/empty_state_widget.dart';
-import '../../widgets/buttons/primary_button.dart';
 import '../profile_details/profile_details_screen.dart';
 
 class HoroscopeScreen extends StatefulWidget {
@@ -23,30 +23,18 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
 
 
   // Form State Values
-  String _selectedMinAge = '20';
-  String _selectedMaxAge = '30';
-  String _selectedMinHeight = 'Any';
-  String _selectedMaxHeight = 'Any';
-  String _selectedMaritalStatus = 'Any';
-  String _selectedReligion = 'Hindu';
-  String _selectedCaste = 'Any';
-  String _selectedKoottam = 'Any';
-  String _selectedEducation = 'Any';
-  String _selectedOccupation = 'Any';
-  String _selectedLocation = 'Any';
-
-
-
-  // Dropdown Lists
-  final List<String> _ageOptions = List.generate(43, (i) => (18 + i).toString());
-  
-  final List<String> _heightOptions = [
-    'Any', "5'0\"", "5'1\"", "5'2\"", "5'3\"", "5'4\"", "5'5\"", "5'6\"", "5'7\"", "5'8\"", "5'9\"", "5'10\"", "5'11\"", "6'0\"", "6'1\"", "6'2\""
-  ];
-  
-
-  final List<String> _educationOptions = ['Any', 'Engineering', 'Medicine', 'Management', 'Science/Arts', 'Chartered Accountant'];
-  final List<String> _occupationOptions = ['Any', 'Software Professional', 'Data Analytics', 'Business Owner', 'Medical Professional', 'Interior Designer', 'Pediatrician'];
+  String _selectedGender = 'All';
+  final String _selectedMinAge = '18';
+  final String _selectedMaxAge = '40';
+  final String _selectedMinHeight = 'Any';
+  final String _selectedMaxHeight = 'Any';
+  final String _selectedMaritalStatus = 'Any';
+  final String _selectedReligion = 'Hindu';
+  final String _selectedCaste = 'Any';
+  final String _selectedKoottam = 'Any';
+  final String _selectedEducation = 'Any';
+  final String _selectedOccupation = 'Any';
+  final String _selectedLocation = 'Any';
 
 
 
@@ -65,20 +53,15 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
   }
 
   void _onDatabaseChanged() {
-    if (mounted && _showResults) {
+    if (mounted) {
       _performAdvancedSearch(ProfileDatabase.currentProfiles);
     }
   }
 
   void _initializeDefaultSearch() {
     final allProfiles = ProfileDatabase.currentProfiles;
-    int minAge = int.parse(_selectedMinAge);
-    int maxAge = int.parse(_selectedMaxAge);
-    if (minAge > maxAge) {
-      final temp = minAge;
-      minAge = maxAge;
-      maxAge = temp;
-    }
+    final minAge = int.tryParse(_selectedMinAge) ?? 18;
+    final maxAge = int.tryParse(_selectedMaxAge) ?? 40;
 
     int? minHeight = _parseHeightToInches(_selectedMinHeight);
     int? maxHeight = _parseHeightToInches(_selectedMaxHeight);
@@ -97,6 +80,9 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
         if (minHeight != null && profileHeight < minHeight) return false;
         if (maxHeight != null && profileHeight > maxHeight) return false;
       }
+
+      if (_selectedGender == 'Female' && profile.gender.toLowerCase() != 'female') return false;
+      if (_selectedGender == 'Male' && profile.gender.toLowerCase() != 'male') return false;
 
       if (_selectedMaritalStatus != 'Any' && _selectedMaritalStatus != 'Never Married') return false;
 
@@ -120,20 +106,6 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
 
     _searchResults = results;
     _showResults = true;
-    
-    final activeFilters = <String>['Age: $minAge-$maxAge'];
-    if (minHeight != null || maxHeight != null) {
-      activeFilters.add('Height: ${_selectedMinHeight == 'Any' ? 'Any' : _selectedMinHeight} - ${_selectedMaxHeight == 'Any' ? 'Any' : _selectedMaxHeight}');
-    }
-    if (_selectedMaritalStatus != 'Any') activeFilters.add('Status: $_selectedMaritalStatus');
-    if (_selectedKoottam != 'Any') activeFilters.add('Koottam: $_selectedKoottam');
-    if (_selectedLocation != 'Any') activeFilters.add('Location: $_selectedLocation');
-    if (_selectedReligion != 'Any') activeFilters.add('Religion: $_selectedReligion');
-    if (_selectedCaste != 'Any') activeFilters.add('Caste: $_selectedCaste');
-    if (_selectedEducation != 'Any') activeFilters.add('Education: $_selectedEducation');
-    if (_selectedOccupation != 'Any') activeFilters.add('Job: $_selectedOccupation');
-    
-
   }
 
   int? _parseHeightToInches(String height) {
@@ -191,34 +163,10 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     }
   }
 
-  void _resetFilters() {
-    setState(() {
-      _selectedMinAge = '20';
-      _selectedMaxAge = '30';
-      _selectedMinHeight = 'Any';
-      _selectedMaxHeight = 'Any';
-      _selectedMaritalStatus = 'Any';
-      _selectedReligion = 'Hindu';
-      _selectedCaste = 'Any';
-      _selectedKoottam = 'Any';
-      _selectedEducation = 'Any';
-      _selectedOccupation = 'Any';
-      _selectedLocation = 'Any';
-      _showResults = false;
-      _searchResults = [];
-
-    });
-  }
-
   // Trigger Advanced Filter Search
   void _performAdvancedSearch(List<Profile> allProfiles) {
-    int minAge = int.parse(_selectedMinAge);
-    int maxAge = int.parse(_selectedMaxAge);
-    if (minAge > maxAge) {
-      final temp = minAge;
-      minAge = maxAge;
-      maxAge = temp;
-    }
+    final minAge = int.tryParse(_selectedMinAge) ?? 18;
+    final maxAge = int.tryParse(_selectedMaxAge) ?? 40;
 
     int? minHeight = _parseHeightToInches(_selectedMinHeight);
     int? maxHeight = _parseHeightToInches(_selectedMaxHeight);
@@ -237,6 +185,9 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
         if (minHeight != null && profileHeight < minHeight) return false;
         if (maxHeight != null && profileHeight > maxHeight) return false;
       }
+
+      if (_selectedGender == 'Female' && profile.gender.toLowerCase() != 'female') return false;
+      if (_selectedGender == 'Male' && profile.gender.toLowerCase() != 'male') return false;
 
       if (_selectedMaritalStatus != 'Any' && _selectedMaritalStatus != 'Never Married') return false;
 
@@ -261,32 +212,10 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     setState(() {
       _searchResults = results;
       _showResults = true;
-      
-      final activeFilters = <String>['Age: $minAge-$maxAge'];
-      if (minHeight != null || maxHeight != null) {
-        activeFilters.add('Height: ${_selectedMinHeight == 'Any' ? 'Any' : _selectedMinHeight} - ${_selectedMaxHeight == 'Any' ? 'Any' : _selectedMaxHeight}');
-      }
-      if (_selectedMaritalStatus != 'Any') activeFilters.add('Status: $_selectedMaritalStatus');
-      if (_selectedKoottam != 'Any') activeFilters.add('Koottam: $_selectedKoottam');
-      if (_selectedLocation != 'Any') activeFilters.add('Location: $_selectedLocation');
-      if (_selectedReligion != 'Any') activeFilters.add('Religion: $_selectedReligion');
-      if (_selectedCaste != 'Any') activeFilters.add('Caste: $_selectedCaste');
-      if (_selectedEducation != 'Any') activeFilters.add('Education: $_selectedEducation');
-      if (_selectedOccupation != 'Any') activeFilters.add('Job: $_selectedOccupation');
-      
-
     });
   }
 
-
-
   bool handleBackPress() {
-    if (_showResults) {
-      setState(() {
-        _showResults = false;
-      });
-      return true; // handled
-    }
     return false; // propagate
   }
 
@@ -298,559 +227,13 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       body: ValueListenableBuilder<List<Profile>>(
         valueListenable: ProfileDatabase.notifier,
         builder: (context, allProfiles, _) {
-          if (_showResults) {
-            return _buildResultsView(context, theme);
-          }
-
-          return Container(
-            color: AppColors.background,
-            child: _buildAdvancedSearchForm(context, theme, allProfiles),
+          return ValueListenableBuilder<AppLanguage>(
+            valueListenable: AppLanguageController.notifier,
+            builder: (context, lang, _) {
+              return _buildResultsView(context, theme);
+            },
           );
         },
-      ),
-    );
-  }
-
-  Widget _buildAdvancedSearchForm(BuildContext context, ThemeData theme, List<Profile> allProfiles) {
-    return SingleChildScrollView(
-      physics: const BouncingScrollPhysics(),
-      padding: const EdgeInsets.only(left: AppConstants.spacingM, right: AppConstants.spacingM, top: 12.0, bottom: 24.0),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: 8.0),
-            decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
-              border: Border.all(color: AppColors.border),
-              boxShadow: AppConstants.softShadow,
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                // Age Select
-                _buildRangeDropdownFields(
-                  label: 'Age',
-                  startValue: _selectedMinAge,
-                  startItems: _ageOptions,
-                  onStartChanged: (val) {
-                    if (val != null) setState(() => _selectedMinAge = val);
-                  },
-                  endValue: _selectedMaxAge,
-                  endItems: _ageOptions,
-                  onEndChanged: (val) {
-                    if (val != null) setState(() => _selectedMaxAge = val);
-                  },
-                ),
-                const Divider(color: AppColors.border, height: 1),
-
-                // Height Select
-                _buildRangeDropdownFields(
-                  label: 'Height',
-                  startValue: _selectedMinHeight,
-                  startItems: _heightOptions,
-                  onStartChanged: (val) {
-                    if (val != null) setState(() => _selectedMinHeight = val);
-                  },
-                  endValue: _selectedMaxHeight,
-                  endItems: _heightOptions,
-                  onEndChanged: (val) {
-                    if (val != null) setState(() => _selectedMaxHeight = val);
-                  },
-                ),
-                const Divider(color: AppColors.border, height: 1),
-
-                // Kootam Select
-                _buildKootamSearchField(context),
-                const Divider(color: AppColors.border, height: 1),
-
-                // Education Select
-                _buildDropdownField(
-                  label: 'Education',
-                  value: _selectedEducation,
-                  items: _educationOptions,
-                  onChanged: (val) {
-                    if (val != null) setState(() => _selectedEducation = val);
-                  },
-                ),
-                const Divider(color: AppColors.border, height: 1),
-
-                // Occupation Select
-                _buildDropdownField(
-                  label: 'Occupation',
-                  value: _selectedOccupation,
-                  items: _occupationOptions,
-                  onChanged: (val) {
-                    if (val != null) setState(() => _selectedOccupation = val);
-                  },
-                ),
-                const Divider(color: AppColors.border, height: 1),
-
-                // Location Select (Search Dialog)
-                _buildLocationSearchField(context),
-              ],
-            ),
-          ),
-          const SizedBox(height: 16),
-
-          // Search button
-          PrimaryButton(
-            text: 'Search Now',
-            height: 48,
-            icon: const Icon(Icons.search_rounded, color: Colors.white, size: 18),
-            onPressed: () => _performAdvancedSearch(allProfiles),
-          ),
-          const SizedBox(height: 10),
-          Row(
-            children: [
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: OutlinedButton(
-                    onPressed: _resetFilters,
-                    style: OutlinedButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      textStyle: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    child: const Text('Reset Filters'),
-                  ),
-                ),
-              ),
-              const SizedBox(width: AppConstants.spacingM),
-              Expanded(
-                child: SizedBox(
-                  height: 48,
-                  child: ElevatedButton(
-                    onPressed: () {
-                      setState(() {
-                        if (_searchResults.isEmpty) {
-                          _initializeDefaultSearch();
-                        } else {
-                          _showResults = true;
-                        }
-                      });
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.secondary,
-                      foregroundColor: Colors.white,
-                      elevation: 0,
-                      padding: const EdgeInsets.symmetric(horizontal: 12),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
-                      ),
-                      textStyle: GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    child: const Text('Close'),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ],
-      ),
-    );
-  }
-
-
-
-  Widget _buildDropdownField({
-    required String label,
-    required String value,
-    required List<String> items,
-    required ValueChanged<String?> onChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: DropdownButtonFormField<String>(
-              value: value,
-              decoration: InputDecoration(
-                contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                enabledBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.border),
-                ),
-                focusedBorder: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                ),
-                filled: true,
-                fillColor: AppColors.background,
-              ),
-              icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.secondaryDark, size: 20),
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                color: AppColors.textPrimary,
-              ),
-              items: items.map((item) {
-                return DropdownMenuItem<String>(
-                  value: item,
-                  child: Text(item),
-                );
-              }).toList(),
-              onChanged: onChanged,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildKootamSearchField(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              'Kootam',
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => _showKootamSearchDialog(context),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _selectedKoottam,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: AppColors.secondaryDark,
-                      size: 20,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showKootamSearchDialog(BuildContext context) {
-    final List<String> defaultKootams = ['Any', 'Sellan', 'Sathandhai', 'Morasan', 'Thennan'];
-    final List<String> otherKootams = [
-      'Kannandhai',
-      'Thorathan',
-      'Koolan',
-      'Maniyan',
-      'Kadaian',
-      'Kavalan',
-      'Padharai',
-      'Kuzhalaian',
-      'Adhiraian',
-      'Vilayan',
-      'Anthuvan',
-      'Pannai',
-      'Sempoothan',
-      'Vaanan',
-      'Oothalar',
-      'Sengunthar',
-      'Thodalar',
-    ];
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        String searchQuery = '';
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            final List<String> filteredDefaults = defaultKootams
-                .where((item) => item.toLowerCase().contains(searchQuery.toLowerCase()))
-                .toList();
-
-            final List<String> filteredOthers = otherKootams
-                .where((item) => item.toLowerCase().contains(searchQuery.toLowerCase()))
-                .toList();
-
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: Text(
-                'Select Kootam',
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: AppColors.primary,
-                ),
-              ),
-              content: SizedBox(
-                width: double.maxFinite,
-                height: 350,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search Kootam...',
-                        hintStyle: GoogleFonts.poppins(fontSize: 13),
-                        prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.textSecondary),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.border),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.border),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                        ),
-                      ),
-                      style: GoogleFonts.poppins(fontSize: 13),
-                      onChanged: (val) {
-                        setStateDialog(() {
-                          searchQuery = val;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: ListView(
-                        shrinkWrap: true,
-                        children: [
-                          if (filteredDefaults.isNotEmpty) ...[
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 4.0),
-                              child: Text(
-                                searchQuery.isEmpty ? 'Default Kootams' : 'Matches in Defaults',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                            ...filteredDefaults.map((item) => ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                                  title: Text(
-                                    item,
-                                    style: GoogleFonts.poppins(fontSize: 13),
-                                  ),
-                                  dense: true,
-                                  trailing: _selectedKoottam == item
-                                      ? const Icon(Icons.check, color: AppColors.primary, size: 18)
-                                      : null,
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedKoottam = item;
-                                    });
-                                    Navigator.of(dialogContext).pop();
-                                  },
-                                )),
-                          ],
-                          if (filteredOthers.isNotEmpty) ...[
-                            const Divider(),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4.0, bottom: 4.0, left: 4.0),
-                              child: Text(
-                                searchQuery.isEmpty ? 'Other Kootams' : 'Matches in Others',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                            ...filteredOthers.map((item) => ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                                  title: Text(
-                                    item,
-                                    style: GoogleFonts.poppins(fontSize: 13),
-                                  ),
-                                  dense: true,
-                                  trailing: _selectedKoottam == item
-                                      ? const Icon(Icons.check, color: AppColors.primary, size: 18)
-                                      : null,
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedKoottam = item;
-                                    });
-                                    Navigator.of(dialogContext).pop();
-                                  },
-                                )),
-                          ],
-                          if (filteredDefaults.isEmpty && filteredOthers.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Center(
-                                child: Text(
-                                  'No Kootam found',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: Text(
-                    'Cancel',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        );
-      },
-    );
-  }
-
-  Widget _buildRangeDropdownFields({
-    required String label,
-    required String startValue,
-    required List<String> startItems,
-    required ValueChanged<String?> onStartChanged,
-    required String endValue,
-    required List<String> endItems,
-    required ValueChanged<String?> onEndChanged,
-  }) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              label,
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Row(
-              children: [
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: startValue,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                      ),
-                      filled: true,
-                      fillColor: AppColors.background,
-                    ),
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.secondaryDark, size: 18),
-                    style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textPrimary),
-                    items: startItems.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
-                    onChanged: onStartChanged,
-                  ),
-                ),
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 8.0),
-                  child: Text(
-                    'To',
-                    style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textSecondary, fontWeight: FontWeight.bold),
-                  ),
-                ),
-                Expanded(
-                  child: DropdownButtonFormField<String>(
-                    value: endValue,
-                    decoration: InputDecoration(
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.border),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                      ),
-                      filled: true,
-                      fillColor: AppColors.background,
-                    ),
-                    icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.secondaryDark, size: 18),
-                    style: GoogleFonts.poppins(fontSize: 12, color: AppColors.textPrimary),
-                    items: endItems.map((item) => DropdownMenuItem(value: item, child: Text(item))).toList(),
-                    onChanged: onEndChanged,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ],
       ),
     );
   }
@@ -859,441 +242,310 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Results Info header
+        // Results Info header title
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: 8.0),
+          child: Text(
+            '${_searchResults.length} ${AppLanguageController.text('horoscope_profiles')}',
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
+              color: AppColors.primary,
+            ),
+          ),
+        ),
 
+        // Gender Filter Pills Bar (All, Women, Men) - Scrollable to prevent right overflow
+        SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          physics: const BouncingScrollPhysics(),
+          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: 4.0),
+          child: Row(
+            children: [
+              _buildGenderFilterChip('All', AppLanguageController.text('all_profiles')),
+              const SizedBox(width: 6),
+              _buildGenderFilterChip('Female', AppLanguageController.text('women_profiles')),
+              const SizedBox(width: 6),
+              _buildGenderFilterChip('Male', AppLanguageController.text('men_profiles')),
+            ],
+          ),
+        ),
+        const SizedBox(height: 4),
 
-        // Profiles grid
+        // Profiles grid with smooth AnimatedSwitcher transition
         Expanded(
-          child: _searchResults.isEmpty
-              ? EmptyStateWidget(
-                  icon: Icons.search_off_rounded,
-                  title: 'No Profiles Found',
-                  description: 'No profiles match your active filters. Try loosening your criteria or using a different ID.',
-                  buttonText: 'Modify Filters',
-                  onButtonPressed: () {
-                    setState(() {
-                      _showResults = false;
-                    });
-                  },
-                )
-              : GridView.builder(
-                  padding: const EdgeInsets.all(AppConstants.spacingM),
-                  physics: const BouncingScrollPhysics(),
-                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 2,
-                    crossAxisSpacing: 12,
-                    mainAxisSpacing: 14,
-                    childAspectRatio: 0.50,
-                  ),
-                  itemCount: _searchResults.length,
-                  itemBuilder: (context, index) {
-                    final profile = _searchResults[index];
-                    return _buildGridProfileCard(context, profile);
-                  },
+          child: AnimatedSwitcher(
+            duration: const Duration(milliseconds: 320),
+            switchInCurve: Curves.easeOutCubic,
+            switchOutCurve: Curves.easeInCubic,
+            transitionBuilder: (child, animation) {
+              return FadeTransition(
+                opacity: animation,
+                child: ScaleTransition(
+                  scale: Tween<double>(begin: 0.95, end: 1.0).animate(animation),
+                  child: child,
                 ),
+              );
+            },
+            child: _searchResults.isEmpty
+                ? EmptyStateWidget(
+                    key: const ValueKey('empty_results'),
+                    icon: Icons.search_off_rounded,
+                    title: 'No Profiles Found',
+                    description: 'No profiles match your selected filter.',
+                  )
+                : GridView.builder(
+                    key: ValueKey('grid-$_selectedGender-${_searchResults.length}'),
+                    padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: 4.0),
+                    physics: const BouncingScrollPhysics(),
+                    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 2,
+                      crossAxisSpacing: 12,
+                      mainAxisSpacing: 14,
+                      childAspectRatio: 0.53,
+                    ),
+                    itemCount: _searchResults.length,
+                    itemBuilder: (context, index) {
+                      final profile = _searchResults[index];
+                      return _buildGridProfileCard(context, profile);
+                    },
+                  ),
+          ),
         ),
       ],
     );
   }
 
+  Widget _buildGenderFilterChip(String value, String label) {
+    final isSelected = _selectedGender == value;
+
+    return GestureDetector(
+      onTap: () {
+        if (_selectedGender != value) {
+          setState(() {
+            _selectedGender = value;
+            _performAdvancedSearch(ProfileDatabase.currentProfiles);
+          });
+        }
+      },
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 250),
+        curve: Curves.easeInOut,
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.primary : Colors.white,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(
+            color: isSelected ? AppColors.primary : AppColors.border.withValues(alpha: 0.8),
+            width: isSelected ? 1.5 : 1.0,
+          ),
+          boxShadow: isSelected
+              ? [
+                  BoxShadow(
+                    color: AppColors.primary.withValues(alpha: 0.25),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ]
+              : [],
+        ),
+        alignment: Alignment.center,
+        child: AnimatedDefaultTextStyle(
+          duration: const Duration(milliseconds: 250),
+          curve: Curves.easeInOut,
+          style: GoogleFonts.poppins(
+            fontSize: 11.5,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+            color: isSelected ? Colors.white : AppColors.textSecondary,
+          ),
+          child: Text(label),
+        ),
+      ),
+    );
+  }
+
   Widget _buildGridProfileCard(BuildContext context, Profile profile) {
+    final translatedEducation = AppLanguageController.text(profile.education.toLowerCase());
+    final displayEducation = (translatedEducation == profile.education.toLowerCase())
+        ? profile.education
+        : translatedEducation;
+
+    final translatedLocation = AppLanguageController.text(profile.location.toLowerCase());
+    final displayLocation = (translatedLocation == profile.location.toLowerCase())
+        ? profile.location
+        : translatedLocation;
+
     return Container(
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.border, width: 0.8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.12),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          // Content Area - Clickable
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: () {
-                Navigator.of(context).push(
-                  appPageRoute(
-                    ProfileDetailsScreen(
-                      profile: profile,
-                      heroTag: 'profile-image-${profile.id}-searchresult',
-                    ),
-                  ),
-                );
-              },
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  // Image Area
-                  Expanded(
-                    child: Hero(
-                      tag: 'profile-image-${profile.id}-searchresult',
-                      child: Container(
-                        decoration: BoxDecoration(
-                          image: DecorationImage(
-                            image: NetworkImage(profile.profileImageUrl),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ),
-                  // Info Area
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          profile.name,
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.textPrimary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        const SizedBox(height: 4),
-                        // Koottam
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.star_outline_rounded,
-                              color: AppColors.secondary,
-                              size: 14,
-                            ),
-                            const SizedBox(width: 4),
-                            Expanded(
-                              child: Text(
-                                'Koottam: ${profile.koottam}',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.primary,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 4),
-                        // Specs
-                        Row(
-                          children: [
-                            const Icon(
-                              Icons.straighten_rounded,
-                              color: AppColors.textLight,
-                              size: 13,
-                            ),
-                            const SizedBox(width: 2),
-                            Text(
-                              profile.heightText,
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                            const SizedBox(width: 6),
-                            const Icon(
-                              Icons.location_on_outlined,
-                              color: AppColors.textLight,
-                              size: 13,
-                            ),
-                            const SizedBox(width: 2),
-                            Expanded(
-                              child: Text(
-                                profile.location,
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 11,
-                                  color: AppColors.textSecondary,
-                                ),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                              ),
-                            ),
-                          ],
-                        ),
-                        const SizedBox(height: 8),
-                        // Button
-                        SizedBox(
-                          width: double.infinity,
-                          height: 34,
-                          child: ElevatedButton(
-                            onPressed: () {
-                              Navigator.of(context).push(
-                                appPageRoute(
-                                  ProfileDetailsScreen(
-                                    profile: profile,
-                                    heroTag: 'profile-image-${profile.id}-searchresult',
-                                  ),
-                                ),
-                              );
-                            },
-                            style: ElevatedButton.styleFrom(
-                              backgroundColor: AppColors.primary,
-                              foregroundColor: Colors.white,
-                              padding: EdgeInsets.zero,
-                              elevation: 0,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(10),
-                              ),
-                            ),
-                            child: Text(
-                              'View Full Profile',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 11,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildLocationSearchField(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.center,
-        children: [
-          SizedBox(
-            width: 100,
-            child: Text(
-              'Location',
-              style: GoogleFonts.poppins(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textSecondary,
-              ),
-            ),
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: GestureDetector(
-              onTap: () => _showLocationSearchDialog(context),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    Text(
-                      _selectedLocation,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    const Icon(
-                      Icons.keyboard_arrow_down_rounded,
-                      color: AppColors.secondaryDark,
-                      size: 20,
-                    ),
-                  ],
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.of(context).push(
+              appPageRoute(
+                ProfileDetailsScreen(
+                  profile: profile,
+                  heroTag: 'profile-image-${profile.id}-searchresult',
                 ),
               ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showLocationSearchDialog(BuildContext context) {
-    final List<String> defaultLocations = ['Any', 'Coimbatore', 'Erode', 'Tiruppur', 'Salem', 'Namakkal'];
-    final List<String> otherLocations = [
-      'Karur',
-      'Dindigul',
-      'Trichy',
-      'Madurai',
-      'Chennai',
-      'Bangalore',
-      'Dharmapuri',
-      'Krishnagiri',
-      'Pollachi',
-      'Udumalaipettai',
-      'Gobichettipalayam',
-    ];
-
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        String searchQuery = '';
-        return StatefulBuilder(
-          builder: (context, setStateDialog) {
-            final List<String> filteredDefaults = defaultLocations
-                .where((item) => item.toLowerCase().contains(searchQuery.toLowerCase()))
-                .toList();
-
-            final List<String> filteredOthers = otherLocations
-                .where((item) => item.toLowerCase().contains(searchQuery.toLowerCase()))
-                .toList();
-
-            return AlertDialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              title: Text(
-                'Select Location',
-                style: GoogleFonts.poppins(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 16,
-                  color: AppColors.primary,
-                ),
-              ),
-              content: SizedBox(
-                width: double.maxFinite,
-                height: 350,
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    TextField(
-                      decoration: InputDecoration(
-                        hintText: 'Search Location...',
-                        hintStyle: GoogleFonts.poppins(fontSize: 13),
-                        prefixIcon: const Icon(Icons.search, size: 20, color: AppColors.textSecondary),
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.border),
-                        ),
-                        enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.border),
-                        ),
-                        focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-                        ),
-                      ),
-                      style: GoogleFonts.poppins(fontSize: 13),
-                      onChanged: (val) {
-                        setStateDialog(() {
-                          searchQuery = val;
-                        });
-                      },
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: ListView(
-                        shrinkWrap: true,
-                        children: [
-                          if (filteredDefaults.isNotEmpty) ...[
-                            Padding(
-                              padding: const EdgeInsets.only(top: 8.0, bottom: 4.0, left: 4.0),
-                              child: Text(
-                                searchQuery.isEmpty ? 'Default Locations' : 'Matches in Defaults',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                            ...filteredDefaults.map((item) => ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                                  title: Text(
-                                    item,
-                                    style: GoogleFonts.poppins(fontSize: 13),
-                                  ),
-                                  dense: true,
-                                  trailing: _selectedLocation == item
-                                      ? const Icon(Icons.check, color: AppColors.primary, size: 18)
-                                      : null,
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedLocation = item;
-                                    });
-                                    Navigator.of(dialogContext).pop();
-                                  },
-                                )),
-                          ],
-                          if (filteredOthers.isNotEmpty) ...[
-                            const Divider(),
-                            Padding(
-                              padding: const EdgeInsets.only(top: 4.0, bottom: 4.0, left: 4.0),
-                              child: Text(
-                                searchQuery.isEmpty ? 'Other Locations' : 'Matches in Others',
-                                style: GoogleFonts.poppins(
-                                  fontSize: 11,
-                                  fontWeight: FontWeight.bold,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                            ),
-                            ...filteredOthers.map((item) => ListTile(
-                                  contentPadding: const EdgeInsets.symmetric(horizontal: 8),
-                                  title: Text(
-                                    item,
-                                    style: GoogleFonts.poppins(fontSize: 13),
-                                  ),
-                                  dense: true,
-                                  trailing: _selectedLocation == item
-                                      ? const Icon(Icons.check, color: AppColors.primary, size: 18)
-                                      : null,
-                                  onTap: () {
-                                    setState(() {
-                                      _selectedLocation = item;
-                                    });
-                                    Navigator.of(dialogContext).pop();
-                                  },
-                                )),
-                          ],
-                          if (filteredDefaults.isEmpty && filteredOthers.isEmpty)
-                            Padding(
-                              padding: const EdgeInsets.all(16.0),
-                              child: Center(
-                                child: Text(
-                                  'No Location found',
-                                  style: GoogleFonts.poppins(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ),
-                            ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              actions: [
-                TextButton(
-                  onPressed: () => Navigator.of(dialogContext).pop(),
-                  child: Text(
-                    'Cancel',
-                    style: GoogleFonts.poppins(
-                      fontSize: 13,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                ),
-              ],
             );
           },
-        );
-      },
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Image Area with fixed height
+              SizedBox(
+                height: 160,
+                width: double.infinity,
+                child: Hero(
+                  tag: 'profile-image-${profile.id}-searchresult',
+                  child: Container(
+                    decoration: BoxDecoration(
+                      image: DecorationImage(
+                        image: NetworkImage(profile.profileImageUrl),
+                        fit: BoxFit.cover,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+              // Info Area
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            profile.name,
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 12.5,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                          ),
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.school_outlined,
+                                color: AppColors.primary,
+                                size: 13,
+                              ),
+                              const SizedBox(width: 4),
+                              Expanded(
+                                child: Text(
+                                  displayEducation,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10.5,
+                                    fontWeight: FontWeight.w600,
+                                    color: AppColors.primary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                          const SizedBox(height: 3),
+                          Row(
+                            children: [
+                              const Icon(
+                                Icons.person_outline_rounded,
+                                color: AppColors.textLight,
+                                size: 13,
+                              ),
+                              const SizedBox(width: 2),
+                              Text(
+                                '${profile.age} ${AppLanguageController.text('yrs')}',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 10,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Icon(
+                                Icons.location_on_outlined,
+                                color: AppColors.textLight,
+                                size: 13,
+                              ),
+                              const SizedBox(width: 2),
+                              Expanded(
+                                child: Text(
+                                  displayLocation,
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 10,
+                                    color: AppColors.textSecondary,
+                                  ),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                      // View Full Profile Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 32,
+                        child: ElevatedButton(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              appPageRoute(
+                                ProfileDetailsScreen(
+                                  profile: profile,
+                                  heroTag: 'profile-image-${profile.id}-searchresult',
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            padding: EdgeInsets.zero,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                          ),
+                          child: Text(
+                            AppLanguageController.text('view_full_profile'),
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 10.5,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
     );
   }
+
 }

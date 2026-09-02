@@ -335,7 +335,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
     final plans = _getPlansForDuration(_selectedDurationIndex);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: Colors.white,
       appBar: const CustomAppBar(
         title: 'Premium Membership',
         isMainScreen: false,

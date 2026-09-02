@@ -47,12 +47,22 @@ class MembershipCard extends StatelessWidget {
       textPrimaryColor = Colors.white;
       textSecondaryColor = const Color(0xFFBAE6FD);
     } else if (plan.contains('gold')) {
-      cardGradient = AppColors.goldGradient;
-      cardShadow = AppConstants.goldShadow;
+      cardGradient = const LinearGradient(
+        colors: [Color(0xFF334155), Color(0xFF1E293B), Color(0xFF0F172A)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
+      cardShadow = [
+        BoxShadow(
+          color: Colors.black.withValues(alpha: 0.25),
+          blurRadius: 16,
+          offset: const Offset(0, 8),
+        ),
+      ];
       cardIcon = Icons.workspace_premium;
-      iconColor = AppColors.primary;
-      textPrimaryColor = AppColors.textPrimary;
-      textSecondaryColor = AppColors.textPrimary.withValues(alpha: 0.7);
+      iconColor = const Color(0xFFCBD5E1);
+      textPrimaryColor = Colors.white;
+      textSecondaryColor = const Color(0xFF94A3B8);
     } else if (plan.contains('platinum')) {
       cardGradient = const LinearGradient(
         colors: [Color(0xFF1E2429), Color(0xFF384048), Color(0xFF4A525A)],
@@ -74,19 +84,19 @@ class MembershipCard extends StatelessWidget {
       cardGradient = AppColors.primaryGradient;
       cardShadow = [
         BoxShadow(
-          color: AppColors.primary.withValues(alpha: 0.35),
+          color: Colors.black.withValues(alpha: 0.25),
           blurRadius: 16,
           offset: const Offset(0, 8),
         ),
       ];
       cardIcon = Icons.stars_rounded;
-      iconColor = AppColors.secondary; // Gold Star
+      iconColor = Colors.white;
       textPrimaryColor = Colors.white;
-      textSecondaryColor = const Color(0xFFFCE7F3);
+      textSecondaryColor = const Color(0xFFCBD5E1);
     } else {
       // Free Member
       cardGradient = const LinearGradient(
-        colors: [Color(0xFFE2E8F0), Color(0xFFCBD5E1)],
+        colors: [Color(0xFFF1F5F9), Color(0xFFE2E8F0)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       );

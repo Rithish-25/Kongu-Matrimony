@@ -62,14 +62,14 @@ class PremiumCard extends StatelessWidget {
                         style: GoogleFonts.poppins(
                           fontSize: 10,
                           fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
+                          color: Colors.white,
                           letterSpacing: 1.0,
                         ),
                       ),
                     ),
                     const Icon(
                       Icons.workspace_premium_rounded,
-                      color: AppColors.secondary,
+                      color: AppColors.secondaryLight,
                       size: 28,
                     ),
                   ],
@@ -114,7 +114,7 @@ class PremiumCard extends StatelessWidget {
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.transparent,
-                        foregroundColor: AppColors.textPrimary,
+                        foregroundColor: Colors.white,
                         shadowColor: Colors.transparent,
                         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
                         minimumSize: const Size.fromHeight(52),

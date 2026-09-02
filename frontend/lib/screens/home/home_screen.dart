@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
+import '../../core/constants/constants.dart';
+import '../../core/assets/mock_data.dart';
+import '../../core/localization/app_language.dart';
+import '../../core/navigation/app_page_route.dart';
+import '../profile_details/profile_details_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final ValueChanged<int> onNavigateToTab;
@@ -9,312 +14,435 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final profiles = ProfileDatabase.currentProfiles;
+
     return Scaffold(
-      backgroundColor: AppColors.background,
-      body: SafeArea(
-        child: Center(
-          child: SingleChildScrollView(
-            physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                // 3D Glowing Matrimonial Badge
-                Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    // Ambient Background Glow
-                    Container(
-                      width: 140,
-                      height: 140,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        boxShadow: [
-                          BoxShadow(
-                            color: const Color(0xFF7A102A).withValues(alpha: 0.22),
-                            blurRadius: 40,
-                            spreadRadius: 8,
+      backgroundColor: Colors.white,
+      body: ValueListenableBuilder<AppLanguage>(
+        valueListenable: AppLanguageController.notifier,
+        builder: (context, lang, _) {
+          return SafeArea(
+            child: SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  // --- TOP HERO LOGO BANNER ---
+                  SizedBox(
+                    width: double.infinity,
+                    height: 165,
+                    child: Image.asset(
+                      'assets/logo.jpeg',
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Icon(
+                            Icons.favorite_rounded,
+                            color: AppColors.primary,
+                            size: 48,
                           ),
-                          BoxShadow(
-                            color: const Color(0xFFD4A937).withValues(alpha: 0.25),
-                            blurRadius: 32,
-                            spreadRadius: 2,
-                          ),
-                        ],
+                        );
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 18),
+
+                  // Verified Badge Pill
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.2),
+                        width: 1,
                       ),
                     ),
-
-                    // Outer Gold Shimmer Ring
-                    Container(
-                      width: 110,
-                      height: 110,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        gradient: const LinearGradient(
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                          colors: [
-                            Color(0xFFF3CF7A),
-                            Color(0xFFB38938),
-                            Color(0xFFFBF0B9),
-                            Color(0xFF996515),
-                          ],
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Icon(
+                          Icons.verified_user_rounded,
+                          size: 14,
+                          color: AppColors.primary,
                         ),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withValues(alpha: 0.15),
-                            blurRadius: 16,
-                            offset: const Offset(0, 8),
+                        const SizedBox(width: 6),
+                        Text(
+                          AppLanguageController.text('kootam_verified'),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 11,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                            letterSpacing: 0.8,
                           ),
-                        ],
+                        ),
+                      ],
+                    ),
+                  ),
+
+                  const SizedBox(height: 14),
+
+                  // Welcome Title
+                  Text(
+                    AppLanguageController.text('welcome_title'),
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.cinzel(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                      letterSpacing: 0.5,
+                    ),
+                  ),
+
+                  const SizedBox(height: 6),
+
+                  // Subtitle
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      AppLanguageController.text('home_subtitle'),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 12.5,
+                        color: AppColors.textSecondary,
+                        height: 1.45,
                       ),
-                      padding: const EdgeInsets.all(3),
-                      child: Container(
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                            colors: [
-                              Color(0xFF9E1D3B),
-                              Color(0xFF7A102A),
-                              Color(0xFF4A0818),
+                    ),
+                  ),
+
+                  const SizedBox(height: 22),
+
+                  // Main Action Button - Explore Horoscope Matches
+                  Container(
+                    width: double.infinity,
+                    height: 48,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppColors.primary.withValues(alpha: 0.25),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => onNavigateToTab(1), // Horoscope Tab
+                        borderRadius: BorderRadius.circular(16),
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.search_rounded,
+                                size: 18,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 8),
+                              Text(
+                                AppLanguageController.text('explore_matches'),
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  letterSpacing: 0.5,
+                                ),
+                              ),
+                              const SizedBox(width: 8),
+                              const Icon(
+                                Icons.arrow_forward_rounded,
+                                size: 16,
+                                color: Colors.white,
+                              ),
                             ],
                           ),
                         ),
-                        child: const Center(
-                          child: Icon(
-                            Icons.auto_awesome_rounded,
-                            size: 48,
-                            color: Color(0xFFFFF6D6),
-                          ),
-                        ),
                       ),
-                    ),
-
-                    // Floating Top Sparkle Badge
-                    Positioned(
-                      top: 4,
-                      right: 12,
-                      child: Container(
-                        padding: const EdgeInsets.all(6),
-                        decoration: BoxDecoration(
-                          gradient: const LinearGradient(
-                            colors: [Color(0xFFFBE49B), Color(0xFFD4A937)],
-                          ),
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0xFFD4A937).withValues(alpha: 0.4),
-                              blurRadius: 8,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Icon(
-                          Icons.favorite_rounded,
-                          size: 14,
-                          color: Color(0xFF5A0818),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 28),
-
-                // Coming Soon Pill Badge
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF7A102A).withValues(alpha: 0.08),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(
-                      color: const Color(0xFF7A102A).withValues(alpha: 0.2),
-                      width: 1,
                     ),
                   ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
+
+                  const SizedBox(height: 24),
+
+                  // Quick Action Cards Row (2x2 Grid)
+                  Row(
                     children: [
-                      const Icon(
-                        Icons.hourglass_top_rounded,
-                        size: 14,
-                        color: AppColors.primary,
-                      ),
-                      const SizedBox(width: 6),
-                      Text(
-                        'COMING SOON',
-                        style: GoogleFonts.plusJakartaSans(
-                          fontSize: 11.5,
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: _buildQuickCard(
+                          context: context,
+                          icon: Icons.female_rounded,
+                          title: AppLanguageController.text('women_profiles'),
+                          count: '6 ${AppLanguageController.text('horoscope_profiles')}',
                           color: AppColors.primary,
-                          letterSpacing: 1.6,
+                          onTap: () => onNavigateToTab(1),
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildQuickCard(
+                          context: context,
+                          icon: Icons.male_rounded,
+                          title: AppLanguageController.text('men_profiles'),
+                          count: '6 ${AppLanguageController.text('horoscope_profiles')}',
+                          color: AppColors.secondaryDark,
+                          onTap: () => onNavigateToTab(1),
                         ),
                       ),
                     ],
                   ),
-                ),
-
-                const SizedBox(height: 18),
-
-                // Royal Title
-                Text(
-                  'Something Special\nIs On The Way',
-                  textAlign: TextAlign.center,
-                  style: GoogleFonts.cinzel(
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primary,
-                    height: 1.25,
-                    letterSpacing: 0.4,
-                  ),
-                ),
-
-                const SizedBox(height: 12),
-
-                // Subtitle description
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Text(
-                    'We are crafting a new personalized matchmaking experience for the Kongu community. Stay tuned for exciting updates!',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 13,
-                      color: AppColors.textSecondary,
-                      height: 1.55,
-                    ),
-                  ),
-                ),
-
-                const SizedBox(height: 28),
-
-                // Quick Teaser Feature Cards
-                Row(
-                  children: [
-                    Expanded(
-                      child: _buildFeatureTeaser(
-                        icon: Icons.search_rounded,
-                        title: 'Smart Discovery',
-                        subtitle: 'AI-curated matching',
+                  const SizedBox(height: 12),
+                  Row(
+                    children: [
+                      Expanded(
+                        child: _buildQuickCard(
+                          context: context,
+                          icon: Icons.wb_sunny_outlined,
+                          title: AppLanguageController.text('horoscope_sync'),
+                          count: '10 Porutham Sync',
+                          color: AppColors.primary,
+                          onTap: () => onNavigateToTab(1),
+                        ),
                       ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _buildFeatureTeaser(
-                        icon: Icons.wb_sunny_outlined,
-                        title: 'Horoscope Sync',
-                        subtitle: 'Accurate Porutham',
-                      ),
-                    ),
-                  ],
-                ),
-
-                const SizedBox(height: 32),
-
-                // Action Button to Explore Horoscope Matches
-                Container(
-                  width: double.infinity,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
-                    borderRadius: BorderRadius.circular(14),
-                    boxShadow: [
-                      BoxShadow(
-                        color: const Color(0x337A102A),
-                        blurRadius: 10,
-                        offset: const Offset(0, 4),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: _buildQuickCard(
+                          context: context,
+                          icon: Icons.favorite_rounded,
+                          title: AppLanguageController.text('nav_favourites'),
+                          count: 'Shortlist Matches',
+                          color: Colors.redAccent,
+                          onTap: () => onNavigateToTab(2),
+                        ),
                       ),
                     ],
                   ),
-                  child: Material(
-                    color: Colors.transparent,
-                    child: InkWell(
-                      onTap: () => onNavigateToTab(1), // Go to Horoscope Tab
-                      borderRadius: BorderRadius.circular(14),
-                      child: Center(
+
+                  const SizedBox(height: 28),
+
+                  // --- FEATURED PROFILES SECTION HEADER ---
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Expanded(
+                        child: Text(
+                          AppLanguageController.text('featured_profiles'),
+                          style: GoogleFonts.poppins(
+                            fontSize: 15,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      TextButton(
+                        onPressed: () => onNavigateToTab(1),
+                        style: TextButton.styleFrom(
+                          padding: const EdgeInsets.symmetric(horizontal: 4),
+                          minimumSize: Size.zero,
+                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                        ),
                         child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              'EXPLORE MATCHES',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 13.5,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: 1.0,
+                              AppLanguageController.text('all_profiles'),
+                              style: GoogleFonts.poppins(
+                                fontSize: 11.5,
+                                fontWeight: FontWeight.w600,
+                                color: AppColors.secondaryDark,
                               ),
                             ),
-                            const SizedBox(width: 8),
                             const Icon(
-                              Icons.arrow_forward_rounded,
+                              Icons.chevron_right_rounded,
                               size: 16,
-                              color: Colors.white,
+                              color: AppColors.secondaryDark,
                             ),
                           ],
                         ),
                       ),
+                    ],
+                  ),
+
+                  const SizedBox(height: 8),
+
+                  // --- FEATURED PROFILES HORIZONTAL CAROUSEL ---
+                  SizedBox(
+                    height: 230,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: profiles.length,
+                      separatorBuilder: (context, index) => const SizedBox(width: 12),
+                      itemBuilder: (context, index) {
+                        final profile = profiles[index];
+                        return _buildFeaturedProfileCard(context, profile);
+                      },
                     ),
                   ),
-                ),
-              ],
+
+                  const SizedBox(height: 12),
+
+                  const SizedBox(height: 24),
+                ],
+              ),
             ),
-          ),
+          );
+        },
+      ),
+    );
+  }
+
+  Widget _buildQuickCard({
+    required BuildContext context,
+    required IconData icon,
+    required String title,
+    required String count,
+    required Color color,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(14),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(color: AppColors.border, width: 0.9),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.03),
+              blurRadius: 8,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: color.withValues(alpha: 0.09),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Icon(icon, size: 20, color: color),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              title,
+              style: GoogleFonts.poppins(
+                fontSize: 13,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+                height: 1.25,
+              ),
+              maxLines: 2,
+            ),
+            const SizedBox(height: 4),
+            Text(
+              count,
+              style: GoogleFonts.poppins(
+                fontSize: 11,
+                color: AppColors.textSecondary,
+                height: 1.2,
+              ),
+              maxLines: 2,
+            ),
+          ],
         ),
       ),
     );
   }
 
-  Widget _buildFeatureTeaser({
-    required IconData icon,
-    required String title,
-    required String subtitle,
-  }) {
+  Widget _buildFeaturedProfileCard(BuildContext context, Profile profile) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      width: 155,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border, width: 0.8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.02),
+            color: Colors.black.withValues(alpha: 0.06),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
         ],
       ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppColors.primary.withValues(alpha: 0.08),
-              shape: BoxShape.circle,
+      clipBehavior: Clip.antiAlias,
+      child: InkWell(
+        onTap: () {
+          Navigator.of(context).push(
+            appPageRoute(
+              ProfileDetailsScreen(
+                profile: profile,
+                heroTag: 'profile-image-${profile.id}-homefeatured',
+              ),
             ),
-            child: Icon(icon, size: 18, color: AppColors.primary),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            title,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 12,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
+          );
+        },
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Image Header
+            Container(
+              height: 125,
+              width: double.infinity,
+              decoration: BoxDecoration(
+                image: DecorationImage(
+                  image: NetworkImage(profile.profileImageUrl),
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 2),
-          Text(
-            subtitle,
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 10,
-              color: AppColors.textSecondary,
+            Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    profile.name,
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    '${profile.age} ${AppLanguageController.text('yrs')} • ${profile.location}',
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      color: AppColors.textSecondary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    profile.education,
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.primary,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ],
+              ),
             ),
-            textAlign: TextAlign.center,
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
