@@ -1,11 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/assets/mock_data.dart';
 import '../../core/colors/colors.dart';
-import '../../core/constants/constants.dart';
-import '../../widgets/cards/premium_card.dart';
-import '../premium/premium_screen.dart';
-import '../../core/navigation/app_page_route.dart';
 
 class HomeScreen extends StatelessWidget {
   final ValueChanged<int> onNavigateToTab;
@@ -14,358 +9,313 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return ValueListenableBuilder<List<Profile>>(
-      valueListenable: ProfileDatabase.notifier,
-      builder: (context, profiles, _) {
-        final receivedInterestCount =
-            profiles
-                .where((profile) => profile.interestStatus == 'received')
-                .length;
-
-        return Scaffold(
-          body: SingleChildScrollView(
+    return Scaffold(
+      backgroundColor: AppColors.background,
+      body: SafeArea(
+        child: Center(
+          child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppConstants.spacingM,
-            ),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
             child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: AppConstants.spacingL),
-                _buildWelcomeBanner(
-                  totalProfiles: profiles.length,
-                  receivedInterestCount: receivedInterestCount,
-                ),
-                const SizedBox(height: AppConstants.spacingL),
-                _buildQuickActions(context),
-                const SizedBox(height: AppConstants.spacingL),
-                ValueListenableBuilder<UserProfileState>(
-                  valueListenable: ProfileDatabase.userProfileNotifier,
-                  builder: (context, userProfile, _) {
-                    return PremiumCard(
-                      onUpgradePressed:
-                          () =>
-                              _showUpgradePlansSheet(context, userProfile.plan),
-                    );
-                  },
-                ),
-                const SizedBox(height: AppConstants.spacingL),
-                _buildAboutCard(theme),
-                const SizedBox(height: AppConstants.spacingXL),
-              ],
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _buildWelcomeBanner({
-    required int totalProfiles,
-    required int receivedInterestCount,
-  }) {
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
-        boxShadow: AppConstants.softShadow,
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          Positioned(
-            right: -10,
-            bottom: -20,
-            child: Icon(
-              Icons.spa,
-              size: 140,
-              color: Colors.white.withValues(alpha: 0.04),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(AppConstants.spacingL),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Vanakkam',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    color: Colors.white.withValues(alpha: 0.82),
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  'Find Your Perfect\nLife Partner',
-                  style: GoogleFonts.cinzel(
-                    fontSize: 24,
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    height: 1.25,
-                  ),
-                ),
-                const SizedBox(height: AppConstants.spacingM),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-
-  Widget _buildQuickActions(BuildContext context) {
-    final actions = [
-      _ActionItem(
-        icon: Icons.search_rounded,
-        title: 'Horoscope',
-        subtitle: 'Find matches by Rasi & Star',
-        onTap: () => onNavigateToTab(1),
-      ),
-      _ActionItem(
-        icon: Icons.favorite_border_rounded,
-        title: 'Favourites',
-        subtitle: 'View your saved profiles',
-        onTap: () => onNavigateToTab(2),
-      ),
-      _ActionItem(
-        icon: Icons.handshake_outlined,
-        title: 'Interests',
-        subtitle: 'Check your sent and received interests',
-        onTap: () => onNavigateToTab(3),
-      ),
-      _ActionItem(
-        icon: Icons.card_membership_rounded,
-        title: 'Subscription',
-        subtitle: 'Manage your premium plans',
-        onTap: () {
-          Navigator.of(context).push(
-            appPageRoute(const PremiumScreen()),
-          );
-        },
-      ),
-    ];
-
-    return GridView.builder(
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-        crossAxisCount: 2,
-        crossAxisSpacing: AppConstants.spacingS,
-        mainAxisSpacing: AppConstants.spacingS,
-        childAspectRatio: 1.35,
-      ),
-      itemCount: actions.length,
-      itemBuilder: (context, index) {
-        final action = actions[index];
-        return Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(
-              AppConstants.borderRadiusMedium,
-            ),
-            border: Border.all(color: AppColors.border),
-            boxShadow: AppConstants.softShadow,
-          ),
-          child: Material(
-            color: Colors.transparent,
-            child: InkWell(
-              onTap: action.onTap,
-              borderRadius: BorderRadius.circular(
-                AppConstants.borderRadiusMedium,
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(AppConstants.spacingM),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.start,
+                // 3D Glowing Matrimonial Badge
+                Stack(
+                  alignment: Alignment.center,
                   children: [
+                    // Ambient Background Glow
                     Container(
-                      padding: const EdgeInsets.all(6),
+                      width: 140,
+                      height: 140,
                       decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.06),
                         shape: BoxShape.circle,
-                      ),
-                      child: Icon(
-                        action.icon,
-                        size: 20,
-                        color: AppColors.primary,
+                        boxShadow: [
+                          BoxShadow(
+                            color: const Color(0xFF7A102A).withValues(alpha: 0.22),
+                            blurRadius: 40,
+                            spreadRadius: 8,
+                          ),
+                          BoxShadow(
+                            color: const Color(0xFFD4A937).withValues(alpha: 0.25),
+                            blurRadius: 32,
+                            spreadRadius: 2,
+                          ),
+                        ],
                       ),
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      action.title,
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+
+                    // Outer Gold Shimmer Ring
+                    Container(
+                      width: 110,
+                      height: 110,
+                      decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        gradient: const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [
+                            Color(0xFFF3CF7A),
+                            Color(0xFFB38938),
+                            Color(0xFFFBF0B9),
+                            Color(0xFF996515),
+                          ],
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: 0.15),
+                            blurRadius: 16,
+                            offset: const Offset(0, 8),
+                          ),
+                        ],
                       ),
-                      textAlign: TextAlign.start,
+                      padding: const EdgeInsets.all(3),
+                      child: Container(
+                        decoration: const BoxDecoration(
+                          shape: BoxShape.circle,
+                          gradient: LinearGradient(
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                            colors: [
+                              Color(0xFF9E1D3B),
+                              Color(0xFF7A102A),
+                              Color(0xFF4A0818),
+                            ],
+                          ),
+                        ),
+                        child: const Center(
+                          child: Icon(
+                            Icons.auto_awesome_rounded,
+                            size: 48,
+                            color: Color(0xFFFFF6D6),
+                          ),
+                        ),
+                      ),
                     ),
-                    const SizedBox(height: 2),
-                    Text(
-                      action.subtitle,
-                      style: GoogleFonts.poppins(
-                        fontSize: 10,
-                        color: AppColors.textSecondary,
-                        height: 1.25,
+
+                    // Floating Top Sparkle Badge
+                    Positioned(
+                      top: 4,
+                      right: 12,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [Color(0xFFFBE49B), Color(0xFFD4A937)],
+                          ),
+                          shape: BoxShape.circle,
+                          boxShadow: [
+                            BoxShadow(
+                              color: const Color(0xFFD4A937).withValues(alpha: 0.4),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Icon(
+                          Icons.favorite_rounded,
+                          size: 14,
+                          color: Color(0xFF5A0818),
+                        ),
                       ),
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
-                      textAlign: TextAlign.start,
                     ),
                   ],
                 ),
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
 
+                const SizedBox(height: 28),
 
-
-  Widget _buildAboutCard(ThemeData theme) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(AppConstants.spacingM),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
-        border: Border.all(color: AppColors.border),
-        boxShadow: AppConstants.softShadow,
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(
-                Icons.favorite_rounded,
-                color: AppColors.primary,
-                size: 22,
-              ),
-              const SizedBox(width: 8),
-              Text(
-                'About Kongu Matrimony',
-                style: GoogleFonts.poppins(
-                  fontSize: 14,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'We are a premium matrimonial network dedicated exclusively to the Kongu community. Our platform blends sacred traditions such as Koottam, Star, and Rasi matching with modern privacy, polished user experience, and trusted profile discovery.',
-            style: GoogleFonts.poppins(
-              fontSize: 11,
-              color: AppColors.textSecondary,
-              height: 1.6,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  void _showUpgradePlansSheet(BuildContext context, String currentPlan) {
-    showModalBottomSheet(
-      context: context,
-      showDragHandle: true,
-      builder: (context) {
-        final plans = ['Free', 'Gold', 'Platinum'];
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Manage Premium Plan',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  'Switch plans to test the membership experience and horoscope download limits.',
-                  style: GoogleFonts.poppins(
-                    fontSize: 12,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                ...plans.map(
-                  (plan) => ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: Icon(
-                      plan == 'Platinum'
-                          ? Icons.military_tech_rounded
-                          : plan == 'Gold'
-                          ? Icons.workspace_premium_rounded
-                          : Icons.stars_rounded,
-                      color: AppColors.primary,
+                // Coming Soon Pill Badge
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF7A102A).withValues(alpha: 0.08),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: const Color(0xFF7A102A).withValues(alpha: 0.2),
+                      width: 1,
                     ),
-                    title: Text(
-                      '$plan Plan',
-                      style: GoogleFonts.poppins(
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.hourglass_top_rounded,
+                        size: 14,
+                        color: AppColors.primary,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        'COMING SOON',
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                          letterSpacing: 1.6,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 18),
+
+                // Royal Title
+                Text(
+                  'Something Special\nIs On The Way',
+                  textAlign: TextAlign.center,
+                  style: GoogleFonts.cinzel(
+                    fontSize: 26,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primary,
+                    height: 1.25,
+                    letterSpacing: 0.4,
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Subtitle description
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 16),
+                  child: Text(
+                    'We are crafting a new personalized matchmaking experience for the Kongu community. Stay tuned for exciting updates!',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                      height: 1.55,
+                    ),
+                  ),
+                ),
+
+                const SizedBox(height: 28),
+
+                // Quick Teaser Feature Cards
+                Row(
+                  children: [
+                    Expanded(
+                      child: _buildFeatureTeaser(
+                        icon: Icons.search_rounded,
+                        title: 'Smart Discovery',
+                        subtitle: 'AI-curated matching',
                       ),
                     ),
-                    trailing:
-                        currentPlan.toLowerCase() == plan.toLowerCase()
-                            ? const Icon(
-                              Icons.check_circle,
-                              color: AppColors.success,
-                            )
-                            : null,
-                    onTap: () async {
-                      await ProfileDatabase.updateUserProfile(
-                        plan: plan,
-                        downloadedCount: 0,
-                      );
-                      Navigator.of(context).pop();
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(
-                          content: Text('$plan plan activated successfully.'),
-                          duration: const Duration(milliseconds: 1200),
+                    const SizedBox(width: 10),
+                    Expanded(
+                      child: _buildFeatureTeaser(
+                        icon: Icons.wb_sunny_outlined,
+                        title: 'Horoscope Sync',
+                        subtitle: 'Accurate Porutham',
+                      ),
+                    ),
+                  ],
+                ),
+
+                const SizedBox(height: 32),
+
+                // Action Button to Explore Horoscope Matches
+                Container(
+                  width: double.infinity,
+                  height: 48,
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: BorderRadius.circular(14),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color(0x337A102A),
+                        blurRadius: 10,
+                        offset: const Offset(0, 4),
+                      ),
+                    ],
+                  ),
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () => onNavigateToTab(1), // Go to Horoscope Tab
+                      borderRadius: BorderRadius.circular(14),
+                      child: Center(
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Text(
+                              'EXPLORE MATCHES',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 13.5,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: 1.0,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            const Icon(
+                              Icons.arrow_forward_rounded,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ],
                         ),
-                      );
-                    },
+                      ),
+                    ),
                   ),
                 ),
               ],
             ),
           ),
-        );
-      },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFeatureTeaser({
+    required IconData icon,
+    required String title,
+    required String subtitle,
+  }) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 14),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border, width: 0.8),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.02),
+            blurRadius: 8,
+            offset: const Offset(0, 3),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: AppColors.primary.withValues(alpha: 0.08),
+              shape: BoxShape.circle,
+            ),
+            child: Icon(icon, size: 18, color: AppColors.primary),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            title,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 2),
+          Text(
+            subtitle,
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 10,
+              color: AppColors.textSecondary,
+            ),
+            textAlign: TextAlign.center,
+          ),
+        ],
+      ),
     );
   }
 }
-
-class _ActionItem {
-  final IconData icon;
-  final String title;
-  final String subtitle;
-  final VoidCallback onTap;
-
-  _ActionItem({
-    required this.icon,
-    required this.title,
-    required this.subtitle,
-    required this.onTap,
-  });
-}
-
-

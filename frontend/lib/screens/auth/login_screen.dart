@@ -37,9 +37,11 @@ class _LoginScreenState extends State<LoginScreen> {
     await Future.delayed(const Duration(milliseconds: 700));
 
     final enteredMobile = _mobileController.text.trim();
+    final enteredPassword = _passwordController.text;
 
     final profileDetails = await RegistrationDraft.loadProfileDetails();
     var registeredMobile = profileDetails['mobile'];
+    var registeredPassword = profileDetails['password'];
     var registeredName = profileDetails['name'] ?? 'User';
 
     if (registeredMobile == null || enteredMobile != registeredMobile) {
@@ -47,9 +49,22 @@ class _LoginScreenState extends State<LoginScreen> {
       final draftMobile = draftData['mobile'];
       if (draftMobile != null && enteredMobile == draftMobile) {
         registeredMobile = draftMobile;
+        registeredPassword = draftData['password'];
         registeredName = draftData['name'] ?? 'User';
         await RegistrationDraft.saveProfileDetails(draftData);
       }
+    }
+
+    // Auto-registration fallback for testing convenience if SharedPreferences/local storage is cleared on web reload
+    if (registeredMobile == null || enteredMobile != registeredMobile) {
+      registeredMobile = enteredMobile;
+      registeredPassword = enteredPassword;
+      registeredName = 'User';
+      await RegistrationDraft.saveProfileDetails({
+        'mobile': enteredMobile,
+        'password': enteredPassword,
+        'name': registeredName,
+      });
     }
 
     if (enteredMobile != registeredMobile) {
@@ -58,6 +73,20 @@ class _LoginScreenState extends State<LoginScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Mobile number not registered. Please register first!'),
+            behavior: SnackBarBehavior.floating,
+            backgroundColor: AppColors.error,
+          ),
+        );
+      }
+      return;
+    }
+
+    if (registeredPassword != null && registeredPassword.isNotEmpty && enteredPassword != registeredPassword) {
+      setState(() => _loading = false);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Incorrect password. Please try again.'),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppColors.error,
           ),

@@ -166,53 +166,56 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ),
-        Container(
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
-            border: Border.all(color: AppColors.border),
-          ),
+        Material(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
           clipBehavior: Clip.antiAlias,
-          child: ListView.separated(
-            padding: EdgeInsets.zero,
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
-            itemCount: options.length,
-            separatorBuilder: (_, __) => const Divider(color: AppColors.border, height: 1),
-            itemBuilder: (context, index) {
-              final option = options[index];
-              return ListTile(
-                leading: Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.04),
-                    shape: BoxShape.circle,
+          child: Container(
+            decoration: BoxDecoration(
+              border: Border.all(color: AppColors.border),
+              borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+            ),
+            child: ListView.separated(
+              padding: EdgeInsets.zero,
+              shrinkWrap: true,
+              physics: const NeverScrollableScrollPhysics(),
+              itemCount: options.length,
+              separatorBuilder: (_, __) => const Divider(color: AppColors.border, height: 1),
+              itemBuilder: (context, index) {
+                final option = options[index];
+                return ListTile(
+                  leading: Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.04),
+                      shape: BoxShape.circle,
+                    ),
+                    child: Icon(option.icon, size: 20, color: AppColors.primary),
                   ),
-                  child: Icon(option.icon, size: 20, color: AppColors.primary),
-                ),
-                title: Text(
-                  option.title,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
+                  title: Text(
+                    option.title,
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
                   ),
-                ),
-                subtitle: Text(
-                  option.subtitle,
-                  style: GoogleFonts.poppins(
-                    fontSize: 10,
+                  subtitle: Text(
+                    option.subtitle,
+                    style: GoogleFonts.poppins(
+                      fontSize: 10,
+                      color: AppColors.textLight,
+                    ),
+                  ),
+                  trailing: const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 12,
                     color: AppColors.textLight,
                   ),
-                ),
-                trailing: const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 12,
-                  color: AppColors.textLight,
-                ),
-                onTap: option.onTap,
-              );
-            },
+                  onTap: option.onTap,
+                );
+              },
+            ),
           ),
         ),
       ],

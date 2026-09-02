@@ -144,14 +144,18 @@ class ProfileDatabase {
 
       _isLoggedIn = isLogged ?? false;
 
-      if (displayName != null || imageUrl != null || plan != null || downloadedCount != null) {
-        userProfileNotifier.value = userProfileNotifier.value.copyWith(
-          displayName: displayName ?? userProfileNotifier.value.displayName,
-          profileImageUrl: imageUrl ?? userProfileNotifier.value.profileImageUrl,
-          plan: plan ?? userProfileNotifier.value.plan,
-          downloadedCount: downloadedCount ?? userProfileNotifier.value.downloadedCount,
-        );
-      }
+      final profileDetails = await RegistrationDraft.loadProfileDetails();
+      final savedName = profileDetails['name']?.trim();
+      final effectiveName = (savedName != null && savedName.isNotEmpty && savedName != 'User')
+          ? savedName
+          : (displayName != null && displayName.isNotEmpty ? displayName : 'User');
+
+      userProfileNotifier.value = userProfileNotifier.value.copyWith(
+        displayName: effectiveName,
+        profileImageUrl: imageUrl ?? userProfileNotifier.value.profileImageUrl,
+        plan: plan ?? userProfileNotifier.value.plan,
+        downloadedCount: downloadedCount ?? userProfileNotifier.value.downloadedCount,
+      );
 
       // Load persisted favourites & interests
       final favList = prefs.getStringList(_kFavourites) ?? [];
@@ -165,15 +169,24 @@ class ProfileDatabase {
         }
       }
 
-      // Apply to initial profiles list
-      final updatedProfiles = _initialProfiles.map((p) {
-        final isFav = favList.contains(p.id);
-        final status = interestMap[p.id] ?? p.interestStatus;
-        return p.copyWith(
-          isFavourite: isFav,
-          interestStatus: status,
-        );
-      }).toList();
+      // Load blocked profiles for the current user (based on their mobile number reference)
+      final userMobile = profileDetails['mobile'] ?? '';
+      final blockedList = prefs.getStringList('blocked_$userMobile') ?? [];
+      _blockedIds.clear();
+      _blockedIds.addAll(blockedList.map((e) => e.toLowerCase()));
+      _blockedIds.addAll(blockedList);
+
+      // Apply to initial profiles list (filtering out blocked profiles)
+      final updatedProfiles = _initialProfiles
+          .where((p) => !_blockedIds.contains(p.id.toLowerCase()) && !_blockedIds.contains(p.id))
+          .map((p) {
+            final isFav = favList.contains(p.id);
+            final status = interestMap[p.id] ?? p.interestStatus;
+            return p.copyWith(
+              isFavourite: isFav,
+              interestStatus: status,
+            );
+          }).toList();
 
       notifier.value = updatedProfiles;
     } catch (_) {
@@ -433,6 +446,38 @@ class ProfileDatabase {
     } catch (_) {}
   }
 
+  static final Set<String> _blockedIds = {};
+  static bool isBlocked(String profileId) =>
+      _blockedIds.contains(profileId.toLowerCase()) || _blockedIds.contains(profileId);
+  static Set<String> get blockedIds => _blockedIds;
+
+  static void blockProfile(String profileId) async {
+    try {
+      final cleanId = profileId.toLowerCase();
+      _blockedIds.add(cleanId);
+      _blockedIds.add(profileId);
+
+      final prefs = await SharedPreferences.getInstance();
+      final profileDetails = await RegistrationDraft.loadProfileDetails();
+      final userMobile = profileDetails['mobile'] ?? '';
+      final key = 'blocked_$userMobile';
+      final blockedList = prefs.getStringList(key) ?? [];
+      if (!blockedList.contains(profileId)) {
+        blockedList.add(profileId);
+      }
+      if (!blockedList.contains(cleanId)) {
+        blockedList.add(cleanId);
+      }
+      await prefs.setStringList(key, blockedList);
+
+      // Update the active list immediately so the UI is in sync
+      final currentList = notifier.value;
+      notifier.value = currentList
+          .where((p) => p.id.toLowerCase() != cleanId && p.id != profileId)
+          .toList();
+    } catch (_) {}
+  }
+
   static final ValueNotifier<UserProfileState>
   userProfileNotifier = ValueNotifier(
     UserProfileState(
@@ -478,7 +523,8 @@ class ProfileDatabase {
       await prefs.remove(_kInterests);
       await prefs.setBool(_kIsLoggedIn, false);
       _isLoggedIn = false;
-      await RegistrationDraft.clearProfileDetails();
+      // Keep profile details on logout so user can log in again
+      // await RegistrationDraft.clearProfileDetails();
       await RegistrationDraft.clearDraft();
     } catch (_) {}
 

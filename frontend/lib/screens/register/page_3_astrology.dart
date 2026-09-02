@@ -43,18 +43,7 @@ class Page3Astrology extends StatelessWidget {
                 return null;
               },
             ),
-            RegisterComponents.buildTextField(
-              label: 'Date of Birth (DOB)',
-              fieldKey: 'dob',
-              formData: formData,
-              onChanged: onChanged,
-              currentStep: currentStep,
-              hint: 'DD-MM-YYYY',
-              validator: (val) {
-                if (val == null || val.trim().isEmpty) return 'Please enter DOB';
-                return null;
-              },
-            ),
+
             RegisterComponents.buildTextField(
               label: 'Time of Birth',
               fieldKey: 'timeOfBirth',

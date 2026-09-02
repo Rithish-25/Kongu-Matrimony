@@ -50,12 +50,17 @@ class PrimaryButton extends StatelessWidget {
               icon!,
               const SizedBox(width: AppConstants.spacingXS),
             ],
-            Text(
-              text,
-              style: theme.textTheme.titleMedium?.copyWith(
-                color: isGold ? AppColors.textPrimary : Colors.white,
-                fontWeight: FontWeight.w700,
-                letterSpacing: 0.3,
+            Flexible(
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  text,
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    color: isGold ? AppColors.textPrimary : Colors.white,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 0.3,
+                  ),
+                ),
               ),
             ),
           ],

@@ -4,7 +4,7 @@ import '../../core/colors/colors.dart';
 import '../../core/constants/constants.dart';
 import '../../core/assets/mock_data.dart';
 import '../../core/navigation/app_page_route.dart';
-import '../../widgets/cards/profile_card.dart';
+
 import '../../widgets/cards/empty_state_widget.dart';
 import '../../widgets/buttons/primary_button.dart';
 import '../profile_details/profile_details_screen.dart';
@@ -20,7 +20,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
   // Results view trigger
   bool _showResults = false;
   List<Profile> _searchResults = [];
-  String _activeFilterSummary = '';
+
 
   // Form State Values
   String _selectedMinAge = '20';
@@ -55,6 +55,19 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     super.initState();
     // Perform initial search synchronously to prevent screen flickering
     _initializeDefaultSearch();
+    ProfileDatabase.notifier.addListener(_onDatabaseChanged);
+  }
+
+  @override
+  void dispose() {
+    ProfileDatabase.notifier.removeListener(_onDatabaseChanged);
+    super.dispose();
+  }
+
+  void _onDatabaseChanged() {
+    if (mounted && _showResults) {
+      _performAdvancedSearch(ProfileDatabase.currentProfiles);
+    }
   }
 
   void _initializeDefaultSearch() {
@@ -120,7 +133,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     if (_selectedEducation != 'Any') activeFilters.add('Education: $_selectedEducation');
     if (_selectedOccupation != 'Any') activeFilters.add('Job: $_selectedOccupation');
     
-    _activeFilterSummary = activeFilters.join(' • ');
+
   }
 
   int? _parseHeightToInches(String height) {
@@ -193,7 +206,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       _selectedLocation = 'Any';
       _showResults = false;
       _searchResults = [];
-      _activeFilterSummary = '';
+
     });
   }
 
@@ -261,7 +274,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       if (_selectedEducation != 'Any') activeFilters.add('Education: $_selectedEducation');
       if (_selectedOccupation != 'Any') activeFilters.add('Job: $_selectedOccupation');
       
-      _activeFilterSummary = activeFilters.join(' • ');
+
     });
   }
 
@@ -847,71 +860,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Results Info header
-        Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: 10),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            border: Border(bottom: BorderSide(color: AppColors.border)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      'Found ${_searchResults.length} Matches',
-                      style: GoogleFonts.poppins(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.primary,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  const SizedBox(width: 8),
-                  OutlinedButton.icon(
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.primary,
-                      side: const BorderSide(color: AppColors.primary, width: 1.2),
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 0),
-                      minimumSize: const Size(90, 36),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                    ),
-                    icon: const Icon(Icons.tune_rounded, size: 14),
-                    label: Text(
-                      'Edit Filters',
-                      style: GoogleFonts.poppins(
-                        fontSize: 11,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _showResults = false;
-                      });
-                    },
-                  ),
-                ],
-              ),
-              if (_activeFilterSummary.isNotEmpty) ...[
-                const SizedBox(height: 4),
-                Text(
-                  _activeFilterSummary,
-                  style: GoogleFonts.poppins(
-                    fontSize: 11,
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-              ],
-            ],
-          ),
-        ),
+
 
         // Profiles grid
         Expanded(
@@ -927,37 +876,192 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
                     });
                   },
                 )
-              : ListView.builder(
+              : GridView.builder(
                   padding: const EdgeInsets.all(AppConstants.spacingM),
                   physics: const BouncingScrollPhysics(),
+                  gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 2,
+                    crossAxisSpacing: 12,
+                    mainAxisSpacing: 14,
+                    childAspectRatio: 0.50,
+                  ),
                   itemCount: _searchResults.length,
                   itemBuilder: (context, index) {
                     final profile = _searchResults[index];
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 8.0),
-                      child: ProfileCard(
-                        profile: profile,
-                        cardType: ProfileCardType.standard,
-                        showLastActive: false,
-                        onFavoriteToggle: () {
-                          ProfileDatabase.toggleFavorite(profile.id);
-                        },
-                        onViewProfile: () {
-                          Navigator.of(context).push(
-                            appPageRoute(
-                              ProfileDetailsScreen(
-                                profile: profile,
-                                heroTag: 'profile-image-${profile.id}-searchresult',
-                              ),
-                            ),
-                          );
-                        },
-                      ),
-                    );
+                    return _buildGridProfileCard(context, profile);
                   },
                 ),
         ),
       ],
+    );
+  }
+
+  Widget _buildGridProfileCard(BuildContext context, Profile profile) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.12),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          // Content Area - Clickable
+          Positioned.fill(
+            child: GestureDetector(
+              onTap: () {
+                Navigator.of(context).push(
+                  appPageRoute(
+                    ProfileDetailsScreen(
+                      profile: profile,
+                      heroTag: 'profile-image-${profile.id}-searchresult',
+                    ),
+                  ),
+                );
+              },
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  // Image Area
+                  Expanded(
+                    child: Hero(
+                      tag: 'profile-image-${profile.id}-searchresult',
+                      child: Container(
+                        decoration: BoxDecoration(
+                          image: DecorationImage(
+                            image: NetworkImage(profile.profileImageUrl),
+                            fit: BoxFit.cover,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  // Info Area
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          profile.name,
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4),
+                        // Koottam
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.star_outline_rounded,
+                              color: AppColors.secondary,
+                              size: 14,
+                            ),
+                            const SizedBox(width: 4),
+                            Expanded(
+                              child: Text(
+                                'Koottam: ${profile.koottam}',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.primary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 4),
+                        // Specs
+                        Row(
+                          children: [
+                            const Icon(
+                              Icons.straighten_rounded,
+                              color: AppColors.textLight,
+                              size: 13,
+                            ),
+                            const SizedBox(width: 2),
+                            Text(
+                              profile.heightText,
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                color: AppColors.textSecondary,
+                              ),
+                            ),
+                            const SizedBox(width: 6),
+                            const Icon(
+                              Icons.location_on_outlined,
+                              color: AppColors.textLight,
+                              size: 13,
+                            ),
+                            const SizedBox(width: 2),
+                            Expanded(
+                              child: Text(
+                                profile.location,
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 8),
+                        // Button
+                        SizedBox(
+                          width: double.infinity,
+                          height: 34,
+                          child: ElevatedButton(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                appPageRoute(
+                                  ProfileDetailsScreen(
+                                    profile: profile,
+                                    heroTag: 'profile-image-${profile.id}-searchresult',
+                                  ),
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              padding: EdgeInsets.zero,
+                              elevation: 0,
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                            child: Text(
+                              'View Full Profile',
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 

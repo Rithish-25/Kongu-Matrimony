@@ -4,8 +4,6 @@ import '../../core/colors/colors.dart';
 import '../../core/constants/constants.dart';
 import '../../core/assets/mock_data.dart';
 import '../../widgets/appbar/custom_app_bar.dart';
-import '../../widgets/buttons/primary_button.dart';
-import '../../widgets/buttons/secondary_button.dart';
 
 class ProfileDetailsScreen extends StatefulWidget {
   final Profile profile;
@@ -23,73 +21,205 @@ class ProfileDetailsScreen extends StatefulWidget {
 
 class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   int _currentImageIndex = 0;
+  late PageController _pageController;
+  late List<Profile> _profiles;
+  late int _initialIndex;
+  double _currentPage = 0.0;
+  int _lastActivePage = 0;
+  final Map<String, double> _pageScrollOffsets = {};
+
+  @override
+  void initState() {
+    super.initState();
+    // Get all current profiles
+    _profiles = ProfileDatabase.currentProfiles;
+    // Find the initial index of the selected profile
+    _initialIndex = _profiles.indexWhere((p) => p.id == widget.profile.id);
+    if (_initialIndex == -1) {
+      _profiles = [widget.profile, ..._profiles];
+      _initialIndex = 0;
+    }
+    _lastActivePage = _initialIndex;
+    _currentPage = _initialIndex.toDouble();
+    _pageController = PageController(initialPage: _initialIndex);
+    _pageController.addListener(() {
+      int activePage = _pageController.page?.round() ?? _initialIndex;
+      if (activePage != _lastActivePage) {
+        setState(() {
+          _lastActivePage = activePage;
+          _currentImageIndex = 0; // reset image slide to first image on page change
+        });
+      }
+      setState(() {
+        _currentPage = _pageController.page ?? _initialIndex.toDouble();
+      });
+    });
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final profileImages = [
-      widget.profile.profileImageUrl,
-      widget.profile.coverImageUrl,
-    ];
 
     return Scaffold(
       appBar: const CustomAppBar(title: 'Profile Details', isMainScreen: false),
-      body: ValueListenableBuilder<List<Profile>>(
-        valueListenable: ProfileDatabase.notifier,
-        builder: (context, profiles, _) {
-          final currentProfileState = profiles.firstWhere(
-            (p) => p.id == widget.profile.id,
-            orElse: () => widget.profile,
+      body: PageView.builder(
+        controller: _pageController,
+        itemCount: _profiles.length,
+        physics: const BouncingScrollPhysics(),
+        itemBuilder: (context, index) {
+          final profile = _profiles[index];
+          
+          // Swipe card tilting & custom animation matching the Tinder/curved drawings
+          double offset = _currentPage - index;
+          double angle = -offset * 0.15; // rotate
+          double translationX = -offset * MediaQuery.of(context).size.width;
+          double translationY = offset.abs() * 40; // curve downward slightly
+          double scale = 1.0 - (offset.abs() * 0.05).clamp(0.0, 0.1);
+          
+          final transformMatrix = Matrix4.translationValues(translationX, translationY, 0.0)
+            ..rotateZ(angle)
+            ..scaleByDouble(scale, scale, 1.0, 1.0);
+          return Transform(
+            transform: transformMatrix,
+            child: _buildProfileContent(context, theme, profile),
           );
-          final isFav = currentProfileState.isFavourite;
-          final interest = currentProfileState.interestStatus;
+        },
+      ),
+    );
+  }
 
-          return Stack(
-            children: [
-              // Scrollable Details Body
-              SingleChildScrollView(
+  Widget _buildProfileContent(BuildContext context, ThemeData theme, Profile profile) {
+    final profileImages = [
+      profile.profileImageUrl,
+    ];
+
+    return ValueListenableBuilder<List<Profile>>(
+      valueListenable: ProfileDatabase.notifier,
+      builder: (context, profiles, _) {
+        final currentProfileState = profiles.firstWhere(
+          (p) => p.id == profile.id,
+          orElse: () => profile,
+        );
+        final isFav = currentProfileState.isFavourite;
+        final interest = currentProfileState.interestStatus;
+
+        final scrollOffset = _pageScrollOffsets[profile.id] ?? 0.0;
+
+        return Stack(
+          children: [
+            // Unified scroll container enabling horizontal page swiping anywhere on the screen
+            NotificationListener<ScrollNotification>(
+              onNotification: (notification) {
+                if (notification.depth == 0) {
+                  setState(() {
+                    _pageScrollOffsets[profile.id] = notification.metrics.pixels;
+                  });
+                }
+                return false;
+              },
+              child: SingleChildScrollView(
                 physics: const BouncingScrollPhysics(),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
+                child: Stack(
                   children: [
-                    // Top Image Slideshow Header
-                    _buildImageHeader(context, profileImages, isFav),
+                    // Background Image Header - dynamically offset to counteract vertical scrolling
+                    Transform.translate(
+                      offset: Offset(0, scrollOffset),
+                      child: _buildImageHeader(context, currentProfileState, profileImages, isFav),
+                    ),
 
-                    // Content Details
-                    Padding(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: AppConstants.spacingM,
-                        vertical: AppConstants.spacingM,
-                      ),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          _buildBasicDetailsCard(theme, currentProfileState),
-                          const SizedBox(height: AppConstants.spacingL),
-                          _buildPersonalDetailsCard(theme, currentProfileState),
-                          const SizedBox(height: AppConstants.spacingL),
-                          _buildHoroscopeCard(theme, currentProfileState),
-                          const SizedBox(height: 120),
-                        ],
-                      ),
+                    // Details content placed in front of the image
+                    Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Spacer and favorite button overlaying the image
+                        const SizedBox(height: 420), // Spacing to show the image below
+                        _buildWaveBannerOverlay(currentProfileState),
+                        Container(
+                          color: AppColors.background,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppConstants.spacingM,
+                            vertical: AppConstants.spacingM,
+                          ),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              _buildBasicDetailsCard(theme, currentProfileState),
+                              const SizedBox(height: AppConstants.spacingL),
+                              _buildPersonalDetailsCard(theme, currentProfileState),
+                              const SizedBox(height: AppConstants.spacingL),
+                              _buildHoroscopeCard(theme, currentProfileState),
+                              const SizedBox(height: 120),
+                            ],
+                          ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
               ),
+            ),
 
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: _buildBottomActionBar(
-                  context,
-                  currentProfileState,
-                  interest,
-                ),
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: _buildBottomActionBar(
+                context,
+                currentProfileState,
+                interest,
               ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildWaveBannerOverlay(Profile profile) {
+    return ClipPath(
+      clipper: ProfileWaveClipper(),
+      child: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          gradient: LinearGradient(
+            colors: [
+              Color(0xDA7A102A),
+              AppColors.primary,
             ],
-          );
-        },
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+          ),
+        ),
+        padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              profile.name,
+              style: GoogleFonts.poppins(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                letterSpacing: 0.5,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${profile.age} Yrs, ${profile.heightText}, ${profile.occupation}, ${profile.location}',
+              style: GoogleFonts.poppins(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: Colors.white.withValues(alpha: 0.9),
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -97,6 +227,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   // Header Image with slideshow buttons, wave overlay, back & action indicators
   Widget _buildImageHeader(
     BuildContext context,
+    Profile profile,
     List<String> images,
     bool isFav,
   ) {
@@ -104,12 +235,14 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
       children: [
         // Main Image view with Hero transition
         Hero(
-          tag: widget.heroTag,
+          tag: profile.id == widget.profile.id
+              ? widget.heroTag
+              : 'profile-image-${profile.id}-details',
           child: Container(
-            height: 380,
+            height: 500,
             width: double.infinity,
             decoration: BoxDecoration(
-              color: AppColors.border,
+              color: const Color(0xFF1A1A1A),
               image: DecorationImage(
                 image: NetworkImage(images[_currentImageIndex]),
                 fit: BoxFit.cover,
@@ -141,14 +274,16 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
           ),
         ),
 
-        // Favourite button (Top Right)
+
+
+        // Favourite button (Top Right) - Placed in the image header Stack
         Positioned(
           top: 16,
           right: 16,
           child: GestureDetector(
             onTap: () {
               final wasFav = isFav;
-              ProfileDatabase.toggleFavorite(widget.profile.id);
+              ProfileDatabase.toggleFavorite(profile.id);
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -178,103 +313,60 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
         ),
 
         // Slideshow Arrow Left
-        Positioned(
-          left: 12,
-          top: 170,
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                _currentImageIndex =
-                    (_currentImageIndex - 1 + images.length) % images.length;
-              });
-            },
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.25),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.chevron_left,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
-          ),
-        ),
-
-        // Slideshow Arrow Right
-        Positioned(
-          right: 12,
-          top: 170,
-          child: GestureDetector(
-            onTap: () {
-              setState(() {
-                _currentImageIndex = (_currentImageIndex + 1) % images.length;
-              });
-            },
-            child: Container(
-              width: 36,
-              height: 36,
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.25),
-                shape: BoxShape.circle,
-              ),
-              child: const Icon(
-                Icons.chevron_right,
-                color: Colors.white,
-                size: 24,
-              ),
-            ),
-          ),
-        ),
-
-        // Wave banner overlay with Name & specs details on bottom of photo
-        Positioned(
-          bottom: 0,
-          left: 0,
-          right: 0,
-          child: ClipPath(
-            clipper: ProfileWaveClipper(),
-            child: Container(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    AppColors.primary.withValues(alpha: 0.85),
-                    AppColors.primary,
-                  ],
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
+        if (images.length > 1)
+          Positioned(
+            left: 12,
+            top: 232,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _currentImageIndex =
+                      (_currentImageIndex - 1 + images.length) % images.length;
+                });
+              },
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.chevron_left,
+                  color: Colors.white,
+                  size: 24,
                 ),
               ),
-              padding: const EdgeInsets.fromLTRB(20, 16, 20, 16),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.profile.name,
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    '${widget.profile.age} Yrs, ${widget.profile.heightText}, ${widget.profile.occupation}, ${widget.profile.location}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 11,
-                      fontWeight: FontWeight.w500,
-                      color: Colors.white.withValues(alpha: 0.9),
-                    ),
-                  ),
-                ],
+            ),
+          ),
+
+        // Slideshow Arrow Right
+        if (images.length > 1)
+          Positioned(
+            right: 12,
+            top: 232,
+            child: GestureDetector(
+              onTap: () {
+                setState(() {
+                  _currentImageIndex = (_currentImageIndex + 1) % images.length;
+                });
+              },
+              child: Container(
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.25),
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.chevron_right,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
             ),
           ),
-        ),
+
       ],
     );
   }
@@ -332,37 +424,38 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
           const Divider(color: AppColors.border, height: 1),
           const SizedBox(height: AppConstants.spacingM),
 
-          // Render details grid list
-          GridView.builder(
+          // Render details in a clean line-by-line list
+          ListView.separated(
             shrinkWrap: true,
             padding: EdgeInsets.zero,
             physics: const NeverScrollableScrollPhysics(),
             itemCount: detailItems.length,
-            gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-              crossAxisCount: 2,
-              childAspectRatio: 2.8,
-              crossAxisSpacing: 10,
-              mainAxisSpacing: 10,
-            ),
+            separatorBuilder:
+                (context, index) =>
+                    const Divider(color: AppColors.divider, height: 20),
             itemBuilder: (context, index) {
               final item = detailItems[index];
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
+              return Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   Text(
                     item.label,
                     style: GoogleFonts.poppins(
-                      fontSize: 10,
-                      color: AppColors.textLight,
+                      fontSize: 12.5,
+                      color: AppColors.textSecondary,
                     ),
                   ),
-                  const SizedBox(height: 2),
-                  Text(
-                    item.value,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                  const SizedBox(width: 12),
+                  Flexible(
+                    child: Text(
+                      item.value,
+                      style: GoogleFonts.poppins(
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                      textAlign: TextAlign.right,
                     ),
                   ),
                 ],
@@ -662,10 +755,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
     String interestStatus,
   ) {
     return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppConstants.spacingM,
-        vertical: AppConstants.spacingS,
-      ),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         border: const Border(
@@ -681,121 +771,337 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
       ),
       child: SafeArea(
         top: false,
-        child: Row(
-          children: [
-            if (interestStatus == 'received') ...[
-              Expanded(
-                child: SecondaryButton(
-                  text: 'Decline',
-                  borderColor: AppColors.textSecondary,
-                  onPressed: () {
-                    ProfileDatabase.updateInterest(
-                      currentProfile.id,
-                      'rejected',
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text('Declined interest.'),
-                        duration: Duration(milliseconds: 1200),
-                      ),
-                    );
-                  },
-                ),
-              ),
-              const SizedBox(width: AppConstants.spacingM),
-              Expanded(
-                child: PrimaryButton(
-                  text: 'Accept Interest',
-                  isGold: true,
-                  onPressed: () {
-                    ProfileDatabase.updateInterest(
-                      currentProfile.id,
-                      'accepted',
-                    );
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(
-                        content: Text(
-                          'Congratulations! You accepted the interest.',
+        child: SizedBox(
+          height: 44,
+          child: Row(
+            children: [
+              if (interestStatus == 'received') ...[
+                // Decline Button (Matching Image 1)
+                Expanded(
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border, width: 1),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              backgroundColor: Colors.white,
+                              title: Text(
+                                'Decline Interest?',
+                                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                              ),
+                              content: Text(
+                                'Are you sure you want to decline this interest from ${currentProfile.name}? This will remove it permanently.',
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: Text(
+                                    'Cancel',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Declined and removed ${currentProfile.name}.'),
+                                        behavior: SnackBarBehavior.floating,
+                                        backgroundColor: AppColors.primary,
+                                        duration: const Duration(milliseconds: 1200),
+                                      ),
+                                    );
+                                    Navigator.of(context).pop();
+                                    ProfileDatabase.blockProfile(currentProfile.id);
+                                  },
+                                  child: Text(
+                                    'Decline & Remove',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        child: Center(
+                          child: Text(
+                            'Decline',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
                         ),
-                        duration: Duration(milliseconds: 1200),
                       ),
-                    );
-                  },
-                ),
-              ),
-            ] else if (interestStatus == 'sent') ...[
-              Expanded(
-                child: Container(
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.buttonRadius,
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.check, color: AppColors.primary),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Interest Sent',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
+                ),
+                const SizedBox(width: 12),
+                // Accept Button with Checkmark (Matching Image 1)
+                Expanded(
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0x337A102A),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          ProfileDatabase.updateInterest(
+                            currentProfile.id,
+                            'accepted',
+                          );
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Congratulations! You accepted the interest.',
+                              ),
+                              duration: Duration(milliseconds: 1200),
+                            ),
+                          );
+                        },
+                        child: Center(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              const Icon(
+                                Icons.check_rounded,
+                                size: 16,
+                                color: Colors.white,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                'Accept',
+                                style: GoogleFonts.plusJakartaSans(
+                                  fontSize: 13.5,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
-                    ],
-                  ),
-                ),
-              ),
-            ] else if (interestStatus == 'accepted') ...[
-              Expanded(
-                child: Container(
-                  height: 54,
-                  decoration: BoxDecoration(
-                    color: Colors.green.withValues(alpha: 0.06),
-                    borderRadius: BorderRadius.circular(
-                      AppConstants.buttonRadius,
                     ),
                   ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.people_alt, color: Colors.green),
-                      const SizedBox(width: 8),
-                      Text(
-                        'Connected',
-                        style: GoogleFonts.poppins(
-                          fontWeight: FontWeight.bold,
-                          color: Colors.green,
-                        ),
+                ),
+              ] else if (interestStatus == 'sent') ...[
+                Expanded(
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: AppColors.primary.withValues(alpha: 0.2),
                       ),
-                    ],
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Interest Sent',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                            fontSize: 13.5,
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-              ),
-            ] else ...[
-              Expanded(
-                child: PrimaryButton(
-                  text: 'Express Interest',
-                  onPressed: () {
-                    ProfileDatabase.updateInterest(currentProfile.id, 'sent');
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(
-                          'Expressed interest to ${currentProfile.name}!',
-                        ),
-                        behavior: SnackBarBehavior.floating,
-                        backgroundColor: AppColors.primary,
-                        duration: const Duration(milliseconds: 1200),
+              ] else if (interestStatus == 'accepted') ...[
+                Expanded(
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.green.withValues(alpha: 0.06),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: Colors.green.withValues(alpha: 0.2),
                       ),
-                    );
-                  },
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        const Icon(Icons.people_alt_rounded, color: Colors.green, size: 18),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Connected',
+                          style: GoogleFonts.plusJakartaSans(
+                            fontWeight: FontWeight.bold,
+                            color: Colors.green,
+                            fontSize: 13.5,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
+              ] else ...[
+                // Not Interested Button
+                Expanded(
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: AppColors.border, width: 1),
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              backgroundColor: Colors.white,
+                              title: Text(
+                                'Not Interested?',
+                                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
+                              ),
+                              content: Text(
+                                'Are you sure you want to remove ${currentProfile.name} from your list? This profile will not be shown to you again.',
+                                style: GoogleFonts.plusJakartaSans(
+                                  color: AppColors.textSecondary,
+                                  fontSize: 13,
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.of(context).pop(),
+                                  child: Text(
+                                    'Cancel',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: AppColors.textSecondary,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () {
+                                    Navigator.of(context).pop();
+                                    ScaffoldMessenger.of(context).showSnackBar(
+                                      SnackBar(
+                                        content: Text('Removed ${currentProfile.name} from your list.'),
+                                        behavior: SnackBarBehavior.floating,
+                                        backgroundColor: AppColors.primary,
+                                        duration: const Duration(milliseconds: 1200),
+                                      ),
+                                    );
+                                    Navigator.of(context).pop();
+                                    ProfileDatabase.blockProfile(currentProfile.id);
+                                  },
+                                  child: Text(
+                                    'Yes, Remove',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      color: Colors.red,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                        child: Center(
+                          child: Text(
+                            'Not Interested',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 13,
+                              fontWeight: FontWeight.w600,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Express Interest Button
+                Expanded(
+                  child: Container(
+                    height: 44,
+                    decoration: BoxDecoration(
+                      gradient: AppColors.primaryGradient,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0x337A102A),
+                          blurRadius: 8,
+                          offset: const Offset(0, 3),
+                        ),
+                      ],
+                    ),
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        borderRadius: BorderRadius.circular(12),
+                        onTap: () {
+                          ProfileDatabase.updateInterest(currentProfile.id, 'sent');
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text(
+                                'Expressed interest to ${currentProfile.name}!',
+                              ),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: AppColors.primary,
+                              duration: const Duration(milliseconds: 1200),
+                            ),
+                          );
+                        },
+                        child: Center(
+                          child: Text(
+                            'Express Interest',
+                            style: GoogleFonts.plusJakartaSans(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

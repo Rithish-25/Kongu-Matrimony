@@ -58,17 +58,31 @@ class _RegisterFlowState extends State<RegisterFlow> {
     setState(() {
       _formData[key] = value;
     });
-    await RegistrationDraft.saveDraft(_formData, _currentStep);
+    if (widget.isEditing) {
+      await RegistrationDraft.saveProfileDetails(_formData);
+      if (key == 'name' && value.trim().isNotEmpty) {
+        await ProfileDatabase.updateUserProfile(displayName: value.trim());
+      }
+    } else {
+      await RegistrationDraft.saveDraft(_formData, _currentStep);
+    }
   }
 
   Future<void> _saveAsDraft() async {
     if (widget.isEditing) {
       await RegistrationDraft.saveProfileDetails(_formData);
+      final registeredName = _formData['name']?.trim();
+      if (registeredName != null && registeredName.isNotEmpty) {
+        await ProfileDatabase.updateUserProfile(
+          displayName: registeredName,
+        );
+      }
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
             content: Text('Profile details saved successfully!'),
             behavior: SnackBarBehavior.floating,
+            backgroundColor: AppColors.primary,
             duration: Duration(seconds: 2),
           ),
         );
@@ -95,15 +109,15 @@ class _RegisterFlowState extends State<RegisterFlow> {
       await RegistrationDraft.saveProfileDetails(_formData);
 
       // Update the user display name in the database/notifiers
-      final registeredName = _formData['name'] ?? 'User';
+      final registeredName = _formData['name']?.trim() ?? 'User';
       await ProfileDatabase.updateUserProfile(
         displayName: registeredName,
       );
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: const Text('Profile updated successfully!'),
+          const SnackBar(
+            content: Text('Profile updated successfully!'),
             behavior: SnackBarBehavior.floating,
             backgroundColor: AppColors.primary,
           ),
@@ -118,7 +132,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
       await RegistrationDraft.saveProfileDetails(_formData);
 
       // Log the user in with the registered name
-      final registeredName = _formData['name'] ?? 'New User';
+      final registeredName = _formData['name']?.trim() ?? 'New User';
       await ProfileDatabase.updateUserProfile(
         displayName: registeredName,
         plan: 'Free',
@@ -143,10 +157,19 @@ class _RegisterFlowState extends State<RegisterFlow> {
 
   void _nextStep() async {
     if (_formKeys[_currentStep].currentState!.validate()) {
-      if (!widget.isEditing) {
+      if (widget.isEditing) {
+        await RegistrationDraft.saveProfileDetails(_formData);
+        final registeredName = _formData['name']?.trim();
+        if (registeredName != null && registeredName.isNotEmpty) {
+          await ProfileDatabase.updateUserProfile(displayName: registeredName);
+        }
+      } else {
         await RegistrationDraft.saveDraft(_formData, _currentStep);
       }
-      if (_currentStep < 9) {
+
+      if (!widget.isEditing && _currentStep == 0) {
+        _submitRegistration();
+      } else if (_currentStep < 9) {
         setState(() {
           _currentStep++;
         });
@@ -179,41 +202,88 @@ class _RegisterFlowState extends State<RegisterFlow> {
     final progress = (_currentStep + 1) / 10;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Step ${_currentStep + 1} of 10',
-          style: GoogleFonts.plusJakartaSans(
-            fontSize: 16,
-            fontWeight: FontWeight.bold,
-            color: AppColors.textPrimary,
-          ),
-        ),
-        leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
-          onPressed: _currentStep > 0 ? _prevStep : () => Navigator.of(context).pop(),
-        ),
-        actions: [
-          TextButton.icon(
-            onPressed: _saveAsDraft,
-            icon: const Icon(Icons.save_outlined, size: 18, color: AppColors.primary),
-            label: Text(
-              'Save Draft',
-              style: GoogleFonts.plusJakartaSans(
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+      appBar: (_currentStep == 0 && !widget.isEditing)
+          ? AppBar(
+              backgroundColor: Colors.transparent,
+              elevation: 0,
+              scrolledUnderElevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppColors.primary),
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+              title: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(18),
+                  border: Border.all(color: AppColors.border),
+                  boxShadow: AppConstants.softShadow,
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'KONGU',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    Text(
+                      ' MATRIMONY',
+                      style: GoogleFonts.cinzel(
+                        fontSize: 15,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.secondaryDark,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              centerTitle: true,
+            )
+          : AppBar(
+              title: Text(
+                widget.isEditing ? 'Edit Profile (${_currentStep + 1}/10)' : 'Step ${_currentStep + 1} of 10',
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
+                ),
+              ),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back),
+                onPressed: _currentStep > 0 ? _prevStep : () => Navigator.of(context).pop(),
+              ),
+              actions: [
+                TextButton.icon(
+                  onPressed: _saveAsDraft,
+                  icon: const Icon(
+                    Icons.save_outlined,
+                    size: 18,
+                    color: AppColors.primary,
+                  ),
+                  label: Text(
+                    'Save Draft',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.primary,
+                    ),
+                  ),
+                ),
+              ],
+              bottom: PreferredSize(
+                preferredSize: const Size.fromHeight(4),
+                child: LinearProgressIndicator(
+                  value: progress,
+                  backgroundColor: AppColors.border,
+                  color: AppColors.primary,
+                ),
               ),
             ),
-          ),
-        ],
-        bottom: PreferredSize(
-          preferredSize: const Size.fromHeight(4),
-          child: LinearProgressIndicator(
-            value: progress,
-            backgroundColor: AppColors.border,
-            color: AppColors.primary,
-          ),
-        ),
-      ),
       body: SafeArea(
         child: Column(
           children: [
@@ -230,6 +300,8 @@ class _RegisterFlowState extends State<RegisterFlow> {
                         formData: _formData,
                         onChanged: _onFieldChanged,
                         currentStep: 0,
+                        isEditing: widget.isEditing,
+                        onNext: _nextStep,
                       ),
                     ),
                   ),
@@ -335,7 +407,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
                 ],
               ),
             ),
-            _buildBottomNavigation(),
+            if (_currentStep > 0) _buildBottomNavigation(),
           ],
         ),
       ),

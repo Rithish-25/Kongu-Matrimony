@@ -51,8 +51,15 @@ class RegistrationDraft {
 
   static const String _kProfileDetailsKey = 'user_profile_details';
 
+  // In-memory runtime cache to persist accounts across logouts/session state resets
+  static final Map<String, Map<String, String>> _runtimeCache = {};
+
   /// Save completed/saved profile details.
   static Future<void> saveProfileDetails(Map<String, String> data) async {
+    final mobile = data['mobile'];
+    if (mobile != null) {
+      _runtimeCache[mobile] = data;
+    }
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_kProfileDetailsKey, jsonEncode(data));
   }
@@ -61,17 +68,26 @@ class RegistrationDraft {
   static Future<Map<String, String>> loadProfileDetails() async {
     final prefs = await SharedPreferences.getInstance();
     final jsonStr = prefs.getString(_kProfileDetailsKey);
-    if (jsonStr == null) return {};
-    try {
-      final Map<String, dynamic> decoded = jsonDecode(jsonStr);
-      return decoded.map((key, value) => MapEntry(key, value.toString()));
-    } catch (_) {
-      return {};
+    if (jsonStr != null) {
+      try {
+        final Map<String, dynamic> decoded = jsonDecode(jsonStr);
+        final data = decoded.map((key, value) => MapEntry(key, value.toString()));
+        final mobile = data['mobile'];
+        if (mobile != null) {
+          _runtimeCache[mobile] = data;
+        }
+        return data;
+      } catch (_) {}
     }
+    if (_runtimeCache.isNotEmpty) {
+      return _runtimeCache.values.last;
+    }
+    return {};
   }
 
   /// Clear profile details on logout.
   static Future<void> clearProfileDetails() async {
+    _runtimeCache.clear();
     final prefs = await SharedPreferences.getInstance();
     await prefs.remove(_kProfileDetailsKey);
   }

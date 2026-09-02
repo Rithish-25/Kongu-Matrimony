@@ -88,18 +88,7 @@ class Page2Physical extends StatelessWidget {
                 return null;
               },
             ),
-            RegisterComponents.buildDropdownField(
-              label: 'Marital Status',
-              fieldKey: 'maritalStatus',
-              formData: formData,
-              onChanged: onChanged,
-              currentStep: currentStep,
-              items: const ['Never Married', 'Divorced', 'Widowed', 'Awaiting Divorce'],
-              validator: (val) {
-                if (val == null || val.isEmpty) return 'Please select marital status';
-                return null;
-              },
-            ),
+
             RegisterComponents.buildChoiceSelector(
               label: 'Skin Tone',
               fieldKey: 'skinTone',
