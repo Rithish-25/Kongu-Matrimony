@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
 import '../../core/constants/constants.dart';
+import '../../core/localization/app_language.dart';
 
 class RegisterComponents {
   RegisterComponents._();
@@ -14,11 +15,11 @@ class RegisterComponents {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            title,
+            AppLanguageController.text(title),
             style: GoogleFonts.playfairDisplay(
               fontSize: 20,
               fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+              color: AppColors.textPrimary,
             ),
           ),
           const SizedBox(height: 4),
@@ -84,12 +85,17 @@ class RegisterComponents {
           color: AppColors.textPrimary,
         ),
         decoration: InputDecoration(
-          labelText: label,
-          hintText: hint,
+          labelText: AppLanguageController.text(label),
+          hintText: hint != null ? AppLanguageController.text(hint) : null,
           labelStyle: GoogleFonts.plusJakartaSans(
-            color: AppColors.textLight,
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+          floatingLabelStyle: GoogleFonts.plusJakartaSans(
+            color: AppColors.textPrimary,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
           ),
           errorStyle: GoogleFonts.plusJakartaSans(
             color: AppColors.error,
@@ -138,13 +144,30 @@ class RegisterComponents {
         key: ValueKey('${fieldKey}_$currentStep'),
         initialValue: selected,
         onChanged: (val) => onChanged(fieldKey, val ?? ''),
-        validator: validator,
+        validator: (val) {
+          final err = validator?.call(val);
+          if (err != null) {
+            return AppLanguageController.text(err);
+          }
+          return null;
+        },
+        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary, size: 24),
+        style: GoogleFonts.plusJakartaSans(
+          fontSize: 14,
+          fontWeight: FontWeight.w600,
+          color: AppColors.textPrimary,
+        ),
         decoration: InputDecoration(
-          labelText: label,
+          labelText: AppLanguageController.text(label),
           labelStyle: GoogleFonts.plusJakartaSans(
-            color: AppColors.textLight,
-            fontSize: 13,
-            fontWeight: FontWeight.w500,
+            color: AppColors.textPrimary,
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
+          floatingLabelStyle: GoogleFonts.plusJakartaSans(
+            color: AppColors.textPrimary,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
           ),
           errorStyle: GoogleFonts.plusJakartaSans(
             color: AppColors.error,
@@ -175,7 +198,7 @@ class RegisterComponents {
             .map((item) => DropdownMenuItem(
                   value: item,
                   child: Text(
-                    item,
+                    AppLanguageController.text(item),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
@@ -196,88 +219,14 @@ class RegisterComponents {
     required List<String> choices,
     String? Function(String?)? validator,
   }) {
-    final selectedValue = formData[fieldKey];
-
-    return FormField<String>(
-      initialValue: selectedValue,
+    return buildDropdownField(
+      label: label,
+      fieldKey: fieldKey,
+      formData: formData,
+      onChanged: onChanged,
+      currentStep: 0,
+      items: choices,
       validator: validator,
-      builder: (FormFieldState<String> state) {
-        return Padding(
-          padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                label,
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 13,
-                  fontWeight: FontWeight.w600,
-                  color: state.hasError ? AppColors.error : AppColors.textSecondary,
-                ),
-              ),
-              const SizedBox(height: 8),
-              Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: choices.map((choice) {
-                  final isSelected = selectedValue == choice;
-                  return ChoiceChip(
-                    label: Text(
-                      choice,
-                      style: GoogleFonts.plusJakartaSans(
-                        fontSize: 13,
-                        fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
-                        color: isSelected ? Colors.white : AppColors.textPrimary,
-                      ),
-                    ),
-                    selected: isSelected,
-                    selectedColor: AppColors.primary,
-                    backgroundColor: const Color(0xFFFAFAFA),
-                    shadowColor: Colors.transparent,
-                    selectedShadowColor: Colors.transparent,
-                    elevation: 0,
-                    pressElevation: 0,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: BorderSide(
-                        color: isSelected ? AppColors.primary : const Color(0xFFE5E7EB),
-                        width: isSelected ? 1.5 : 1,
-                      ),
-                    ),
-                    onSelected: (selected) {
-                      final newVal = selected ? choice : '';
-                      onChanged(fieldKey, newVal);
-                      state.didChange(newVal);
-                    },
-                  );
-                }).toList(),
-              ),
-              if (state.hasError) ...[
-                const SizedBox(height: 6),
-                Row(
-                  crossAxisAlignment: CrossAxisAlignment.center,
-                  children: [
-                    const Icon(
-                      Icons.error_outline_rounded,
-                      color: AppColors.error,
-                      size: 14,
-                    ),
-                    const SizedBox(width: 4),
-                    Text(
-                      state.errorText ?? '',
-                      style: GoogleFonts.plusJakartaSans(
-                        color: AppColors.error,
-                        fontSize: 11.5,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
-            ],
-          ),
-        );
-      },
     );
   }
 }

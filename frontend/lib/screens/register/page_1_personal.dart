@@ -4,6 +4,8 @@ import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
 import '../../core/constants/constants.dart';
+import '../../core/localization/app_language.dart';
+import 'register_components.dart';
 
 class Page1Personal extends StatefulWidget {
   final Map<String, String> formData;
@@ -195,7 +197,7 @@ class _Page1PersonalState extends State<Page1Personal> {
     return Padding(
       padding: const EdgeInsets.only(bottom: 8.0, top: 4.0),
       child: Text(
-        label,
+        AppLanguageController.text(label),
         style: GoogleFonts.plusJakartaSans(
           fontSize: 14,
           fontWeight: FontWeight.bold,
@@ -210,34 +212,29 @@ class _Page1PersonalState extends State<Page1Personal> {
     Widget? suffixIcon,
   }) {
     return InputDecoration(
-      hintText: hintText,
+      hintText: AppLanguageController.text(hintText),
       hintStyle: GoogleFonts.plusJakartaSans(
         color: AppColors.textLight,
-        fontSize: 14,
-        fontWeight: FontWeight.w400,
-      ),
-      errorStyle: GoogleFonts.plusJakartaSans(
-        color: AppColors.error,
-        fontSize: 12,
+        fontSize: 13,
         fontWeight: FontWeight.w500,
       ),
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
       filled: true,
-      fillColor: Colors.white,
+      fillColor: const Color(0xFFFAFAFA),
       enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: Color(0xFFE8E5E0), width: 1.5),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
       ),
       focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
       ),
       errorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
-        borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+        borderRadius: BorderRadius.circular(12),
+        borderSide: const BorderSide(color: AppColors.error, width: 1),
       ),
       focusedErrorBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(12),
         borderSide: const BorderSide(color: AppColors.error, width: 1.5),
       ),
       suffixIcon: suffixIcon,
@@ -251,7 +248,7 @@ class _Page1PersonalState extends State<Page1Personal> {
       children: [
         const SizedBox(height: 8),
         Text(
-          'Create Your Account',
+          AppLanguageController.text('Create Your Account'),
           style: GoogleFonts.plusJakartaSans(
             fontSize: 28,
             fontWeight: FontWeight.bold,
@@ -260,7 +257,7 @@ class _Page1PersonalState extends State<Page1Personal> {
         ),
         const SizedBox(height: 8),
         Text(
-          'Find your perfect match from Erode and surrounding areas',
+          AppLanguageController.text('Find your perfect match from Erode and surrounding areas'),
           style: GoogleFonts.plusJakartaSans(
             fontSize: 14,
             fontWeight: FontWeight.w500,
@@ -310,62 +307,33 @@ class _Page1PersonalState extends State<Page1Personal> {
               const SizedBox(height: 12),
 
               // 2. Gender
-              _buildFieldLabel('Gender *'),
-              DropdownButtonFormField<String>(
-                initialValue: widget.formData['gender'],
-                items: const [
-                  DropdownMenuItem(value: 'Male', child: Text('Male')),
-                  DropdownMenuItem(value: 'Female', child: Text('Female')),
-                ],
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() => widget.formData['gender'] = val);
-                    widget.onChanged('gender', val);
-                  }
-                },
-                decoration: _buildInputDecoration(hintText: ''),
-                icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary, size: 24),
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
+              RegisterComponents.buildDropdownField(
+                label: 'Gender *',
+                fieldKey: 'gender',
+                formData: widget.formData,
+                onChanged: widget.onChanged,
+                currentStep: widget.currentStep,
+                items: const ['Male', 'Female'],
                 validator: (val) {
                   if (val == null || val.isEmpty) return 'Please select your gender';
                   return null;
                 },
               ),
-              const SizedBox(height: 12),
 
               // 3. Marital Status
-              _buildFieldLabel('Marital Status *'),
-              DropdownButtonFormField<String>(
-                initialValue: widget.formData['maritalStatus'],
-                items: const [
-                  DropdownMenuItem(value: 'Single', child: Text('Single')),
-                  DropdownMenuItem(value: 'Divorced', child: Text('Divorced')),
-                  DropdownMenuItem(value: 'Widowed', child: Text('Widowed')),
-                  DropdownMenuItem(value: 'Awaiting Divorce', child: Text('Awaiting Divorce')),
-                ],
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() => widget.formData['maritalStatus'] = val);
-                    widget.onChanged('maritalStatus', val);
-                  }
-                },
-                decoration: _buildInputDecoration(hintText: ''),
-                icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary, size: 24),
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
+              RegisterComponents.buildDropdownField(
+                label: 'Marital Status *',
+                fieldKey: 'maritalStatus',
+                formData: widget.formData,
+                onChanged: widget.onChanged,
+                currentStep: widget.currentStep,
+                items: const ['Single', 'Divorced', 'Widowed', 'Awaiting Divorce'],
                 validator: (val) {
                   if (val == null || val.isEmpty) return 'Please select marital status';
                   return null;
                 },
               ),
-              const SizedBox(height: 12),
+              const SizedBox(height: 4),
 
               // 4. Date of Birth
               _buildFieldLabel('Date of Birth *'),
@@ -438,29 +406,13 @@ class _Page1PersonalState extends State<Page1Personal> {
               const SizedBox(height: 12),
 
               // 6. Profile Created By
-              _buildFieldLabel('Profile Created By *'),
-              DropdownButtonFormField<String>(
-                initialValue: widget.formData['profileCreatedBy'],
-                items: const [
-                  DropdownMenuItem(value: 'Self', child: Text('Self')),
-                  DropdownMenuItem(value: 'Parents', child: Text('Parents')),
-                  DropdownMenuItem(value: 'Sibling', child: Text('Sibling')),
-                  DropdownMenuItem(value: 'Relative', child: Text('Relative')),
-                  DropdownMenuItem(value: 'Friend', child: Text('Friend')),
-                ],
-                onChanged: (val) {
-                  if (val != null) {
-                    setState(() => widget.formData['profileCreatedBy'] = val);
-                    widget.onChanged('profileCreatedBy', val);
-                  }
-                },
-                decoration: _buildInputDecoration(hintText: ''),
-                icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary, size: 24),
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 14,
-                  fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
-                ),
+              RegisterComponents.buildDropdownField(
+                label: 'Profile Created By *',
+                fieldKey: 'profileCreatedBy',
+                formData: widget.formData,
+                onChanged: widget.onChanged,
+                currentStep: widget.currentStep,
+                items: const ['Self', 'Parents', 'Sibling', 'Relative', 'Friend'],
                 validator: (val) {
                   if (val == null || val.isEmpty) return 'Please select who created the profile';
                   return null;

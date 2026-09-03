@@ -527,6 +527,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
             onTap: () {
               final wasFav = isFav;
               ProfileDatabase.toggleFavorite(profile.id);
+              setState(() {});
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
                   content: Text(
@@ -538,18 +539,29 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                 ),
               );
             },
-            child: Container(
-              width: 40,
-              height: 40,
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              width: 42,
+              height: 42,
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.92),
+                color: isFav ? const Color(0xFFFFF0F2) : Colors.white.withValues(alpha: 0.95),
                 shape: BoxShape.circle,
-                boxShadow: AppConstants.softShadow,
+                boxShadow: [
+                  BoxShadow(
+                    color: isFav
+                        ? const Color(0xFFE53935).withValues(alpha: 0.3)
+                        : Colors.black.withValues(alpha: 0.12),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
-              child: Icon(
-                isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                color: AppColors.primary,
-                size: 20,
+              child: Center(
+                child: Icon(
+                  isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                  color: isFav ? const Color(0xFFE53935) : const Color(0xFF64748B),
+                  size: 22,
+                ),
               ),
             ),
           ),
@@ -1047,7 +1059,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(AppLanguageController.text('plan_upgraded_success')),
-                        backgroundColor: Colors.green,
+                        backgroundColor: AppColors.primary,
                         behavior: SnackBarBehavior.floating,
                       ),
                     );
@@ -1071,7 +1083,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
                         content: Text(AppLanguageController.text('plan_upgraded_success')),
-                        backgroundColor: Colors.green,
+                        backgroundColor: AppColors.primary,
                         behavior: SnackBarBehavior.floating,
                       ),
                     );
@@ -1231,7 +1243,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
           'Opened Horoscope for ${profile.name}! (Views: ${userState.downloadedCount + 1} / $limit)',
         ),
         behavior: SnackBarBehavior.floating,
-        backgroundColor: Colors.green,
+        backgroundColor: AppColors.primary,
         duration: const Duration(milliseconds: 1200),
       ),
     );
@@ -1437,22 +1449,22 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                   child: Container(
                     height: 44,
                     decoration: BoxDecoration(
-                      color: Colors.green.withValues(alpha: 0.06),
+                      color: AppColors.primary.withValues(alpha: 0.06),
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: Colors.green.withValues(alpha: 0.2),
+                        color: AppColors.primary.withValues(alpha: 0.2),
                       ),
                     ),
                     child: Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        const Icon(Icons.people_alt_rounded, color: Colors.green, size: 18),
+                        const Icon(Icons.people_alt_rounded, color: AppColors.primary, size: 18),
                         const SizedBox(width: 8),
                         Text(
                           'Connected',
                           style: GoogleFonts.plusJakartaSans(
                             fontWeight: FontWeight.bold,
-                            color: Colors.green,
+                            color: AppColors.primary,
                             fontSize: 13.5,
                           ),
                         ),

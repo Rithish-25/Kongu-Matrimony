@@ -4,6 +4,7 @@ import '../../core/colors/colors.dart';
 import '../../core/constants/constants.dart';
 import '../../core/assets/registration_draft.dart';
 import '../../core/assets/mock_data.dart';
+import '../../core/localization/app_language.dart';
 import '../main_layout.dart';
 
 // Import all 10 modular pages
@@ -247,7 +248,9 @@ class _RegisterFlowState extends State<RegisterFlow> {
             )
           : AppBar(
               title: Text(
-                widget.isEditing ? 'Edit Profile (${_currentStep + 1}/10)' : 'Step ${_currentStep + 1} of 10',
+                widget.isEditing
+                    ? '${AppLanguageController.text('Edit Profile')} (${_currentStep + 1}/10)'
+                    : '${AppLanguageController.text('Step')} ${_currentStep + 1} / 10',
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 16,
                   fontWeight: FontWeight.bold,
@@ -267,7 +270,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
                     color: AppColors.primary,
                   ),
                   label: Text(
-                    'Save Draft',
+                    AppLanguageController.text('Save Draft'),
                     style: GoogleFonts.plusJakartaSans(
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
@@ -438,7 +441,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
                   ),
                 ),
                 child: Text(
-                  'Back',
+                  AppLanguageController.text('Back'),
                   style: GoogleFonts.plusJakartaSans(
                     fontWeight: FontWeight.bold,
                   ),
@@ -473,7 +476,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
                   padding: EdgeInsets.zero,
                 ),
                 child: Text(
-                  isLastStep ? 'Submit' : 'Next',
+                  AppLanguageController.text(isLastStep ? 'Submit' : 'Next'),
                   style: GoogleFonts.plusJakartaSans(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,

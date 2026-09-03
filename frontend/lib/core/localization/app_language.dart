@@ -38,22 +38,36 @@ class AppLanguageController {
       if (_tamilTranslations.containsKey(input)) {
         return _tamilTranslations[input]!;
       }
-      // 2. Case-insensitive key match
+      // 2. Case-insensitive key match & space/underscore normalization
       final lower = input.toLowerCase().trim();
       if (_tamilTranslations.containsKey(lower)) {
         return _tamilTranslations[lower]!;
       }
+      final lowerUnderscore = lower.replaceAll(' ', '_');
+      if (_tamilTranslations.containsKey(lowerUnderscore)) {
+        return _tamilTranslations[lowerUnderscore]!;
+      }
+      final lowerSpace = lower.replaceAll('_', ' ');
+      if (_tamilTranslations.containsKey(lowerSpace)) {
+        return _tamilTranslations[lowerSpace]!;
+      }
 
-      // 3. Smart substring replacement for mixed phrases
+      // 3. Smart substring replacement with word boundaries for mixed phrases (sorted longest keys first)
       String translated = input;
       bool matched = false;
-      _tamilTranslations.forEach((engKey, tamilVal) {
+      final sortedKeys = _tamilTranslations.keys.toList()
+        ..sort((a, b) => b.length.compareTo(a.length));
+
+      for (final engKey in sortedKeys) {
+        final tamilVal = _tamilTranslations[engKey]!;
         if (engKey.length > 2 && translated.toLowerCase().contains(engKey.toLowerCase())) {
-          final regex = RegExp(RegExp.escape(engKey), caseSensitive: false);
-          translated = translated.replaceAll(regex, tamilVal);
-          matched = true;
+          final regex = RegExp(r'\b' + RegExp.escape(engKey) + r'\b', caseSensitive: false);
+          if (regex.hasMatch(translated)) {
+            translated = translated.replaceAll(regex, tamilVal);
+            matched = true;
+          }
         }
-      });
+      }
       if (matched) return translated;
     }
     return _englishTranslations[input] ?? input;
@@ -105,7 +119,7 @@ class AppLanguageController {
     'location_contact': 'Location & Contact Details',
     'habits_lifestyle': 'Habits & Lifestyle',
     'partner_expectations': 'Partner Expectations',
-    'about_bio': 'About & Short Bio',
+    'about_bio': 'About Myself',
     'download_actions': 'Download & Actions',
 
     // Field Labels
@@ -167,6 +181,7 @@ class AppLanguageController {
     'view_horoscope': 'View Horoscope',
     'send_interest': 'Express Interest',
     'add_favourite': 'Save Profile',
+    'not_interested': 'Not Interested',
     'verified': 'Verified Profile',
 
     // Paywall & Membership
@@ -291,6 +306,7 @@ class AppLanguageController {
     'view_horoscope': 'ஜாதகம் பார்க்க',
     'send_interest': 'விருப்பம் தெரிவிக்க',
     'add_favourite': 'சுயவிவரம் சேமிக்க',
+    'not_interested': 'விருப்பமில்லை',
     'verified': 'உறுதிசெய்யப்பட்ட சுயவிவரம்',
 
     // Paywall & Membership
@@ -337,7 +353,6 @@ class AppLanguageController {
     // Common Answers & Hobbies
     'no': 'இல்லை',
     'yes': 'ஆம்',
-    'not_interested': 'விருப்பமில்லை',
     'not interested': 'விருப்பமில்லை',
     'express interest': 'விருப்பம் தெரிவிக்க',
     'classical music, reading finance books, baking, podcasts': 'இசை, நிதி புத்தகங்கள் படித்தல், சமையல்',
@@ -351,5 +366,256 @@ class AppLanguageController {
     'automobile diy, long drives, road trips': 'வாகனம் ஓட்டுதல், பயணம்',
     'fitness, medical research, classical violin': 'வயலின் இசை, உடற்பயிற்சி',
     'cycling, tech innovations, gaming': 'சைக்கிள் ஓட்டுதல், கேமிங்',
+
+    // Membership Plan Features
+    'valid for 3 months': '3 மாதங்கள் செல்லுபடியாகும்',
+    'valid for 6 months': '6 மாதங்கள் செல்லுபடியாகும்',
+    'access 40 verified phone & email': '40 உறுதிசெய்யப்பட்ட தொடர்பு எண்கள்',
+    'access 100 verified phone & email': '100 உறுதிசெய்யப்பட்ட தொடர்பு எண்கள்',
+    'send unlimited messages & chat': 'வரம்பற்ற செய்திகள் அனுப்புதல்',
+    'unlimited horoscope views & downloads': 'வரம்பற்ற ஜாதகம் பார்த்தல்',
+    'view verified profiles with photos': 'உறுதிசெய்யப்பட்ட சுயவிவரங்கள்',
+    'view unlimited phone nos*': 'வரம்பற்ற தொடர்பு எண்கள் பார்க்க',
+    'free profile highlighter & top rank': 'இலவச சுயவிவர விளம்பரம்',
+    'cannot view mobile & email (locked)': 'தொடர்பு எண்கள் பார்க்க முடியாது',
+    'cannot view horoscope charts (locked)': 'ஜாதக கட்டங்கள் பார்க்க முடியாது',
+    'cannot view family & income (locked)': 'குடும்ப விவரங்கள் பார்க்க முடியாது',
+    '₹ 0 / free forever': '₹ 0 / எப்போதும் இலவசம்',
+    '₹ 900 per month': 'மாதம் ₹ 900 மட்டுமே',
+    '₹ 800 per month': 'மாதம் ₹ 800 மட்டுமே',
+    '₹ 1,333 per month': 'மாதம் ₹ 1,333 மட்டுமே',
+
+    // Registration Steps & Headers
+    'create your account': 'உங்கள் கணக்கை உருவாக்கவும்',
+    'find your perfect match from erode and surrounding areas': 'ஈரோடு மற்றும் சுற்றியுள்ள பகுதிகளின் சிறந்த வரன்கள்',
+    'edit profile': 'சுயவிவரத்தை திருத்து',
+    'step': 'படி',
+    'save draft': 'வரைவை சேமி',
+    'personal details': 'தனிப்பட்ட விவரங்கள்',
+    'account credentials': 'கணக்கு கடவுச்சொல்',
+    'profile created by': 'சுயவிவரம் உருவாக்குபவர்',
+    'physical details': 'உடல் விவரங்கள்',
+    'physical attributes': 'உடல் அமைப்பு விவரங்கள்',
+    'astrology profile': 'ஜாதக விவரங்கள்',
+    'astrological details': 'ஜாதக விவரங்கள்',
+    'lifestyle & hobbies': 'வாழ்க்கை முறை & பொழுதுபோக்குகள்',
+    'lifestyle & habits': 'வாழ்க்கை முறை & பழக்கவழக்கங்கள்',
+    'family details': 'குடும்ப விவரங்கள்',
+    'family background': 'குடும்ப பின்னணி விவரங்கள்',
+    'education & career': 'கல்வி & பணி விவரங்கள்',
+    'education & occupation profile': 'கல்வி & தொழில் விவரங்கள்',
+    'education & occupation': 'கல்வி & தொழில் விவரங்கள்',
+    'contact & location': 'தொடர்பு & முகவரி விவரங்கள்',
+    'communication details': 'தொடர்பு விவரங்கள்',
+    'partner preference details': 'எதிர்பார்க்கும் துணை விருப்பங்கள்',
+    'partner expectation': 'துணை பற்றிய எதிர்பார்ப்புகள்',
+    'partner expectations': 'துணை பற்றிய எதிர்பார்ப்புகள்',
+    'partner preferences': 'வாழ்க்கை துணை விருப்பங்கள்',
+    'about myself': 'என்னை பற்றி',
+    'write about yourself': 'உங்களைப் பற்றி எழுதுங்கள்',
+
+    // Form Field Labels & Choices
+    'full name *': 'முழு பெயர் *',
+    'gender *': 'பாலினம் *',
+    'marital status *': 'திருமண நிலை *',
+    'date of birth *': 'பிறந்த தேதி *',
+    'phone number *': 'தொலைபேசி எண் *',
+    'password *': 'கடவுச்சொல் *',
+    'confirm password *': 'கடவுச்சொல்லை உறுதிப்படுத்தவும் *',
+    'blood group': 'இரத்த வகை',
+    'body type': 'உடல் அமைப்பு',
+    'athletic': 'தடகளம்',
+    'slim': 'மெலிந்த',
+    'average': 'சாதாரண',
+    'heavy': 'உடல் பருமன்',
+    'drink': 'மது அருந்துதல்',
+    'smoke': 'புகைப்பிடித்தல்',
+    'occasionally': 'எப்போதாவது',
+    'skin tone': 'தோல் நிறம்',
+    'brown': 'பழுப்பு',
+    'medium': 'நடுத்தரம்',
+    'very fair': 'மிகவும் சிகப்பு',
+    'fair': 'சிகப்பு',
+    'wheatish': 'கோதுமை நிறம்',
+    'diet': 'உணவுப் பழக்கம்',
+    'veg': 'சைவம்',
+    'non-veg': 'அசைவம்',
+    'vegan': 'சுத்த சைவ உணவு',
+    'physically challenged': 'உடல் மாற்றுத்திறனாளி',
+    'kula theiva temple': 'குலதெய்வம் கோயில்',
+    'time of birth': 'பிறந்த நேரம்',
+    'place of birth': 'பிறந்த இடம்',
+    'father name': 'தந்தையின் பெயர்',
+    'mother name': 'தாயின் பெயர்',
+    'father occupation': 'தந்தையின் தொழில்',
+    'mother occupation': 'தாயின் தொழில்',
+    'no. of brothers': 'சகோதரர்களின் எண்ணிக்கை',
+    'no. of sisters': 'சகோதரிகளின் எண்ணிக்கை',
+    'sisters married': 'திருமணமான சகோதரிகள்',
+    'brothers married': 'திருமணமான சகோதரர்கள்',
+    'family type': 'குடும்ப வகை',
+    'family status': 'குடும்ப நிலை',
+    'family values': 'குடும்ப கொள்கைகள்',
+    'affluent': 'மிகவும் செல்வந்தர்',
+    'rich': 'செல்வந்தர்',
+    'upper middle': 'உயர் நடுத்தர வர்க்கம்',
+    'middle': 'நடுத்தர வர்க்கம்',
+    'family annual income': 'குடும்ப ஆண்டு வருமானம்',
+    'family property': 'குடும்ப சொத்து விவரங்கள்',
+    'family monthly income': 'குடும்ப மாத வருமானம்',
+    'farming land details': 'விவசாய நில விவரங்கள்',
+    'native place': 'சொந்த ஊர்',
+    'native': 'சொந்த ஊர்',
+    'education level': 'கல்வி தகுதி நிலை',
+    'family name': 'குடும்ப பெயர் / வகையறா',
+    'education detail': 'கல்வி விரிவான விவரம்',
+    'highest education': 'உயர்கல்வி தகுதி',
+    'education details': 'கல்வி விவரம்',
+    'job details': 'பணி விவரங்கள்',
+    'current working company': 'தற்போதைய நிறுவனம்',
+    'current city or near by city': 'தற்போதைய அல்லது அருகில் உள்ள நகரம்',
+    'annual income': 'ஆண்டு வருமானம்',
+    'monthly income': 'மாத வருமானம்',
+    'alternate mobile': 'மாற்று கைபேசி எண்',
+    'email address': 'மின்னஞ்சல் முகவரி',
+    'refer name': 'பரிந்துரைத்தவர் பெயர்',
+    'refer mobile': 'பரிந்துரைத்தவர் கைபேசி எண்',
+    'work location': 'பணிபுரியும் இடம்',
+    'address': 'முகவரி',
+    'postal code': 'அஞ்சல் குறியீடு (Pincode)',
+    'interests': 'ஆர்வங்கள்',
+    'favourite music': 'விருப்பமான இசை',
+    'preferred musics': 'விருப்பமான இசை வகைகள்',
+    'sport/fitness activities': 'விளையாட்டு & உடற்பயிற்சி',
+    'favourite cuisine': 'விருப்பமான உணவு வகைகள்',
+    'preferred dress styles': 'விருப்பமான ஆடை வகைகள்',
+    'spoken language': 'பேசும் மொழிகள்',
+    'partner\'s age (e.g. 20-25)': 'துணையின் வயது (எ.கா. 20-25)',
+    'height preference': 'எதிர்பார்க்கும் உயரம்',
+    'weight preference': 'எதிர்பார்க்கும் எடை',
+    'education preference': 'எதிர்பார்க்கும் கல்வி',
+    'country preference': 'எதிர்பார்க்கும் நாடு',
+    'occupation preference': 'எதிர்பார்க்கும் தொழில்',
+    'partner income value': 'எதிர்பார்க்கும் வருமானம்',
+    'kootam preference': 'எதிர்பார்க்கும் கூட்டம்',
+    'kulam preference': 'எதிர்பார்க்கும் குலம்',
+    'horoscope match required': 'ஜாதக பொருத்தம் அவசியமா?',
+    'doesn\'t matter': 'பொருட்டல்ல',
+    'star preference': 'எதிர்பார்க்கும் நட்சத்திரம்',
+    'rasi preference': 'எதிர்பார்க்கும் ராசி',
+    'marital status preference': 'எதிர்பார்க்கும் திருமண நிலை',
+    'dosham preference': 'எதிர்பார்க்கும் தோஷம்',
+    'describe your expectations': 'உங்கள் எதிர்பார்ப்புகளை விவரிக்கவும்',
+    'preferred age': 'எதிர்பார்க்கும் வயது',
+    'preferred height': 'எதிர்பார்க்கும் உயரம்',
+    'preferred education': 'எதிர்பார்க்கும் கல்வி',
+    'preferred occupation': 'எதிர்பார்க்கும் தொழில்',
+    'preferred location': 'எதிர்பார்க்கும் இடம்',
+    'back': 'முந்தைய படி',
+    'next': 'அடுத்த படி',
+    'submit': 'சமர்ப்பிக்கவும்',
+
+    // Placeholders & Validation Error Messages
+    'enter your full name': 'உங்கள் முழு பெயரை உள்ளிடவும்',
+    'select your date of birth': 'பிறந்த தேதியை தேர்ந்தெடுக்கவும்',
+    'select date of birth': 'பிறந்த தேதியை தேர்ந்தெடுக்கவும்',
+    'enter 10-digit mobile number': '10 இலக்க கைபேசி எண்',
+    'enter your phone number': 'தொலைபேசி எண்ணை உள்ளிடவும்',
+    'enter your email address': 'உங்கள் மின்னஞ்சலை உள்ளிடவும்',
+    'create a password': 'கடவுச்சொல்லை உருவாக்கவும்',
+    'done': 'முடிந்தது',
+    'divorced': 'விவாகரத்தானவர்',
+    'widowed': 'விதவை / விதவை ஆண்',
+    'awaiting divorce': 'விவாகரத்து எதிர்நோக்குபவர்',
+    'profile created by *': 'சுயவிவரம் உருவாக்குபவர் *',
+    'self': 'சுயமாக',
+    'parents': 'பெற்றோர்கள்',
+    'sibling': 'சகோதரர் / சகோதரி',
+    'relative': 'உறவினர்',
+    'friend': 'நண்பர்',
+    'save & continue': 'சேமித்து தொடரவும்',
+    'register & continue': 'பதிவு செய்து தொடரவும்',
+    'already have an account? ': 'ஏற்கனவே கணக்கு உள்ளதா? ',
+    'login': 'உள்நுழைய',
+    'please select height': 'தயவுசெய்து உயரத்தை தேர்ந்தெடுக்கவும்',
+    'please select weight': 'தயவுசெய்து எடையை தேர்ந்தெடுக்கவும்',
+    'please select blood group': 'தயவுசெய்து இரத்த வகையை தேர்ந்தெடுக்கவும்',
+    'please select body type': 'தயவுசெய்து உடல் அமைப்பை தேர்ந்தெடுக்கவும்',
+    'please select an option': 'தயவுசெய்து ஒரு விருப்பத்தை தேர்ந்தெடுக்கவும்',
+    'please select skin tone': 'தயவுசெய்து தோல் நிறத்தை தேர்ந்தெடுக்கவும்',
+    'please select diet': 'தயவுசெய்து உணவு முறையை தேர்ந்தெடுக்கவும்',
+    'please select physically challenged': 'தயவுசெய்து தேர்வை தேர்ந்தெடுக்கவும்',
+    'please enter kootam': 'தயவுசெய்து கூட்டத்தை உள்ளிடவும்',
+    'please enter kula theiva temple': 'தயவுசெய்து குலதெய்வ கோயிலை உள்ளிடவும்',
+    'please enter time of birth': 'தயவுசெய்து பிறந்த நேரத்தை உள்ளிடவும்',
+    'please enter place of birth': 'தயவுசெய்து பிறந்த இடத்தை உள்ளிடவும்',
+    'please enter star': 'தயவுசெய்து நட்சத்திரத்தை உள்ளிடவும்',
+    'please select padham': 'தயவுசெய்து பாதத்தை தேர்ந்தெடுக்கவும்',
+    'please enter rasi': 'தயவுசெய்து ராசியை உள்ளிடவும்',
+    'please enter lagnam': 'தயவுசெய்து லக்னத்தை உள்ளிடவும்',
+    'please enter your hobbies': 'தயவுசெய்து உங்கள் பொழுதுபோக்குகளை உள்ளிடவும்',
+    'please enter your interests': 'தயவுசெய்து உங்கள் ஆர்வங்களை உள்ளிடவும்',
+    'please enter favourite music': 'தயவுசெய்து விருப்பமான இசையை உள்ளிடவும்',
+    'please enter preferred musics': 'தயவுசெய்து விருப்பமான இசையை உள்ளிடவும்',
+    'please enter sport/fitness activities': 'தயவுசெய்து உடற்பயிற்சி விவரங்களை உள்ளிடவும்',
+    'please enter favourite cuisine': 'தயவுசெய்து உணவு வகைகளை உள்ளிடவும்',
+    'please enter preferred dress styles': 'தயவுசெய்து ஆடை வகைகளை உள்ளிடவும்',
+    'please enter spoken languages': 'தயவுசெய்து பேசும் மொழிகளை உள்ளிடவும்',
+    'please enter father\'s name': 'தயவுசெய்து தந்தையின் பெயரை உள்ளிடவும்',
+    'please enter mother\'s name': 'தயவுசெய்து தாயின் பெயரை உள்ளிடவும்',
+    'please enter father\'s occupation': 'தயவுசெய்து தந்தையின் தொழிலை உள்ளிடவும்',
+    'please enter mother\'s occupation': 'தயவுசெய்து தாயின் தொழிலை உள்ளிடவும்',
+    'please enter number': 'தயவுசெய்து எண்ணிக்கையை உள்ளிடவும்',
+    'please select family status': 'தயவுசெய்து குடும்ப நிலையை தேர்ந்தெடுக்கவும்',
+    'please enter property details': 'தயவுசெய்து சொத்து விவரங்களை உள்ளிடவும்',
+    'please enter monthly income': 'தயவுசெய்து மாத வருமானத்தை உள்ளிடவும்',
+    'please enter farming land details': 'தயவுசெய்து விவசாய நில விவரங்களை உள்ளிடவும்',
+    'please enter native place': 'தயவுசெய்து சொந்த ஊரை உள்ளிடவும்',
+    'please enter education level': 'தயவுசெய்து கல்வி நிலையை உள்ளிடவும்',
+    'please enter education': 'தயவுசெய்து கல்வியை உள்ளிடவும்',
+    'please enter occupation': 'தயவுசெய்து தொழிலை உள்ளிடவும்',
+    'please enter country': 'தயவுசெய்து நாட்டை உள்ளிடவும்',
+    'please enter state': 'தயவுசெய்து மாநிலத்தை உள்ளிடவும்',
+    'please enter family name': 'தயவுசெய்து குடும்ப பெயரை உள்ளிடவும்',
+    'please enter education details': 'தயவுசெய்து கல்வி விவரங்களை உள்ளிடவும்',
+    'please enter job details': 'தயவுசெய்து பணி விவரங்களை உள்ளிடவும்',
+    'please enter working company': 'தயவுசெய்து நிறுவனத்தை உள்ளிடவும்',
+    'please enter city': 'தயவுசெய்து நகரத்தை உள்ளிடவும்',
+    'please enter alternate mobile': 'தயவுசெய்து மாற்று கைபேசி எண்ணை உள்ளிடவும்',
+    'please enter email': 'தயவுசெய்து மின்னஞ்சலை உள்ளிடவும்',
+    'please enter a valid email': 'செல்லுபடியாகும் மின்னஞ்சலை உள்ளிடவும்',
+    'please enter refer name': 'தயவுசெய்து பரிந்துரைத்தவர் பெயரை உள்ளிடவும்',
+    'please enter refer mobile': 'தயவுசெய்து பரிந்துரைத்தவர் எண்ணை உள்ளிடவும்',
+    'please enter address': 'தயவுசெய்து முகவரியை உள்ளிடவும்',
+    'please enter postal code': 'தயவுசெய்து அஞ்சல் குறியீட்டை உள்ளிடவும்',
+    'please enter age preference': 'தயவுசெய்து வயது விருப்பத்தை உள்ளிடவும்',
+    'please enter height preference': 'தயவுசெய்து உயர விருப்பத்தை உள்ளிடவும்',
+    'please enter weight preference': 'தயவுசெய்து எடை விருப்பத்தை உள்ளிடவும்',
+    'please enter education preference': 'தயவுசெய்து கல்வி விருப்பத்தை உள்ளிடவும்',
+    'please enter country preference': 'தயவுசெய்து நாட்டு விருப்பத்தை உள்ளிடவும்',
+    'please enter occupation preference': 'தயவுசெய்து தொழில் விருப்பத்தை உள்ளிடவும்',
+    'please enter partner income': 'தயவுசெய்து வருமான விருப்பத்தை உள்ளிடவும்',
+    'please enter kootam preference': 'தயவுசெய்து கூட்டம் விருப்பத்தை உள்ளிடவும்',
+    'please enter kulam preference': 'தயவுசெய்து குல விருப்பத்தை உள்ளிடவும்',
+    'please enter star preference': 'தயவுசெய்து நட்சத்திர விருப்பத்தை உள்ளிடவும்',
+    'please enter rasi preference': 'தயவுசெய்து ராசி விருப்பத்தை உள்ளிடவும்',
+    'please enter marital status preference': 'தயவுசெய்து திருமண நிலை விருப்பத்தை உள்ளிடவும்',
+    'please write something about yourself': 'தயவுசெய்து உங்களைப் பற்றி சுருக்கமாக எழுதுங்கள்',
+    'please describe your expectations': 'தயவுசெய்து உங்கள் எதிர்பார்ப்புகளை விவரிக்கவும்',
+
+    // Interests Screen & Statuses
+    'received': 'பெறப்பட்டவை',
+    'sent': 'அனுப்பியவை',
+    'decline': 'நிராகரி',
+    'declined': 'நிராகரிக்கப்பட்டது',
+    'accept': 'ஏற்றுக்கொள்',
+    'accepted': 'ஏற்றுக்கொள்ளப்பட்டது',
+    'pending': 'நிலுவையில்',
+    'delivered': 'அனுப்பப்பட்டது',
+    'status': 'நிலை',
+    'no requests found': 'கோரிக்கைகள் எதுவும் இல்லை',
+    'request declined': 'கோரிக்கை நிராகரிக்கப்பட்டது',
+    'request accepted': 'கோரிக்கை ஏற்றுக்கொள்ளப்பட்டது',
+    'status: ': 'நிலை: ',
   };
 }

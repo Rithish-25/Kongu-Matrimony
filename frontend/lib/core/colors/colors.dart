@@ -4,29 +4,29 @@ class AppColors {
   // Prevent instantiation
   AppColors._();
 
-  // App Bar specific colors (Matching kongumanamakkal.com green & warm gold)
-  static const Color appBarPrimary = Color(0xFF026135);
-  static const Color appBarSecondaryDark = Color(0xFF9E751D);
-  static const Color appBarSecondary = Color(0xFFD4A337);
+  // App Bar specific colors (Gradient Vibrant Orange)
+  static const Color appBarPrimary = Color(0xFFE65100);
+  static const Color appBarSecondaryDark = Color(0xFFBF360C);
+  static const Color appBarSecondary = Color(0xFFF57C00);
 
-  // Page Primary (Kongu Forest Green - Simple & Traditional)
-  static const Color primary = Color(0xFF026135);
-  static const Color primaryDark = Color(0xFF014726);
-  static const Color primaryLight = Color(0xFF1B8A52);
-  static const Color primarySoft = Color(0xFFEBF7F0);
+  // Page Primary (Vibrant Orange Theme)
+  static const Color primary = Color(0xFFE65100);
+  static const Color primaryDark = Color(0xFFBF360C);
+  static const Color primaryLight = Color(0xFFFF7043);
+  static const Color primarySoft = Color(0xFFFFF3E0);
 
-  // Page Secondary (Muted Warm Gold)
-  static const Color secondary = Color(0xFFD4A337);
-  static const Color secondaryDark = Color(0xFF9E751D);
-  static const Color secondaryLight = Color(0xFFE6C265);
-  static const Color secondarySoft = Color(0xFFFFF9EB);
+  // Page Secondary (Warm Amber)
+  static const Color secondary = Color(0xFFF57C00);
+  static const Color secondaryDark = Color(0xFFBF360C);
+  static const Color secondaryLight = Color(0xFFFFB74D);
+  static const Color secondarySoft = Color(0xFFFFF8E1);
 
   // Pure White & Soft Neutral App Backgrounds
   static const Color background = Color(0xFFFFFFFF);
   static const Color backgroundAlt = Color(0xFFF8FAFC);
   static const Color surface = Color(0xFFFFFFFF);
   static const Color surfaceMuted = Color(0xFFF8FAFC);
-  static const Color surfaceDark = Color(0xFF014726);
+  static const Color surfaceDark = Color(0xFFBF360C);
 
   static const Color textPrimary = Color(0xFF1E293B);
   static const Color textSecondary = Color(0xFF64748B);
@@ -35,40 +35,40 @@ class AppColors {
   static const Color border = Color(0xFFE2E8F0);
   static const Color divider = Color(0xFFF1F5F9);
   static const Color error = Color(0xFFDC2626);
-  static const Color success = Color(0xFF026135);
-  static const Color successSoft = Color(0xFFEBF7F0);
+  static const Color success = Color(0xFF16A34A);
+  static const Color successSoft = Color(0xFFDCFCE7);
   static const Color warning = Color(0xFFD97706);
   static const Color warningSoft = Color(0xFFFFFBEB);
-  static const Color info = Color(0xFF026135);
-  static const Color infoSoft = Color(0xFFEBF7F0);
+  static const Color info = Color(0xFFE65100);
+  static const Color infoSoft = Color(0xFFFFF3E0);
 
-  // Simple, elegant gradients
+  // Vibrant Gradient Orange Theme
   static const Gradient goldGradient = LinearGradient(
-    colors: [Color(0xFFE6C265), Color(0xFFD4A337)],
+    colors: [Color(0xFFFFB74D), Color(0xFFF57C00)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const Gradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF026135), Color(0xFF014726)],
+    colors: [Color(0xFFE65100), Color(0xFFF57C00)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const Gradient heroGradient = LinearGradient(
-    colors: [Color(0xFF026135), Color(0xFF014726)],
+    colors: [Color(0xFFE65100), Color(0xFFFF6D00)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
   static const Gradient blushGradient = LinearGradient(
-    colors: [Color(0xFFFFFFFF), Color(0xFFEBF7F0)],
+    colors: [Color(0xFFFFFFFF), Color(0xFFFFF3E0)],
     begin: Alignment.topCenter,
     end: Alignment.bottomCenter,
   );
 
   static const Gradient softDarkGradient = LinearGradient(
-    colors: [Color(0xFF026135), Color(0xFF014726)],
+    colors: [Color(0xFFE65100), Color(0xFFBF360C)],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );

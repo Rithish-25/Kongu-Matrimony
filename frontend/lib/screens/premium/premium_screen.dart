@@ -39,7 +39,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
     return [
       _PlanModel(
         name: 'Free Plan',
-        planCode: 'Free Plan',
+        planCode: 'Free',
         finalPrice: '₹ 0',
         monthlyPillText: '₹ 0 / free forever',
         isPopular: false,
@@ -208,6 +208,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
       body: ValueListenableBuilder<UserProfileState>(
         valueListenable: ProfileDatabase.userProfileNotifier,
         builder: (context, userProfile, _) {
+          final selectedTabName = _planTabNames[_selectedPlanIndex].toLowerCase();
+          final userActivePlanName = userProfile.plan.toLowerCase();
+          final isSelectedTabActivePlan = userActivePlanName.contains(selectedTabName) ||
+              (userActivePlanName == 'free' && selectedTabName == 'free');
+
           return Column(
             children: [
               const SizedBox(height: 10),
@@ -242,13 +247,26 @@ class _PremiumScreenState extends State<PremiumScreen> {
                           top: 0,
                           bottom: 0,
                           width: tabWidth,
-                          child: Container(
+                          child: AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
                             decoration: BoxDecoration(
-                              gradient: AppColors.primaryGradient,
+                              gradient: isSelectedTabActivePlan
+                                  ? const LinearGradient(
+                                      colors: [Color(0xFF026135), Color(0xFF16A34A)],
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                    )
+                                  : const LinearGradient(
+                                      colors: [Color(0xFFE65100), Color(0xFFF57C00)],
+                                      begin: Alignment.centerLeft,
+                                      end: Alignment.centerRight,
+                                    ),
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
-                                  color: const Color(0x407A102A),
+                                  color: isSelectedTabActivePlan
+                                      ? const Color(0x40026135)
+                                      : const Color(0x40E65100),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -320,9 +338,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
                   },
                   itemBuilder: (context, index) {
                     final plan = plans[index];
-                    final isCurrentActive =
-                        userProfile.plan.toLowerCase() ==
-                        plan.planCode.toLowerCase();
+                    final userPlanLower = userProfile.plan.toLowerCase();
+                    final planCodeLower = plan.planCode.toLowerCase();
+                    final planNameLower = plan.name.toLowerCase();
+                    final isCurrentActive = userPlanLower == planCodeLower ||
+                        userPlanLower.contains(planCodeLower) ||
+                        (userPlanLower.contains('free') && (planCodeLower.contains('free') || planNameLower.contains('free')));
 
                     // Dynamic 3D depth and scale transformation during swiping
                     double pageOffset = 0.0;
@@ -371,7 +392,11 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       width: isSelected ? 22 : 8,
                       height: 8,
                       decoration: BoxDecoration(
-                        color: isSelected ? AppColors.primary : AppColors.border,
+                        color: isSelected
+                            ? (isSelectedTabActivePlan
+                                ? const Color(0xFF026135)
+                                : const Color(0xFFE65100))
+                            : AppColors.border,
                         borderRadius: BorderRadius.circular(4),
                       ),
                     );
@@ -405,170 +430,197 @@ class _PremiumScreenState extends State<PremiumScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(22),
         border: Border.all(
-          color: isCurrentActive ? AppColors.primary : const Color(0xFFC7D0DC),
-          width: isCurrentActive ? 2.2 : 1.5,
+          color: isCurrentActive ? const Color(0xFF026135) : const Color(0xFFE65100),
+          width: isCurrentActive ? 2.5 : 1.8,
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
+            color: isCurrentActive
+                ? const Color(0xFF026135).withValues(alpha: 0.15)
+                : Colors.black.withValues(alpha: 0.04),
             blurRadius: 12,
             offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            // 1. Plan Name Title
-            Text(
-              AppLanguageController.text(plan.name),
-              style: GoogleFonts.plusJakartaSans(
-                fontSize: 18,
-                fontWeight: FontWeight.w800,
-                color: AppColors.primary,
-                letterSpacing: 0.2,
-              ),
-            ),
-            const SizedBox(height: 4),
-
-            // 2. Price Row (Big Final Price)
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              crossAxisAlignment: CrossAxisAlignment.baseline,
-              textBaseline: TextBaseline.alphabetic,
-              children: [
-                Text(
-                  plan.finalPrice,
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 28,
-                    fontWeight: FontWeight.w900,
-                    color: Colors.black,
-                    letterSpacing: -0.5,
-                  ),
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 8),
-
-            // 3. Monthly Price Pill Container
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5),
-              decoration: BoxDecoration(
-                color: const Color(0xFFFDF0F2),
-                borderRadius: BorderRadius.circular(14),
-                border: Border.all(color: const Color(0xFFF5C2C7), width: 0.8),
-              ),
-              child: Text(
-                AppLanguageController.text(plan.monthlyPillText),
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 11.5,
-                  fontWeight: FontWeight.w700,
-                  color: const Color(0xFF4A4A4A),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            // 4. Feature Checklist
-            Expanded(
-              child: SingleChildScrollView(
-                physics: const BouncingScrollPhysics(),
-                child: Column(
-                  children: plan.features.map((feature) {
-                    final isNegative = feature.startsWith('Cannot');
-
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: 9),
-                      child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Icon(
-                            isNegative ? Icons.close_rounded : Icons.check_rounded,
-                            size: 18,
-                            color: isNegative ? Colors.red.shade400 : const Color(0xFF2E7D32),
-                          ),
-                          const SizedBox(width: 8),
-                          Expanded(
-                            child: Text(
-                              AppLanguageController.text(feature),
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 12.5,
-                                fontWeight: FontWeight.w500,
-                                color: const Color(0xFF333333),
-                                height: 1.25,
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    );
-                  }).toList(),
-                ),
-              ),
-            ),
-
-            const SizedBox(height: 12),
-
-            // 5. Orange Action Button
+            // Top 2 Corners Accent Bar (GREEN for user's current plan, Orange for balance plans)
             Container(
               width: double.infinity,
-              height: 44,
+              height: 6,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(25),
                 gradient: isCurrentActive
-                    ? null
-                    : (plan.planCode.toLowerCase().contains('free')
-                        ? AppColors.primaryGradient
-                        : const LinearGradient(
-                            colors: [Color(0xFFE65100), Color(0xFFF57C00)],
-                            begin: Alignment.centerLeft,
-                            end: Alignment.centerRight,
-                          )),
-                color: isCurrentActive ? Colors.teal.shade700 : null,
-                boxShadow: [
-                  BoxShadow(
-                    color: isCurrentActive
-                        ? Colors.teal.withValues(alpha: 0.3)
-                        : (plan.planCode.toLowerCase().contains('free')
-                            ? const Color(0x337A102A)
-                            : const Color(0x40E65100)),
-                    blurRadius: 8,
-                    offset: const Offset(0, 3),
-                  ),
-                ],
+                    ? const LinearGradient(
+                        colors: [Color(0xFF026135), Color(0xFF16A34A)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      )
+                    : const LinearGradient(
+                        colors: [Color(0xFFE65100), Color(0xFFF57C00)],
+                        begin: Alignment.centerLeft,
+                        end: Alignment.centerRight,
+                      ),
               ),
-              child: Material(
-                color: Colors.transparent,
-                child: InkWell(
-                  onTap: isCurrentActive ? null : () => _onPayNow(plan),
-                  borderRadius: BorderRadius.circular(25),
-                  child: Center(
-                    child: Row(
+            ),
+
+            // Main Card Content filling available vertical height
+            Expanded(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  children: [
+                    // 1. Plan Name Title
+                    Text(
+                      AppLanguageController.text(plan.name),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 18,
+                        fontWeight: FontWeight.w800,
+                        color: isCurrentActive ? const Color(0xFF026135) : const Color(0xFFE65100),
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+
+                    // 2. Price Row (Big Final Price)
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.baseline,
+                      textBaseline: TextBaseline.alphabetic,
                       children: [
-                        if (isCurrentActive) ...[
-                          const Icon(Icons.check_circle_rounded, size: 16, color: Colors.white),
-                          const SizedBox(width: 6),
-                        ],
                         Text(
-                          isCurrentActive
-                              ? AppLanguageController.text('CURRENT PLAN')
-                              : (plan.planCode.toLowerCase().contains('free')
-                                  ? AppLanguageController.text('SELECT FREE PLAN')
-                                  : AppLanguageController.text('Pay Now')),
+                          plan.finalPrice,
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                            fontSize: 28,
+                            fontWeight: FontWeight.w900,
+                            color: Colors.black,
+                            letterSpacing: -0.5,
                           ),
                         ),
                       ],
                     ),
-                  ),
+
+                    const SizedBox(height: 8),
+
+                    // 3. Monthly Price Pill Container
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFDF0F2),
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: const Color(0xFFF5C2C7), width: 0.8),
+                      ),
+                      child: Text(
+                        AppLanguageController.text(plan.monthlyPillText),
+                        style: GoogleFonts.plusJakartaSans(
+                          fontSize: 11.5,
+                          fontWeight: FontWeight.w700,
+                          color: const Color(0xFF4A4A4A),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // 4. Feature Checklist
+                    Expanded(
+                      child: SingleChildScrollView(
+                        physics: const BouncingScrollPhysics(),
+                        child: Column(
+                          children: plan.features.map((feature) {
+                            final isNegative = feature.startsWith('Cannot');
+
+                            return Padding(
+                              padding: const EdgeInsets.only(bottom: 9),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Icon(
+                                    isNegative ? Icons.close_rounded : Icons.check_rounded,
+                                    size: 18,
+                                    color: isNegative ? Colors.red.shade400 : const Color(0xFF2E7D32),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Expanded(
+                                    child: Text(
+                                      AppLanguageController.text(feature),
+                                      style: GoogleFonts.plusJakartaSans(
+                                        fontSize: 12.5,
+                                        fontWeight: FontWeight.w500,
+                                        color: const Color(0xFF333333),
+                                        height: 1.25,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            );
+                          }).toList(),
+                        ),
+                      ),
+                    ),
+
+                    const SizedBox(height: 12),
+
+                    // 5. Orange Action Button
+                    Container(
+                      width: double.infinity,
+                      height: 44,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(25),
+                        gradient: isCurrentActive
+                            ? null
+                            : const LinearGradient(
+                                colors: [Color(0xFFE65100), Color(0xFFF57C00)],
+                                begin: Alignment.centerLeft,
+                                end: Alignment.centerRight,
+                              ),
+                        color: isCurrentActive ? Colors.teal.shade700 : null,
+                        boxShadow: [
+                          BoxShadow(
+                            color: isCurrentActive
+                                ? Colors.teal.withValues(alpha: 0.3)
+                                : const Color(0x40E65100),
+                            blurRadius: 8,
+                            offset: const Offset(0, 3),
+                          ),
+                        ],
+                      ),
+                      child: Material(
+                        color: Colors.transparent,
+                        child: InkWell(
+                          onTap: isCurrentActive ? null : () => _onPayNow(plan),
+                          borderRadius: BorderRadius.circular(25),
+                          child: Center(
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                if (isCurrentActive) ...[
+                                  const Icon(Icons.check_circle_rounded, size: 16, color: Colors.white),
+                                  const SizedBox(width: 6),
+                                ],
+                                Text(
+                                  isCurrentActive
+                                      ? AppLanguageController.text('CURRENT PLAN')
+                                      : (plan.planCode.toLowerCase().contains('free')
+                                          ? AppLanguageController.text('SELECT FREE PLAN')
+                                          : AppLanguageController.text('Pay Now')),
+                                  style: GoogleFonts.plusJakartaSans(
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
