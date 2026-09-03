@@ -416,26 +416,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
             ),
           ),
 
-          // 3. Top-Right "1/1" Pill Badge
-          Positioned(
-            top: 8,
-            right: 8,
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.55),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '1/1',
-                style: GoogleFonts.poppins(
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-            ),
-          ),
+
 
           // 4. InkWell overlay for card tap navigation
           Positioned.fill(

@@ -16,6 +16,27 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final profiles = ProfileDatabase.currentProfiles;
 
+    // Filter Men and Women profiles
+    final allMen = profiles.where((p) => p.gender.toLowerCase() == 'male').toList();
+    final allWomen = profiles.where((p) => p.gender.toLowerCase() == 'female').toList();
+
+    // Ensure 6 profiles for each list
+    final List<Profile> displayMen = [];
+    if (allMen.isNotEmpty) {
+      while (displayMen.length < 6) {
+        displayMen.addAll(allMen);
+      }
+    }
+    final men6 = displayMen.take(6).toList();
+
+    final List<Profile> displayWomen = [];
+    if (allWomen.isNotEmpty) {
+      while (displayWomen.length < 6) {
+        displayWomen.addAll(allWomen);
+      }
+    }
+    final women6 = displayWomen.take(6).toList();
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: ValueListenableBuilder<AppLanguage>(
@@ -112,18 +133,71 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 22),
+                  const SizedBox(height: 24),
 
-                  // Main Action Button - Explore Horoscope Matches
+                  // --- SECTION 1: MEN PROFILES (GROOMS) ---
+                  _buildSectionHeader(
+                    title: AppLanguageController.isTamil
+                        ? AppLanguageController.text('men_profiles_section')
+                        : 'Men Profiles (Grooms)',
+                    icon: Icons.male_rounded,
+                    color: AppColors.secondaryDark,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  SizedBox(
+                    height: 240,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: men6.length,
+                      separatorBuilder: (context, index) => const SizedBox(width: 12),
+                      itemBuilder: (context, index) {
+                        return _buildHorizontalProfileCard(context, men6[index], 'men-$index');
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // --- SECTION 2: WOMEN PROFILES (BRIDES) ---
+                  _buildSectionHeader(
+                    title: AppLanguageController.isTamil
+                        ? AppLanguageController.text('women_profiles_section')
+                        : 'Women Profiles (Brides)',
+                    icon: Icons.female_rounded,
+                    color: AppColors.primary,
+                  ),
+
+                  const SizedBox(height: 10),
+
+                  SizedBox(
+                    height: 240,
+                    child: ListView.separated(
+                      scrollDirection: Axis.horizontal,
+                      physics: const BouncingScrollPhysics(),
+                      itemCount: women6.length,
+                      separatorBuilder: (context, index) => const SizedBox(width: 12),
+                      itemBuilder: (context, index) {
+                        return _buildHorizontalProfileCard(context, women6[index], 'women-$index');
+                      },
+                    ),
+                  ),
+
+                  const SizedBox(height: 28),
+
+                  // --- VIEW ALL PROFILES BUTTON (Navigates to Horoscope Screen) ---
                   Container(
                     width: double.infinity,
                     height: 48,
                     decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
+                      color: Colors.white,
                       borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.primary, width: 1.8),
                       boxShadow: [
                         BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.25),
+                          color: AppColors.primary.withValues(alpha: 0.12),
                           blurRadius: 10,
                           offset: const Offset(0, 4),
                         ),
@@ -132,32 +206,33 @@ class HomeScreen extends StatelessWidget {
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
-                        onTap: () => onNavigateToTab(1), // Horoscope Tab
+                        onTap: () => onNavigateToTab(1), // Navigates to Horoscope Screen
                         borderRadius: BorderRadius.circular(16),
                         child: Center(
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
                               const Icon(
-                                Icons.search_rounded,
+                                Icons.grid_view_rounded,
                                 size: 18,
-                                color: Colors.white,
+                                color: AppColors.primary,
                               ),
                               const SizedBox(width: 8),
                               Text(
-                                AppLanguageController.text('explore_matches'),
+                                AppLanguageController.isTamil
+                                    ? AppLanguageController.text('view_all_profiles_button')
+                                    : 'View All Profiles',
                                 style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 13.5,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.white,
-                                  letterSpacing: 0.5,
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w800,
+                                  color: AppColors.primary,
                                 ),
                               ),
                               const SizedBox(width: 8),
                               const Icon(
-                                Icons.arrow_forward_rounded,
-                                size: 16,
-                                color: Colors.white,
+                                Icons.arrow_forward_ios_rounded,
+                                size: 14,
+                                color: AppColors.primary,
                               ),
                             ],
                           ),
@@ -167,128 +242,6 @@ class HomeScreen extends StatelessWidget {
                   ),
 
                   const SizedBox(height: 24),
-
-                  // Quick Action Cards Row (2x2 Grid)
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildQuickCard(
-                          context: context,
-                          icon: Icons.female_rounded,
-                          title: AppLanguageController.text('women_profiles'),
-                          count: '6 ${AppLanguageController.text('horoscope_profiles')}',
-                          color: AppColors.primary,
-                          onTap: () => onNavigateToTab(1),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildQuickCard(
-                          context: context,
-                          icon: Icons.male_rounded,
-                          title: AppLanguageController.text('men_profiles'),
-                          count: '6 ${AppLanguageController.text('horoscope_profiles')}',
-                          color: AppColors.secondaryDark,
-                          onTap: () => onNavigateToTab(1),
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Row(
-                    children: [
-                      Expanded(
-                        child: _buildQuickCard(
-                          context: context,
-                          icon: Icons.wb_sunny_outlined,
-                          title: AppLanguageController.text('horoscope_sync'),
-                          count: '10 Porutham Sync',
-                          color: AppColors.primary,
-                          onTap: () => onNavigateToTab(1),
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: _buildQuickCard(
-                          context: context,
-                          icon: Icons.favorite_rounded,
-                          title: AppLanguageController.text('nav_favourites'),
-                          count: 'Shortlist Matches',
-                          color: Colors.redAccent,
-                          onTap: () => onNavigateToTab(2),
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // --- FEATURED PROFILES SECTION HEADER ---
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Expanded(
-                        child: Text(
-                          AppLanguageController.text('featured_profiles'),
-                          style: GoogleFonts.poppins(
-                            fontSize: 15,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                          ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      TextButton(
-                        onPressed: () => onNavigateToTab(1),
-                        style: TextButton.styleFrom(
-                          padding: const EdgeInsets.symmetric(horizontal: 4),
-                          minimumSize: Size.zero,
-                          tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                        ),
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            Text(
-                              AppLanguageController.text('all_profiles'),
-                              style: GoogleFonts.poppins(
-                                fontSize: 11.5,
-                                fontWeight: FontWeight.w600,
-                                color: AppColors.secondaryDark,
-                              ),
-                            ),
-                            const Icon(
-                              Icons.chevron_right_rounded,
-                              size: 16,
-                              color: AppColors.secondaryDark,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-
-                  const SizedBox(height: 8),
-
-                  // --- FEATURED PROFILES HORIZONTAL CAROUSEL ---
-                  SizedBox(
-                    height: 230,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: profiles.length,
-                      separatorBuilder: (context, index) => const SizedBox(width: 12),
-                      itemBuilder: (context, index) {
-                        final profile = profiles[index];
-                        return _buildFeaturedProfileCard(context, profile);
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 12),
-
-                  const SizedBox(height: 24),
                 ],
               ),
             ),
@@ -298,151 +251,201 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildQuickCard({
-    required BuildContext context,
-    required IconData icon,
+  Widget _buildSectionHeader({
     required String title,
-    required String count,
+    required IconData icon,
     required Color color,
-    required VoidCallback onTap,
   }) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Container(
-        padding: const EdgeInsets.all(14),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: AppColors.border, width: 0.9),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.03),
-              blurRadius: 8,
-              offset: const Offset(0, 3),
-            ),
-          ],
+    return Row(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, size: 18, color: color),
         ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: color.withValues(alpha: 0.09),
-                borderRadius: BorderRadius.circular(10),
-              ),
-              child: Icon(icon, size: 20, color: color),
+        const SizedBox(width: 8),
+        Expanded(
+          child: Text(
+            title,
+            style: GoogleFonts.poppins(
+              fontSize: 15,
+              fontWeight: FontWeight.bold,
+              color: AppColors.textPrimary,
             ),
-            const SizedBox(height: 8),
-            Text(
-              title,
-              style: GoogleFonts.poppins(
-                fontSize: 13,
-                fontWeight: FontWeight.bold,
-                color: AppColors.textPrimary,
-                height: 1.25,
-              ),
-              maxLines: 2,
-            ),
-            const SizedBox(height: 4),
-            Text(
-              count,
-              style: GoogleFonts.poppins(
-                fontSize: 11,
-                color: AppColors.textSecondary,
-                height: 1.2,
-              ),
-              maxLines: 2,
-            ),
-          ],
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+          ),
         ),
-      ),
+        Container(
+          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Text(
+            '6 ${AppLanguageController.text('profiles')}',
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 11,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Widget _buildFeaturedProfileCard(BuildContext context, Profile profile) {
+
+
+  Widget _buildHorizontalProfileCard(BuildContext context, Profile profile, String tagPrefix) {
     return Container(
       width: 155,
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border, width: 0.8),
+        borderRadius: BorderRadius.circular(14),
+        border: Border.all(color: AppColors.border, width: 0.9),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
+            color: Colors.black.withValues(alpha: 0.08),
             blurRadius: 8,
             offset: const Offset(0, 3),
           ),
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: InkWell(
-        onTap: () {
-          Navigator.of(context).push(
-            appPageRoute(
-              ProfileDetailsScreen(
-                profile: profile,
-                heroTag: 'profile-image-${profile.id}-homefeatured',
-              ),
-            ),
-          );
-        },
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            // Image Header
-            Container(
-              height: 125,
-              width: double.infinity,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: NetworkImage(profile.profileImageUrl),
-                  fit: BoxFit.cover,
+      child: Stack(
+        children: [
+          // 1. Full Image Background
+          Positioned.fill(
+            child: Hero(
+              tag: 'profile-image-${profile.id}-$tagPrefix',
+              child: Image.network(
+                profile.profileImageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Colors.grey.shade300,
+                  child: const Icon(Icons.person, size: 40, color: Colors.grey),
                 ),
               ),
             ),
-            Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    profile.name,
-                    style: GoogleFonts.poppins(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    '${profile.age} ${AppLanguageController.text('yrs')} • ${profile.location}',
-                    style: GoogleFonts.poppins(
-                      fontSize: 10,
-                      color: AppColors.textSecondary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    profile.education,
-                    style: GoogleFonts.poppins(
-                      fontSize: 10,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.primary,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                ],
+          ),
+
+          // 2. Dark Gradient Overlay at bottom
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.3, 0.65, 1.0],
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.45),
+                    Colors.black.withValues(alpha: 0.88),
+                  ],
+                ),
               ),
             ),
-          ],
-        ),
+          ),
+
+          // 3. Tap Navigation Overlay
+          Positioned.fill(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    appPageRoute(
+                      ProfileDetailsScreen(
+                        profile: profile,
+                        heroTag: 'profile-image-${profile.id}-$tagPrefix',
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          // 4. Bottom Overlay Info Text (Name, Age, Occupation) - NO View Details Button
+          Positioned(
+            left: 10,
+            right: 10,
+            bottom: 10,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  profile.name,
+                  style: GoogleFonts.poppins(
+                    fontSize: 13.5,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: const [
+                      Shadow(
+                        color: Colors.black54,
+                        blurRadius: 4,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 3),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.person_outline_rounded,
+                      size: 12,
+                      color: Colors.white70,
+                    ),
+                    const SizedBox(width: 3),
+                    Expanded(
+                      child: Text(
+                        '${profile.age} ${AppLanguageController.text('yrs')}',
+                        style: GoogleFonts.poppins(
+                          fontSize: 10.5,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white70,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.business_center_outlined,
+                      size: 12,
+                      color: Colors.white70,
+                    ),
+                    const SizedBox(width: 3),
+                    Expanded(
+                      child: Text(
+                        profile.occupation,
+                        style: GoogleFonts.poppins(
+                          fontSize: 10,
+                          fontWeight: FontWeight.w500,
+                          color: Colors.white70,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

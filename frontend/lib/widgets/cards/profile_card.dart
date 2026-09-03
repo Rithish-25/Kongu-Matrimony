@@ -11,8 +11,7 @@ class ProfileCard extends StatelessWidget {
   final ProfileCardType cardType;
   final VoidCallback? onViewProfile;
   final VoidCallback? onFavoriteToggle;
-  final Function(String action)?
-  onInterestAction; // 'accept' or 'reject' or 'cancel'
+  final Function(String action)? onInterestAction;
   final bool showLastActive;
 
   const ProfileCard({
@@ -33,8 +32,8 @@ class ProfileCard extends StatelessWidget {
     return GestureDetector(
       onTap: onViewProfile,
       child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 5),
-        padding: const EdgeInsets.all(10),
+        margin: const EdgeInsets.symmetric(vertical: 4),
+        padding: const EdgeInsets.fromLTRB(10, 8, 10, 8),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(12),
@@ -49,26 +48,20 @@ class ProfileCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 // Square Image with overlays
-                Stack(
-                  children: [
-                    Hero(
-                      tag: 'profile-image-${profile.id}-${cardType.name}',
-                      child: Container(
-                        width: 95,
-                        height: 95,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(10),
-                          color: AppColors.border.withValues(alpha: 0.3),
-                          image: DecorationImage(
-                            image: NetworkImage(profile.profileImageUrl),
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                Hero(
+                  tag: 'profile-image-${profile.id}-${cardType.name}',
+                  child: Container(
+                    width: 82,
+                    height: 82,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(9),
+                      color: AppColors.border.withValues(alpha: 0.3),
+                      image: DecorationImage(
+                        image: NetworkImage(profile.profileImageUrl),
+                        fit: BoxFit.cover,
                       ),
                     ),
-
-                    // Removed Newly Joined Ribbon
-                  ],
+                  ),
                 ),
                 const SizedBox(width: 10),
 
@@ -81,35 +74,35 @@ class ProfileCard extends StatelessWidget {
                       Text(
                         profile.name,
                         style: GoogleFonts.poppins(
-                          fontSize: 15.5,
+                          fontSize: 15,
                           fontWeight: FontWeight.bold,
                           color: AppColors.textPrimary,
                         ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
-                      const SizedBox(height: 4),
+                      const SizedBox(height: 2),
 
                       // ID & Last Active
                       if (showLastActive) ...[
                         Text(
                           'Last active at 07:15 am',
                           style: GoogleFonts.poppins(
-                            fontSize: 11,
+                            fontSize: 10.5,
                             color: AppColors.textSecondary,
                           ),
                         ),
-                        const SizedBox(height: 6),
+                        const SizedBox(height: 4),
                       ] else ...[
-                        const SizedBox(height: 12),
+                        const SizedBox(height: 6),
                       ],
 
                       // Wrapped Inline specs: age, height, job, koottam, location
                       Text(
                         '${profile.age} yrs | ${profile.heightText} | ${profile.occupation} | ${profile.koottam} | ${profile.location}',
                         style: GoogleFonts.poppins(
-                          fontSize: 12.5,
-                          height: 1.3,
+                          fontSize: 12,
+                          height: 1.25,
                           color: AppColors.textSecondary.withValues(
                             alpha: 0.85,
                           ),
@@ -122,9 +115,9 @@ class ProfileCard extends StatelessWidget {
                 ),
               ],
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
             const Divider(color: AppColors.border, height: 1),
-            const SizedBox(height: 8),
+            const SizedBox(height: 6),
 
             // Bottom Actions Section
             _buildActionButtonsRow(context, isSent, isAccepted),
@@ -149,9 +142,9 @@ class ProfileCard extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.textSecondary,
                   side: const BorderSide(color: AppColors.border, width: 1.2),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 7.5),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                 ),
                 child: const Text(
@@ -160,16 +153,16 @@ class ProfileCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
               child: ElevatedButton(
                 onPressed: () => onInterestAction?.call('accepted'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 7.5),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                 ),
                 child: const Text(
@@ -190,9 +183,9 @@ class ProfileCard extends StatelessWidget {
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.error,
                   side: const BorderSide(color: AppColors.error, width: 1.2),
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 7.5),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                 ),
                 child: const Text(
@@ -201,16 +194,16 @@ class ProfileCard extends StatelessWidget {
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
               child: ElevatedButton(
                 onPressed: onViewProfile,
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 7.5),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                 ),
                 child: const Text(
@@ -232,19 +225,19 @@ class ProfileCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondary,
                   foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 7.5),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                 ),
-                icon: const Icon(Icons.visibility_outlined, size: 16),
+                icon: const Icon(Icons.visibility_outlined, size: 15),
                 label: const Text(
                   'View',
                   style: TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
             Expanded(
               child: ElevatedButton.icon(
                 onPressed:
@@ -270,16 +263,16 @@ class ProfileCard extends StatelessWidget {
                           : AppColors.primary,
                   foregroundColor:
                       (isSent || isAccepted) ? Colors.grey[600] : Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  padding: const EdgeInsets.symmetric(vertical: 7.5),
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20),
+                    borderRadius: BorderRadius.circular(18),
                   ),
                 ),
                 icon: Icon(
                   isAccepted
                       ? Icons.done_all
                       : (isSent ? Icons.check : Icons.favorite),
-                  size: 16,
+                  size: 15,
                 ),
                 label: Text(
                   isAccepted

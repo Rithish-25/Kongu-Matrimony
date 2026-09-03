@@ -617,5 +617,10 @@ class AppLanguageController {
     'request declined': 'கோரிக்கை நிராகரிக்கப்பட்டது',
     'request accepted': 'கோரிக்கை ஏற்றுக்கொள்ளப்பட்டது',
     'status: ': 'நிலை: ',
+
+    // Home Page Sections & Buttons
+    'men_profiles_section': 'மணமகன்',
+    'women_profiles_section': 'மணமகள்',
+    'view_all_profiles_button': 'அனைத்து சுயவிவரங்களையும் பார்க்க',
   };
 }
