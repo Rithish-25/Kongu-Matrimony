@@ -10,12 +10,17 @@ import '../auth/login_screen.dart';
 import '../../core/assets/registration_draft.dart';
 import '../register/register_flow.dart';
 
+import '../../core/localization/app_language.dart';
+import '../about/about_kongu_kootamaipu_screen.dart';
+
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isTamil = AppLanguageController.isTamil;
+
     return Scaffold(
       body: ValueListenableBuilder<UserProfileState>(
         valueListenable: ProfileDatabase.userProfileNotifier,
@@ -28,29 +33,31 @@ class ProfileScreen extends StatelessWidget {
 
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM),
+            padding: const EdgeInsets.all(AppConstants.spacingM),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                const SizedBox(height: 10),
-                Container(
-                  width: 130,
-                  height: 130,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    border: Border.all(color: AppColors.primary, width: 3),
-                    boxShadow: AppConstants.softShadow,
-                    image: DecorationImage(
-                      image: NetworkImage(userProfile.profileImageUrl),
-                      fit: BoxFit.cover,
+                const SizedBox(height: AppConstants.spacingM),
+                Center(
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: AppColors.primary, width: 3),
+                      boxShadow: AppConstants.softShadow,
+                      image: DecorationImage(
+                        image: NetworkImage(userProfile.profileImageUrl),
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                 ),
                 const SizedBox(height: AppConstants.spacingS),
                 Text(
                   userProfile.displayName,
-                  style: GoogleFonts.poppins(
+                  style: GoogleFonts.roboto(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
@@ -75,12 +82,12 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: AppConstants.spacingL),
                 _buildOptionsGroup(
                   context: context,
-                  title: 'Account Settings',
+                  title: isTamil ? 'கணக்கு அமைப்புகள்' : 'Account Settings',
                   options: [
                     _ProfileOption(
                       icon: Icons.edit_note_outlined,
-                      title: 'Edit Profile',
-                      subtitle: 'Update your profile details',
+                      title: isTamil ? 'சுயவிவரத்தைத் திருத்து' : 'Edit Profile',
+                      subtitle: isTamil ? 'உங்கள் விவரங்களை புதுப்பிக்க' : 'Update your profile details',
                       onTap: () async {
                         final data = await RegistrationDraft.loadProfileDetails();
                         if (context.mounted) {
@@ -97,9 +104,19 @@ class ProfileScreen extends StatelessWidget {
                       },
                     ),
                     _ProfileOption(
+                      icon: Icons.info_outline_rounded,
+                      title: isTamil ? 'கொங்கு கூட்டமைப்பு பற்றி' : 'About Kongu Kootamaipu',
+                      subtitle: isTamil ? 'எங்கள் வரலாறு மற்றும் சேவைகள்' : 'Learn about our community trust',
+                      onTap: () {
+                        Navigator.of(context).push(
+                          appPageRoute(const AboutKonguKootamaipuScreen()),
+                        );
+                      },
+                    ),
+                    _ProfileOption(
                       icon: Icons.workspace_premium_outlined,
-                      title: 'Premium Membership',
-                      subtitle: 'View and change your membership plans',
+                      title: isTamil ? 'பிரீமியம் உறுப்பினர்' : 'Premium Membership',
+                      subtitle: isTamil ? 'உறுப்பினர் திட்டங்களைப் பார்க்க' : 'View and change your membership plans',
                       onTap: () {
                         Navigator.of(context).push(
                           appPageRoute(const PremiumScreen()),

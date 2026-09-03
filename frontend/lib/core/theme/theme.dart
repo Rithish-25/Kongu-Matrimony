@@ -8,11 +8,12 @@ class AppTheme {
   AppTheme._();
 
   static ThemeData get lightTheme {
-    final baseTextTheme = GoogleFonts.poppinsTextTheme(ThemeData.light().textTheme);
+    final baseTextTheme = GoogleFonts.robotoTextTheme(ThemeData.light().textTheme);
 
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
+      fontFamily: GoogleFonts.roboto().fontFamily,
       primaryColor: AppColors.primary,
       scaffoldBackgroundColor: AppColors.background,
       colorScheme: const ColorScheme(
@@ -29,37 +30,37 @@ class AppTheme {
         secondaryContainer: AppColors.secondaryDark,
       ),
       textTheme: baseTextTheme.copyWith(
-        displayLarge: GoogleFonts.poppins(
+        displayLarge: GoogleFonts.roboto(
           fontSize: 32,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
-        headlineLarge: GoogleFonts.poppins(
+        headlineLarge: GoogleFonts.roboto(
           fontSize: 24,
           fontWeight: FontWeight.bold,
           color: AppColors.textPrimary,
         ),
-        titleLarge: GoogleFonts.poppins(
+        titleLarge: GoogleFonts.roboto(
           fontSize: 20,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        titleMedium: GoogleFonts.poppins(
+        titleMedium: GoogleFonts.roboto(
           fontSize: 16,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,
         ),
-        bodyLarge: GoogleFonts.poppins(
+        bodyLarge: GoogleFonts.roboto(
           fontSize: 15,
           fontWeight: FontWeight.normal,
           color: AppColors.textPrimary,
         ),
-        bodyMedium: GoogleFonts.poppins(
+        bodyMedium: GoogleFonts.roboto(
           fontSize: 13,
           fontWeight: FontWeight.normal,
           color: AppColors.textSecondary,
         ),
-        labelLarge: GoogleFonts.poppins(
+        labelLarge: GoogleFonts.roboto(
           fontSize: 14,
           fontWeight: FontWeight.w600,
           color: AppColors.textPrimary,

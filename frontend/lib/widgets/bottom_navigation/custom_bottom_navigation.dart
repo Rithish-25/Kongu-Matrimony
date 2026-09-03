@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
-import '../../core/constants/constants.dart';
 import '../../core/localization/app_language.dart';
 
 class CustomBottomNavigationBar extends StatelessWidget {
@@ -46,138 +46,58 @@ class CustomBottomNavigationBar extends StatelessWidget {
           ),
         ];
 
-        return SafeArea(
-          top: false,
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(14, 0, 14, 14),
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(26),
-                border: Border.all(color: AppColors.border),
-                boxShadow: AppConstants.cardShadow,
+        return Container(
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.15),
+                blurRadius: 10,
+                offset: const Offset(0, -3),
               ),
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  final itemWidth = constraints.maxWidth / items.length;
+            ],
+          ),
+          child: SafeArea(
+            top: false,
+            child: SizedBox(
+              height: 58,
+              child: Row(
+                children: List.generate(items.length, (index) {
+                  final item = items[index];
+                  final isSelected = index == currentIndex;
 
-                  return SizedBox(
-                    height: 62,
-                    child: Stack(
-                      children: [
-                        AnimatedPositioned(
-                          duration: const Duration(milliseconds: 260),
-                          curve: Curves.easeOutCubic,
-                          left: currentIndex * itemWidth,
-                          top: 0,
-                          bottom: 0,
-                          width: itemWidth,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 4,
-                              vertical: 2,
+                  return Expanded(
+                    child: Material(
+                      color: Colors.transparent,
+                      child: InkWell(
+                        onTap: () => onTap(index),
+                        splashColor: Colors.white.withValues(alpha: 0.15),
+                        highlightColor: Colors.white.withValues(alpha: 0.08),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Icon(
+                              isSelected ? item.activeIcon : item.icon,
+                              color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
+                              size: isSelected ? 23 : 21,
                             ),
-                            child: DecoratedBox(
-                              decoration: BoxDecoration(
-                                gradient: AppColors.primaryGradient,
-                                borderRadius: BorderRadius.circular(18),
-                                boxShadow: AppConstants.softShadow,
+                            const SizedBox(height: 3),
+                            Text(
+                              item.label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: GoogleFonts.roboto(
+                                fontSize: 11,
+                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.75),
                               ),
                             ),
-                          ),
+                          ],
                         ),
-                        Row(
-                          children: List.generate(items.length, (index) {
-                            final item = items[index];
-                            final isSelected = index == currentIndex;
-
-                            return Expanded(
-                              child: Material(
-                                color: Colors.transparent,
-                                child: InkWell(
-                                  onTap: () => onTap(index),
-                                  splashColor: Colors.transparent,
-                                  highlightColor: Colors.transparent,
-                                  borderRadius: BorderRadius.circular(20),
-                                  child: Padding(
-                                    padding: const EdgeInsets.symmetric(
-                                      vertical: 6,
-                                      horizontal: 1,
-                                    ),
-                                    child: Column(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        AnimatedSwitcher(
-                                          duration: const Duration(
-                                            milliseconds: 180,
-                                          ),
-                                          transitionBuilder: (child, animation) {
-                                            return FadeTransition(
-                                              opacity: animation,
-                                              child: ScaleTransition(
-                                                scale: animation,
-                                                child: child,
-                                              ),
-                                            );
-                                          },
-                                          child: Icon(
-                                            isSelected
-                                                ? item.activeIcon
-                                                : item.icon,
-                                            key: ValueKey(
-                                              '${item.label}-$isSelected',
-                                            ),
-                                            color:
-                                                isSelected
-                                                    ? Colors.white
-                                                    : AppColors.textSecondary,
-                                            size: 20,
-                                          ),
-                                        ),
-                                        const SizedBox(height: 2),
-                                        AnimatedDefaultTextStyle(
-                                          duration: const Duration(
-                                            milliseconds: 180,
-                                          ),
-                                          curve: Curves.easeOut,
-                                          style: TextStyle(
-                                            fontSize: 9.0,
-                                            fontWeight:
-                                                isSelected
-                                                    ? FontWeight.w700
-                                                    : FontWeight.w500,
-                                            color:
-                                                isSelected
-                                                    ? Colors.white
-                                                    : AppColors.textSecondary,
-                                            letterSpacing: 0.0,
-                                            height: 1.1,
-                                          ),
-                                          child: Padding(
-                                            padding: const EdgeInsets.symmetric(horizontal: 2),
-                                            child: FittedBox(
-                                              fit: BoxFit.scaleDown,
-                                              child: Text(
-                                                item.label,
-                                                maxLines: 1,
-                                                textAlign: TextAlign.center,
-                                              ),
-                                            ),
-                                          ),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ],
+                      ),
                     ),
                   );
-                },
+                }),
               ),
             ),
           ),

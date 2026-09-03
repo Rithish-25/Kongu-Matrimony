@@ -69,54 +69,7 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 18),
-
-                  // Verified Badge Pill
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(
-                        color: AppColors.primary.withValues(alpha: 0.2),
-                        width: 1,
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.verified_user_rounded,
-                          size: 14,
-                          color: AppColors.primary,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          AppLanguageController.text('kootam_verified'),
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 11,
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.primary,
-                            letterSpacing: 0.8,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                  const SizedBox(height: 14),
-
-                  // Welcome Title
-                  Text(
-                    AppLanguageController.text('welcome_title'),
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.cinzel(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                      letterSpacing: 0.5,
-                    ),
-                  ),
+                  const SizedBox(height: 8),
 
                   const SizedBox(height: 6),
 
@@ -126,7 +79,7 @@ class HomeScreen extends StatelessWidget {
                     child: Text(
                       AppLanguageController.text('home_subtitle'),
                       textAlign: TextAlign.center,
-                      style: GoogleFonts.plusJakartaSans(
+                      style: GoogleFonts.roboto(
                         fontSize: 12.5,
                         color: AppColors.textSecondary,
                         height: 1.45,

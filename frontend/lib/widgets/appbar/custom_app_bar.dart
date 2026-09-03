@@ -24,27 +24,19 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     return AppBar(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.primary,
       elevation: 0,
       scrolledUnderElevation: 0,
       flexibleSpace: Container(
         decoration: const BoxDecoration(
-          color: Colors.white,
+          color: AppColors.primary,
         ),
       ),
       bottom: PreferredSize(
-        preferredSize: const Size.fromHeight(2),
+        preferredSize: const Size.fromHeight(1),
         child: Container(
-          height: 2,
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              colors: [
-                AppColors.appBarPrimary.withValues(alpha: 0),
-                AppColors.appBarSecondary.withValues(alpha: 0.45),
-                AppColors.appBarPrimary.withValues(alpha: 0),
-              ],
-            ),
-          ),
+          height: 1,
+          color: Colors.white.withValues(alpha: 0.15),
         ),
       ),
       automaticallyImplyLeading: false,
@@ -54,7 +46,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   icon: const Icon(
                     Icons.arrow_back,
                     size: 22,
-                    color: AppColors.appBarPrimary,
+                    color: Colors.white,
                   ),
                   onPressed: () => Navigator.of(context).pop(),
                 )
@@ -62,7 +54,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   tooltip: 'Translate / மொழி',
                   icon: const Icon(
                     Icons.g_translate_rounded,
-                    color: AppColors.appBarPrimary,
+                    color: Colors.white,
                     size: 22,
                   ),
                   onPressed: () => _showLanguageSelectorSheet(context),
@@ -87,35 +79,13 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
 
           final bool isTamil = currentLang == AppLanguage.tamil;
 
-          return Container(
-            constraints: const BoxConstraints(maxWidth: 210),
-            padding: const EdgeInsets.symmetric(
-              horizontal: 12,
-              vertical: 6,
-            ),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(18),
-              border: Border.all(color: AppColors.border),
-              boxShadow: AppConstants.softShadow,
-            ),
-            child: FittedBox(
-              fit: BoxFit.scaleDown,
-              child: Text(
-                displayTitle,
-                style: isTamil
-                    ? GoogleFonts.poppins(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.appBarPrimary,
-                      )
-                    : GoogleFonts.cinzel(
-                        fontSize: 14,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.appBarPrimary,
-                        letterSpacing: 1.0,
-                      ),
-              ),
+          return Text(
+            displayTitle,
+            style: GoogleFonts.roboto(
+              fontSize: 17,
+              fontWeight: FontWeight.w700,
+              color: Colors.white,
+              letterSpacing: isTamil ? 0.0 : 0.8,
             ),
           );
         },
@@ -132,7 +102,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     IconButton(
                       icon: const Icon(
                         Icons.notifications_outlined,
-                        color: AppColors.appBarPrimary,
+                        color: Colors.white,
                         size: 24,
                       ),
                       onPressed: () => _showNotificationsSheet(context),
@@ -144,10 +114,10 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                         width: 10,
                         height: 10,
                         decoration: BoxDecoration(
-                          gradient: AppColors.goldGradient,
+                          color: const Color(0xFFFFD700),
                           shape: BoxShape.circle,
                           border: Border.all(
-                            color: AppColors.surface,
+                            color: AppColors.primary,
                             width: 1.5,
                           ),
                         ),
