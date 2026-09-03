@@ -191,8 +191,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
         subMeta: '${AppLanguageController.text('Tamil')}, ${AppLanguageController.text('Gounder')} • ${AppLanguageController.text('Salem, Tamil Nadu')}',
         message: 'R Mani K has sent you an interest request.',
         status: _customStatuses['km-manik'] ?? 'New',
-        avatarUrl:
-            'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=500&auto=format&fit=crop&q=80',
+        avatarUrl: 'assets/photos/men1.jpg',
         timeAgo: 'few mins ago',
         isPremium: true,
       ),
@@ -203,8 +202,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
         subMeta: '${AppLanguageController.text('Tamil')}, ${AppLanguageController.text('Gounder')} • ${AppLanguageController.text('Coimbatore, Tamil Nadu')}',
         message: 'Hi, I would like to connect with your profile.',
         status: _customStatuses['km-malavika'] ?? 'Accepted',
-        avatarUrl:
-            'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=500&auto=format&fit=crop&q=80',
+        avatarUrl: 'assets/photos/women1.jpg',
         timeAgo: '10 mins ago',
       ),
       InboxItem(
@@ -214,8 +212,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
         subMeta: '${AppLanguageController.text('Tamil')}, ${AppLanguageController.text('Gounder')} • ${AppLanguageController.text('Erode, Tamil Nadu')}',
         message: 'Hi, I would like to connect with your profile.',
         status: _customStatuses['km-neha'] ?? 'Accepted',
-        avatarUrl:
-            'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=500&auto=format&fit=crop&q=80',
+        avatarUrl: 'assets/photos/women2.jpg',
         timeAgo: '1 hr ago',
       ),
       ...receivedProfiles.map(
@@ -238,8 +235,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
         subMeta: '${AppLanguageController.text('Tamil')}, ${AppLanguageController.text('Gounder')} • ${AppLanguageController.text('Salem, Tamil Nadu')}',
         message: 'Expressed interest in your profile.',
         status: _customStatuses['km-priya'] ?? 'New',
-        avatarUrl:
-            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500&auto=format&fit=crop&q=80',
+        avatarUrl: 'assets/photos/women3.jpg',
         timeAgo: '3 hrs ago',
       ),
       InboxItem(
@@ -249,8 +245,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
         subMeta: '${AppLanguageController.text('Tamil')}, ${AppLanguageController.text('Gounder')} • ${AppLanguageController.text('Tiruppur, Tamil Nadu')}',
         message: 'Viewed your profile and would love to exchange horoscopes.',
         status: _customStatuses['km-shilpa'] ?? 'New',
-        avatarUrl:
-            'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=500&auto=format&fit=crop&q=80',
+        avatarUrl: 'assets/photos/women4.jpg',
         timeAgo: '5 hrs ago',
       ),
     ];
@@ -289,8 +284,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
         subMeta: '${AppLanguageController.text('Tamil')}, ${AppLanguageController.text('Gounder')} • ${AppLanguageController.text('Coimbatore, Tamil Nadu')}',
         message: 'Interest sent. Awaiting horoscope response.',
         status: _customStatuses['p6'] ?? 'Delivered',
-        avatarUrl:
-            'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=500&auto=format&fit=crop&q=80',
+        avatarUrl: 'assets/photos/women4.jpg',
         timeAgo: 'Yesterday',
       ),
     ];

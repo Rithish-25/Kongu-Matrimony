@@ -209,33 +209,39 @@ class HomeScreen extends StatelessWidget {
                       child: InkWell(
                         onTap: () => onNavigateToTab(1), // Navigates to Horoscope Screen
                         borderRadius: BorderRadius.circular(16),
-                        child: Center(
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.grid_view_rounded,
-                                size: 18,
-                                color: AppColors.primary,
+                        child: Padding(
+                          padding: const EdgeInsets.symmetric(horizontal: 14),
+                          child: Center(
+                            child: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.grid_view_rounded,
+                                    size: 18,
+                                    color: AppColors.primary,
+                                  ),
+                                  const SizedBox(width: 8),
+                                  Text(
+                                    AppLanguageController.isTamil
+                                        ? AppLanguageController.text('view_all_profiles_button')
+                                        : 'View All Profiles',
+                                    style: GoogleFonts.plusJakartaSans(
+                                      fontSize: 13.5,
+                                      fontWeight: FontWeight.w800,
+                                      color: AppColors.primary,
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  const Icon(
+                                    Icons.arrow_forward_ios_rounded,
+                                    size: 13,
+                                    color: AppColors.primary,
+                                  ),
+                                ],
                               ),
-                              const SizedBox(width: 8),
-                              Text(
-                                AppLanguageController.isTamil
-                                    ? AppLanguageController.text('view_all_profiles_button')
-                                    : 'View All Profiles',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w800,
-                                  color: AppColors.primary,
-                                ),
-                              ),
-                              const SizedBox(width: 8),
-                              const Icon(
-                                Icons.arrow_forward_ios_rounded,
-                                size: 14,
-                                color: AppColors.primary,
-                              ),
-                            ],
+                            ),
                           ),
                         ),
                       ),
