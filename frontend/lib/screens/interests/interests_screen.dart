@@ -4,6 +4,7 @@ import '../../core/colors/colors.dart';
 import '../../core/assets/mock_data.dart';
 import '../../core/navigation/app_page_route.dart';
 import '../../core/localization/app_language.dart';
+import '../../widgets/app_profile_image.dart';
 import '../profile_details/profile_details_screen.dart';
 
 class InterestsScreen extends StatefulWidget {
@@ -602,10 +603,9 @@ class _InterestsScreenState extends State<InterestsScreen> {
                   children: [
                     // Ambient background
                     Positioned.fill(
-                      child: Image.network(
-                        item.avatarUrl,
+                      child: AppProfileImage(
+                        imageUrl: item.avatarUrl,
                         fit: BoxFit.cover,
-                        errorBuilder: (_, __, ___) => const SizedBox(),
                       ),
                     ),
                     // Dark soft overlay on background
@@ -616,18 +616,9 @@ class _InterestsScreenState extends State<InterestsScreen> {
                     ),
                     // 100% UNCROPPED Foreground Photo
                     Positioned.fill(
-                      child: Image.network(
-                        item.avatarUrl,
+                      child: AppProfileImage(
+                        imageUrl: item.avatarUrl,
                         fit: BoxFit.contain,
-                        alignment: Alignment.center,
-                        errorBuilder: (_, __, ___) => Container(
-                          color: AppColors.backgroundAlt,
-                          child: const Icon(
-                            Icons.person,
-                            size: 80,
-                            color: AppColors.textSecondary,
-                          ),
-                        ),
                       ),
                     ),
                   ],

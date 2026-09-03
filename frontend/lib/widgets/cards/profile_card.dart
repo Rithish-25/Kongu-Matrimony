@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
 import '../../core/constants/constants.dart';
 import '../../core/assets/mock_data.dart';
+import '../app_profile_image.dart';
 
 enum ProfileCardType { standard, favourite, interestReceived, interestSent }
 
@@ -57,7 +58,7 @@ class ProfileCard extends StatelessWidget {
                       borderRadius: BorderRadius.circular(9),
                       color: AppColors.border.withValues(alpha: 0.3),
                       image: DecorationImage(
-                        image: NetworkImage(profile.profileImageUrl),
+                        image: AppProfileImage.provider(profile.profileImageUrl),
                         fit: BoxFit.cover,
                       ),
                     ),

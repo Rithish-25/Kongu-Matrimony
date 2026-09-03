@@ -5,6 +5,7 @@ import '../../core/constants/constants.dart';
 import '../../core/assets/mock_data.dart';
 import '../../core/localization/app_language.dart';
 import '../../widgets/appbar/custom_app_bar.dart';
+import '../../widgets/app_profile_image.dart';
 
 class ProfileDetailsScreen extends StatefulWidget {
   final Profile profile;
@@ -487,7 +488,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
             decoration: BoxDecoration(
               color: const Color(0xFF1A1A1A),
               image: DecorationImage(
-                image: NetworkImage(images[_currentImageIndex]),
+                image: AppProfileImage.provider(images[_currentImageIndex]),
                 fit: BoxFit.cover,
               ),
               borderRadius: const BorderRadius.vertical(
