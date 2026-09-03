@@ -7,6 +7,7 @@ import '../../core/navigation/app_page_route.dart';
 import '../../core/localization/app_language.dart';
 
 import '../../widgets/cards/empty_state_widget.dart';
+import '../../widgets/app_profile_image.dart';
 import '../profile_details/profile_details_screen.dart';
 
 class HoroscopeScreen extends StatefulWidget {
@@ -387,13 +388,9 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
           Positioned.fill(
             child: Hero(
               tag: 'profile-image-${profile.id}-searchresult',
-              child: Image.network(
-                profile.profileImageUrl,
+              child: AppProfileImage(
+                imageUrl: profile.profileImageUrl,
                 fit: BoxFit.cover,
-                errorBuilder: (context, error, stackTrace) => Container(
-                  color: Colors.grey.shade300,
-                  child: const Icon(Icons.person, size: 50, color: Colors.grey),
-                ),
               ),
             ),
           ),

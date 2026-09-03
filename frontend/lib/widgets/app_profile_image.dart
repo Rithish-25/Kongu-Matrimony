@@ -1,0 +1,54 @@
+import 'package:flutter/material.dart';
+
+class AppProfileImage extends StatelessWidget {
+  final String imageUrl;
+  final BoxFit fit;
+  final double? width;
+  final double? height;
+
+  const AppProfileImage({
+    super.key,
+    required this.imageUrl,
+    this.fit = BoxFit.cover,
+    this.width,
+    this.height,
+  });
+
+  static ImageProvider provider(String url) {
+    if (url.startsWith('assets/')) {
+      return AssetImage(url);
+    }
+    return NetworkImage(url);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (imageUrl.startsWith('assets/')) {
+      return Image.asset(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: width,
+          height: height,
+          color: Colors.grey.shade300,
+          child: const Icon(Icons.person, size: 40, color: Colors.grey),
+        ),
+      );
+    } else {
+      return Image.network(
+        imageUrl,
+        width: width,
+        height: height,
+        fit: fit,
+        errorBuilder: (context, error, stackTrace) => Container(
+          width: width,
+          height: height,
+          color: Colors.grey.shade300,
+          child: const Icon(Icons.person, size: 40, color: Colors.grey),
+        ),
+      );
+    }
+  }
+}
