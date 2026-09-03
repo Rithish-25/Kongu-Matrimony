@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 class AppProfileImage extends StatelessWidget {
   final String imageUrl;
   final BoxFit fit;
+  final Alignment alignment;
   final double? width;
   final double? height;
 
@@ -10,6 +11,7 @@ class AppProfileImage extends StatelessWidget {
     super.key,
     required this.imageUrl,
     this.fit = BoxFit.cover,
+    this.alignment = Alignment.topCenter,
     this.width,
     this.height,
   });
@@ -29,6 +31,7 @@ class AppProfileImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
+        alignment: alignment,
         errorBuilder: (context, error, stackTrace) => Container(
           width: width,
           height: height,
@@ -42,6 +45,7 @@ class AppProfileImage extends StatelessWidget {
         width: width,
         height: height,
         fit: fit,
+        alignment: alignment,
         errorBuilder: (context, error, stackTrace) => Container(
           width: width,
           height: height,

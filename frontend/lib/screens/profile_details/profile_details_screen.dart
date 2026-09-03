@@ -490,6 +490,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
               image: DecorationImage(
                 image: AppProfileImage.provider(images[_currentImageIndex]),
                 fit: BoxFit.cover,
+                alignment: Alignment.topCenter,
               ),
               borderRadius: const BorderRadius.vertical(
                 bottom: Radius.circular(30),

@@ -60,6 +60,7 @@ class ProfileCard extends StatelessWidget {
                       image: DecorationImage(
                         image: AppProfileImage.provider(profile.profileImageUrl),
                         fit: BoxFit.cover,
+                        alignment: Alignment.topCenter,
                       ),
                     ),
                   ),
