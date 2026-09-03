@@ -338,7 +338,7 @@ class ProfileDatabase {
       userProfileNotifier.value = userProfileNotifier.value.copyWith(
         displayName: effectiveName,
         profileImageUrl: imageUrl ?? userProfileNotifier.value.profileImageUrl,
-        plan: plan ?? userProfileNotifier.value.plan,
+        plan: (plan != null && plan.isNotEmpty) ? plan : 'Free Plan',
         downloadedCount: downloadedCount ?? userProfileNotifier.value.downloadedCount,
       );
 
@@ -1230,7 +1230,7 @@ class ProfileDatabase {
       displayName: 'User',
       profileImageUrl:
           'https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?w=500&auto=format&fit=crop&q=80',
-      plan: 'Gold',
+      plan: 'Free Plan',
       downloadedCount: 0,
     ),
   );
@@ -1278,7 +1278,7 @@ class ProfileDatabase {
     userProfileNotifier.value = UserProfileState(
       displayName: 'User',
       profileImageUrl: userProfileNotifier.value.profileImageUrl,
-      plan: 'Gold',
+      plan: 'Free Plan',
       downloadedCount: 0,
     );
 

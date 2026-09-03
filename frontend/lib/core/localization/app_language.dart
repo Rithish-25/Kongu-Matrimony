@@ -31,11 +31,32 @@ class AppLanguageController {
     } catch (_) {}
   }
 
-  static String text(String key) {
+  static String text(String input) {
+    if (input.trim().isEmpty) return input;
     if (notifier.value == AppLanguage.tamil) {
-      return _tamilTranslations[key] ?? _englishTranslations[key] ?? key;
+      // 1. Direct key match
+      if (_tamilTranslations.containsKey(input)) {
+        return _tamilTranslations[input]!;
+      }
+      // 2. Case-insensitive key match
+      final lower = input.toLowerCase().trim();
+      if (_tamilTranslations.containsKey(lower)) {
+        return _tamilTranslations[lower]!;
+      }
+
+      // 3. Smart substring replacement for mixed phrases
+      String translated = input;
+      bool matched = false;
+      _tamilTranslations.forEach((engKey, tamilVal) {
+        if (engKey.length > 2 && translated.toLowerCase().contains(engKey.toLowerCase())) {
+          final regex = RegExp(RegExp.escape(engKey), caseSensitive: false);
+          translated = translated.replaceAll(regex, tamilVal);
+          matched = true;
+        }
+      });
+      if (matched) return translated;
     }
-    return _englishTranslations[key] ?? key;
+    return _englishTranslations[input] ?? input;
   }
 
   // English Dictionary
@@ -102,15 +123,23 @@ class AppLanguageController {
     'blood_group': 'Blood Group',
     'complexion': 'Complexion',
     'body_type': 'Body Type',
-    'disability': 'Disability',
-    'koottam': 'Koottam',
+    'disability': 'Physical Status / Disability',
+    'koottam': 'Kongu Kootam',
     'subsect': 'Subsect / Caste',
-    'star': 'Horoscope Star',
-    'rasi': 'Rasi (Moon Sign)',
-    'paatham': 'Paatham',
+    'horoscope_star': 'Horoscope Star (Natchathiram)',
+    'horoscope_rasi': 'Rasi (Zodiac)',
+    'horoscope_paatham': 'Paatham',
     'lagnam': 'Lagnam',
     'dosham': 'Dosham',
     'gothram': 'Gothram',
+    'family_status': 'Family Status',
+    'family_type': 'Family Type',
+    'family_values': 'Family Values',
+    'father_occupation': 'Father Occupation',
+    'mother_occupation': 'Mother Occupation',
+    'brothers': 'Brothers',
+    'sisters': 'Sisters',
+    'ancestral_origin': 'Ancestral Origin',
     'education': 'Education',
     'education_detail': 'Education Details',
     'occupation': 'Occupation',
@@ -123,27 +152,32 @@ class AppLanguageController {
     'district': 'District',
     'state': 'State',
     'country': 'Country',
-    'father_occupation': 'Father Occupation',
-    'mother_occupation': 'Mother Occupation',
-    'brothers': 'Brothers',
-    'sisters': 'Sisters',
-    'ancestral_origin': 'Ancestral Origin',
     'eating_habits': 'Eating Habits',
     'smoking_habits': 'Smoking Habits',
     'drinking_habits': 'Drinking Habits',
     'hobbies': 'Hobbies',
-    'pref_age': 'Partner Age',
-    'pref_height': 'Partner Height',
-    'pref_marital_status': 'Partner Marital Status',
-    'pref_education': 'Partner Education',
-    'pref_occupation': 'Partner Occupation',
-    'pref_location': 'Partner Location',
+    'pref_age': 'Preferred Age Range',
+    'pref_height': 'Preferred Height',
+    'pref_marital_status': 'Preferred Marital Status',
+    'pref_education': 'Preferred Education',
+    'pref_occupation': 'Preferred Occupation',
+    'pref_location': 'Preferred Location',
     'bio': 'About Me',
-    'partner_expectations_desc': 'Expectations',
-    'download_horoscope': 'Download Horoscope PDF',
-    'send_interest': 'Send Interest',
+    'download_horoscope': 'Download Horoscope Copy (PDF)',
+    'view_horoscope': 'View Horoscope',
+    'send_interest': 'Express Interest',
     'add_favourite': 'Save Profile',
     'verified': 'Verified Profile',
+
+    // Paywall & Membership
+    'locked_info': '🔒 Upgrade Plan to Unlock',
+    'unlock_contact': 'Unlock Contact Details',
+    'contact_locked_msg': 'Contact info is locked for Free users. Upgrade to Gold or Platinum plan to view full phone number, email & horoscope.',
+    'membership_plans': 'Membership Plans',
+    'gold_membership': 'Gold Plan (50 Contacts)',
+    'platinum_membership': 'Platinum Plan (Unlimited)',
+    'upgrade_now': 'Upgrade Now',
+    'plan_upgraded_success': 'Plan successfully upgraded! All details unlocked.',
 
     // Common Values
     'vegetarian': 'Vegetarian',
@@ -158,7 +192,7 @@ class AppLanguageController {
     'app_title': 'கொங்கு மேட்ரிமோனி',
     'nav_home': 'முகப்பு',
     'nav_horoscope': 'ஜாதகம்',
-    'nav_favourites': 'விருப்பங்கள்',
+    'nav_favourites': 'விருப்பம்',
     'nav_interests': 'ஆர்வம்',
     'nav_profile': 'சுயவிவரம்',
 
@@ -181,10 +215,10 @@ class AppLanguageController {
 
     // Horoscope & Filters
     'horoscope_profiles': 'ஜாதக சுயவிவரங்கள்',
-    'all_profiles': 'அனைத்து சுயவிவரங்கள்',
-    'women_profiles': 'பெண்கள் சுயவிவரங்கள்',
-    'men_profiles': 'ஆண்கள் சுயவிவரங்கள்',
-    'view_full_profile': 'முழு விவரம் பார்க்க',
+    'all_profiles': 'அனைத்தும்',
+    'women_profiles': 'பெண் வரன்கள்',
+    'men_profiles': 'ஆண் வரன்கள்',
+    'view_full_profile': 'முழு விவரம்',
     'yrs': 'வயது',
     'no_profiles_found': 'சுயவிவரங்கள் எதுவும் கிடைக்கவில்லை',
 
@@ -209,11 +243,11 @@ class AppLanguageController {
     'male': 'ஆண்',
     'marital_status': 'திருமண நிலை',
     'dob': 'பிறந்த தேதி',
-    'mobile': 'கைபேசி',
+    'mobile': 'தொலைபேசி எண்',
     'email': 'மின்னஞ்சல்',
     'height': 'உயரம்',
     'weight': 'எடை',
-    'blood_group': 'ரத்த வகை',
+    'blood_group': 'இரத்த வகை',
     'complexion': 'நிறம்',
     'body_type': 'உடல் அமைப்பு',
     'disability': 'உடல் குறைபாடு',
@@ -259,6 +293,16 @@ class AppLanguageController {
     'add_favourite': 'சுயவிவரம் சேமிக்க',
     'verified': 'உறுதிசெய்யப்பட்ட சுயவிவரம்',
 
+    // Paywall & Membership
+    'locked_info': '🔒 அறிய திட்டத்தை உயர்த்தவும்',
+    'unlock_contact': 'தொடர்பு விவரங்களை பெற',
+    'contact_locked_msg': 'இலவச பயனர்களுக்கு தொடர்பு விவரங்கள் மறைக்கப்பட்டுள்ளன. தொலைபேசி எண், மின்னஞ்சல் மற்றும் ஜாதகம் பெற திட்டத்தை உயர்த்தவும்.',
+    'membership_plans': 'உறுப்பினர்தன்மை திட்டங்கள்',
+    'gold_membership': 'கோல்ட் திட்டம் (50 தொடர்புகள்)',
+    'platinum_membership': 'பிளாட்டினம் திட்டம் (வரம்பற்ற தொடர்புகள்)',
+    'upgrade_now': 'இப்பொழுதே உயர்த்தவும்',
+    'plan_upgraded_success': 'திட்டம் உயர்த்தப்பட்டது! அனைத்து விவரங்களும் திறக்கப்பட்டன.',
+
     // Common Values
     'vegetarian': 'சைவம்',
     'non_vegetarian': 'அசைவம்',
@@ -289,5 +333,23 @@ class AppLanguageController {
     'b.e. mechanical': 'பி.இ. மெக்கானிக்கல்',
     'm.com & financial analyst': 'எம்.காம் நிதி ஆய்வாளர்',
     'b.e. & mba (iit)': 'பி.இ. & எம்பா (ஐஐடி)',
+
+    // Common Answers & Hobbies
+    'no': 'இல்லை',
+    'yes': 'ஆம்',
+    'not_interested': 'விருப்பமில்லை',
+    'not interested': 'விருப்பமில்லை',
+    'express interest': 'விருப்பம் தெரிவிக்க',
+    'classical music, reading finance books, baking, podcasts': 'இசை, நிதி புத்தகங்கள் படித்தல், சமையல்',
+    'cooking, painting, classical music': 'சமையல், ஓவியம், இசை',
+    'photography, gardening, organic farming': 'புகைப்படம், தோட்டம் அமைத்தல்',
+    'baking, reading medical journals, travel': 'மருத்துவ இதழ்கள் படித்தல், பயணம்',
+    'carnatic music, classical dance, reading': 'கர்நாடக இசை, பரதநாட்டியம்',
+    'hiking, tech blogs, badminton, traveling': 'பேட்மிண்டன், தொழில்நுட்பம், பயணம்',
+    'tennis, cafe exploring, business strategy': 'டென்னிஸ், வணிக உத்திகள்',
+    'badminton, reading history books, agriculture tech': 'பேட்மிண்டன், வரலாறு படித்தல்',
+    'automobile diy, long drives, road trips': 'வாகனம் ஓட்டுதல், பயணம்',
+    'fitness, medical research, classical violin': 'வயலின் இசை, உடற்பயிற்சி',
+    'cycling, tech innovations, gaming': 'சைக்கிள் ஓட்டுதல், கேமிங்',
   };
 }

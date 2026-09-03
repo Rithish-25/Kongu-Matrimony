@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/assets/mock_data.dart';
 import '../../core/colors/colors.dart';
+import '../../core/localization/app_language.dart';
 import '../../widgets/appbar/custom_app_bar.dart';
 
 class PremiumScreen extends StatefulWidget {
@@ -12,14 +13,13 @@ class PremiumScreen extends StatefulWidget {
 }
 
 class _PremiumScreenState extends State<PremiumScreen> {
-  int _selectedDurationIndex = 0; // 0: 3 Months, 1: 6 Months, 2: 12 Months
+  int _selectedPlanIndex = 0; // 0: Free, 1: Gold, 2: Diamond, 3: Platinum
   late final PageController _pageController;
-  int _currentPage = 0;
 
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(viewportFraction: 0.82, initialPage: 0);
+    _pageController = PageController(viewportFraction: 0.80, initialPage: 0);
     _pageController.addListener(() {
       if (mounted) {
         setState(() {});
@@ -33,224 +33,89 @@ class _PremiumScreenState extends State<PremiumScreen> {
     super.dispose();
   }
 
-  final List<String> _durations = ['3 Months', '6 Months', '12 Months'];
-  final List<String?> _durationBadges = [null, 'SAVE 15%', 'SAVE 25%'];
+  final List<String> _planTabNames = ['Free', 'Gold', 'Platinum', 'Diamond'];
 
-  List<_PlanModel> _getPlansForDuration(int index) {
-    if (index == 0) {
-      // 3 Months
-      return [
-        _PlanModel(
-          name: 'Gold',
-          planCode: 'Gold',
-          originalPrice: '₹ 2,999',
-          discountText: 'Discount (10%)',
-          discountAmount: '₹ 300',
-          finalPrice: '₹ 2,699',
-          isPopular: false,
-          badgeText: 'RECOMMENDED',
-          downloads: 10,
-          features: [
-            'Send unlimited messages, chat and make video calls',
-            'Access 40 verified mobile numbers',
-            'View unlimited horoscopes',
-          ],
-        ),
-        _PlanModel(
-          name: 'Diamond',
-          planCode: 'Diamond',
-          originalPrice: '₹ 4,499',
-          discountText: 'Discount (15%)',
-          discountAmount: '₹ 675',
-          finalPrice: '₹ 3,824',
-          isPopular: true,
-          badgeText: 'MOST POPULAR',
-          downloads: 15,
-          features: [
-            'Send unlimited messages, chat and make video calls',
-            'Access 50 verified mobile numbers',
-            'View unlimited horoscopes',
-            'Priority profile listing in search results',
-          ],
-        ),
-        _PlanModel(
-          name: 'Platinum',
-          planCode: 'Platinum',
-          originalPrice: '₹ 5,999',
-          discountText: 'Discount (20%)',
-          discountAmount: '₹ 1,200',
-          finalPrice: '₹ 4,799',
-          isPopular: false,
-          badgeText: 'BEST VALUE',
-          downloads: 20,
-          features: [
-            'Send unlimited messages, chat and make video calls',
-            'Access 80 verified mobile numbers',
-            'View unlimited horoscopes',
-            '3 months FREE Profile Highlighter & Top Rank',
-          ],
-        ),
-        _PlanModel(
-          name: 'Assisted Service',
-          planCode: 'Assisted',
-          originalPrice: '₹ 14,999',
-          discountText: null,
-          discountAmount: null,
-          finalPrice: '₹ 14,999',
-          isPopular: false,
-          badgeText: 'VIP ASSISTED',
-          downloads: 50,
-          features: [
-            'Dedicated Relationship Manager who shortlists, connects & schedules meetings',
-            'Get matches from our Kongu community network',
-            'Increase the chance of finding your life partner by 3 times',
-          ],
-        ),
-      ];
-    } else if (index == 1) {
-      // 6 Months
-      return [
-        _PlanModel(
-          name: 'Gold',
-          planCode: 'Gold',
-          originalPrice: '₹ 5,499',
-          discountText: 'Discount (15%)',
-          discountAmount: '₹ 825',
-          finalPrice: '₹ 4,674',
-          isPopular: false,
-          badgeText: 'RECOMMENDED',
-          downloads: 25,
-          features: [
-            'Send unlimited messages, chat and make video calls',
-            'Access 80 verified mobile numbers',
-            'View unlimited horoscopes',
-          ],
-        ),
-        _PlanModel(
-          name: 'Diamond',
-          planCode: 'Diamond',
-          originalPrice: '₹ 7,999',
-          discountText: 'Discount (20%)',
-          discountAmount: '₹ 1,600',
-          finalPrice: '₹ 6,399',
-          isPopular: true,
-          badgeText: 'MOST POPULAR',
-          downloads: 35,
-          features: [
-            'Send unlimited messages, chat and make video calls',
-            'Access 100 verified mobile numbers',
-            'View unlimited horoscopes',
-            'Priority profile listing in search results',
-          ],
-        ),
-        _PlanModel(
-          name: 'Platinum',
-          planCode: 'Platinum',
-          originalPrice: '₹ 9,999',
-          discountText: 'Discount (25%)',
-          discountAmount: '₹ 2,500',
-          finalPrice: '₹ 7,499',
-          isPopular: false,
-          badgeText: 'BEST VALUE',
-          downloads: 50,
-          features: [
-            'Send unlimited messages, chat and make video calls',
-            'Access 160 verified mobile numbers',
-            'View unlimited horoscopes',
-            '6 months FREE Profile Highlighter & Top Rank',
-          ],
-        ),
-        _PlanModel(
-          name: 'Assisted Service',
-          planCode: 'Assisted',
-          originalPrice: '₹ 24,999',
-          discountText: 'Discount (10%)',
-          discountAmount: '₹ 2,500',
-          finalPrice: '₹ 22,499',
-          isPopular: false,
-          badgeText: 'VIP ASSISTED',
-          downloads: 100,
-          features: [
-            'Dedicated Relationship Manager who shortlists, connects & schedules meetings',
-            'Get matches from our Kongu community network',
-            'Increase the chance of finding your life partner by 3 times',
-          ],
-        ),
-      ];
-    } else {
-      // 12 Months
-      return [
-        _PlanModel(
-          name: 'Gold',
-          planCode: 'Gold',
-          originalPrice: '₹ 8,999',
-          discountText: 'Discount (25%)',
-          discountAmount: '₹ 2,250',
-          finalPrice: '₹ 6,749',
-          isPopular: false,
-          badgeText: 'ANNUAL SAVER',
-          downloads: 60,
-          features: [
-            'Send unlimited messages, chat and make video calls',
-            'Access 150 verified mobile numbers',
-            'View unlimited horoscopes',
-          ],
-        ),
-        _PlanModel(
-          name: 'Diamond',
-          planCode: 'Diamond',
-          originalPrice: '₹ 12,999',
-          discountText: 'Discount (30%)',
-          discountAmount: '₹ 3,900',
-          finalPrice: '₹ 9,099',
-          isPopular: true,
-          badgeText: 'MOST POPULAR',
-          downloads: 80,
-          features: [
-            'Send unlimited messages, chat and make video calls',
-            'Access 200 verified mobile numbers',
-            'View unlimited horoscopes',
-            '1 Year Priority profile listing in search results',
-          ],
-        ),
-        _PlanModel(
-          name: 'Platinum',
-          planCode: 'Platinum',
-          originalPrice: '₹ 15,999',
-          discountText: 'Discount (35%)',
-          discountAmount: '₹ 5,600',
-          finalPrice: '₹ 10,399',
-          isPopular: false,
-          badgeText: 'MAX SAVINGS',
-          downloads: 120,
-          features: [
-            'Send unlimited messages, chat and make video calls',
-            'Access Unlimited verified mobile numbers',
-            'View unlimited horoscopes',
-            '12 months FREE Profile Highlighter & VIP Rank',
-          ],
-        ),
-        _PlanModel(
-          name: 'Assisted Service',
-          planCode: 'Assisted',
-          originalPrice: '₹ 39,999',
-          discountText: 'Discount (15%)',
-          discountAmount: '₹ 6,000',
-          finalPrice: '₹ 33,999',
-          isPopular: false,
-          badgeText: 'VIP ASSISTED',
-          downloads: 250,
-          features: [
-            'Dedicated Relationship Manager who shortlists, connects & schedules meetings',
-            'Get matches from our Kongu community network',
-            'Increase the chance of finding your life partner by 3 times',
-          ],
-        ),
-      ];
-    }
+  List<_PlanModel> _getPlans() {
+    return [
+      _PlanModel(
+        name: 'Free Plan',
+        planCode: 'Free Plan',
+        finalPrice: '₹ 0',
+        monthlyPillText: '₹ 0 / free forever',
+        isPopular: false,
+        badgeText: 'BASIC MEMBER',
+        downloads: 0,
+        features: [
+          'Cannot view Mobile & Email (Locked)',
+          'Cannot view Horoscope charts (Locked)',
+          'Cannot view Family & Income (Locked)',
+          'Basic profile browsing & express interest',
+        ],
+      ),
+      _PlanModel(
+        name: 'Gold',
+        planCode: 'Gold',
+        finalPrice: '₹ 2,699',
+        monthlyPillText: '₹ 900 per month',
+        isPopular: false,
+        badgeText: 'RECOMMENDED',
+        downloads: 40,
+        features: [
+          'Valid for 3 months',
+          'Access 40 verified Phone & Email',
+          'Send unlimited messages & chat',
+          'Unlimited horoscope views & downloads',
+          'View verified profiles with photos',
+        ],
+      ),
+      _PlanModel(
+        name: 'Platinum',
+        planCode: 'Platinum',
+        finalPrice: '₹ 4,799',
+        monthlyPillText: '₹ 800 per month',
+        isPopular: false,
+        badgeText: 'BEST VALUE',
+        downloads: 100,
+        features: [
+          'Valid for 6 months',
+          'Access 100 verified Phone & Email',
+          'Send unlimited messages & chat',
+          'Unlimited horoscope views & downloads',
+          'FREE Profile Highlighter & Top Rank',
+        ],
+      ),
+      _PlanModel(
+        name: 'Diamond',
+        planCode: 'Diamond',
+        finalPrice: '₹ 4,000',
+        monthlyPillText: '₹ 1,333 per month',
+        isPopular: true,
+        badgeText: 'MOST POPULAR',
+        downloads: 60,
+        features: [
+          'Valid for 3 months',
+          'View unlimited Phone Nos*',
+          'Send unlimited messages',
+          'Unlimited horoscope views',
+          'View verified profiles with photos',
+        ],
+      ),
+    ];
   }
 
   void _onPayNow(_PlanModel plan) {
+    if (plan.planCode.toLowerCase().contains('free')) {
+      ProfileDatabase.updateUserProfile(plan: 'Free');
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Switched to Free Plan.'),
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
+      return;
+    }
+
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -273,7 +138,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
           ],
         ),
         content: Text(
-          'Confirm activation of ${plan.name} Plan for ${plan.finalPrice} (${_durations[_selectedDurationIndex]})?\n\nYou will get ${plan.downloads} horoscope downloads and full premium benefits.',
+          'Confirm activation of ${plan.name} Plan for ${plan.finalPrice}?\n\nYou will get ${plan.downloads} horoscope downloads and full premium benefits.',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13,
             color: AppColors.textSecondary,
@@ -332,12 +197,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final plans = _getPlansForDuration(_selectedDurationIndex);
+    final plans = _getPlans();
 
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: const CustomAppBar(
-        title: 'Premium Membership',
+        title: 'Membership Plans',
         isMainScreen: false,
       ),
       body: ValueListenableBuilder<UserProfileState>(
@@ -345,9 +210,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
         builder: (context, userProfile, _) {
           return Column(
             children: [
-              const SizedBox(height: 8),
+              const SizedBox(height: 10),
 
-              // Smooth Sliding Duration Selector
+              // 4 Plan Boxes Bar (Free, Gold, Platinum, Diamond)
               Container(
                 margin: const EdgeInsets.symmetric(horizontal: 14),
                 padding: const EdgeInsets.all(4),
@@ -365,15 +230,15 @@ class _PremiumScreenState extends State<PremiumScreen> {
                 ),
                 child: LayoutBuilder(
                   builder: (context, constraints) {
-                    final tabWidth = constraints.maxWidth / _durations.length;
+                    final tabWidth = constraints.maxWidth / _planTabNames.length;
 
                     return Stack(
                       children: [
-                        // Smooth sliding dark red indicator
+                        // Smooth sliding active plan indicator
                         AnimatedPositioned(
                           duration: const Duration(milliseconds: 300),
                           curve: Curves.easeInOutCubic,
-                          left: _selectedDurationIndex * tabWidth,
+                          left: _selectedPlanIndex * tabWidth,
                           top: 0,
                           bottom: 0,
                           width: tabWidth,
@@ -392,63 +257,40 @@ class _PremiumScreenState extends State<PremiumScreen> {
                           ),
                         ),
 
-                        // Content Row
+                        // Content Row with 4 Boxes
                         Row(
-                          children: List.generate(_durations.length, (index) {
-                            final isSelected = _selectedDurationIndex == index;
-                            final badge = _durationBadges[index];
+                          children: List.generate(_planTabNames.length, (index) {
+                            final isSelected = _selectedPlanIndex == index;
 
                             return Expanded(
                               child: GestureDetector(
                                 behavior: HitTestBehavior.opaque,
                                 onTap: () {
                                   setState(() {
-                                    _selectedDurationIndex = index;
+                                    _selectedPlanIndex = index;
                                   });
+                                  _pageController.animateToPage(
+                                    index,
+                                    duration: const Duration(milliseconds: 300),
+                                    curve: Curves.easeInOutCubic,
+                                  );
                                 },
                                 child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 4),
-                                  child: FittedBox(
-                                    fit: BoxFit.scaleDown,
-                                    child: Row(
-                                      mainAxisAlignment: MainAxisAlignment.center,
-                                      children: [
-                                        AnimatedDefaultTextStyle(
-                                          duration: const Duration(milliseconds: 250),
-                                          style: GoogleFonts.plusJakartaSans(
-                                            fontSize: 12.5,
-                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                                            color: isSelected ? Colors.white : AppColors.textPrimary,
-                                          ),
-                                          child: Text(_durations[index]),
+                                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
+                                  child: Center(
+                                    child: FittedBox(
+                                      fit: BoxFit.scaleDown,
+                                      child: AnimatedDefaultTextStyle(
+                                        duration: const Duration(milliseconds: 250),
+                                        style: GoogleFonts.plusJakartaSans(
+                                          fontSize: 12,
+                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                          color: isSelected ? Colors.white : AppColors.textPrimary,
                                         ),
-                                        if (badge != null) ...[
-                                          const SizedBox(width: 4),
-                                          AnimatedContainer(
-                                            duration: const Duration(milliseconds: 250),
-                                            padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 2),
-                                            decoration: BoxDecoration(
-                                              color: isSelected
-                                                  ? AppColors.secondary.withValues(alpha: 0.3)
-                                                  : AppColors.primarySoft,
-                                              borderRadius: BorderRadius.circular(6),
-                                              border: Border.all(
-                                                color: isSelected
-                                                    ? AppColors.secondaryLight
-                                                    : AppColors.primaryLight.withValues(alpha: 0.3),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              badge,
-                                              style: GoogleFonts.plusJakartaSans(
-                                                fontSize: 8,
-                                                fontWeight: FontWeight.bold,
-                                                color: isSelected ? Colors.white : AppColors.primary,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ],
+                                        child: Text(
+                                          AppLanguageController.text(_planTabNames[index]),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
@@ -462,66 +304,67 @@ class _PremiumScreenState extends State<PremiumScreen> {
                 ),
               ),
 
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
 
-              // Horizontal Swipeable Cards Container
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
-                  child: PageView.builder(
-                    controller: _pageController,
-                    physics: const BouncingScrollPhysics(),
-                    itemCount: plans.length,
-                    onPageChanged: (index) {
-                      setState(() {
-                        _currentPage = index;
-                      });
-                    },
-                    itemBuilder: (context, index) {
-                      final plan = plans[index];
-                      final isCurrentActive =
-                          userProfile.plan.toLowerCase() ==
-                          plan.planCode.toLowerCase();
+              // Compact Swipeable Cards Container
+              SizedBox(
+                height: 425,
+                child: PageView.builder(
+                  controller: _pageController,
+                  physics: const BouncingScrollPhysics(),
+                  itemCount: plans.length,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _selectedPlanIndex = index;
+                    });
+                  },
+                  itemBuilder: (context, index) {
+                    final plan = plans[index];
+                    final isCurrentActive =
+                        userProfile.plan.toLowerCase() ==
+                        plan.planCode.toLowerCase();
 
-                      // Dynamic 3D depth and scale transformation during swiping
-                      double pageOffset = 0.0;
-                      if (_pageController.position.haveDimensions) {
-                        pageOffset =
-                            (_pageController.page ??
-                                _currentPage.toDouble()) -
-                            index;
-                      } else {
-                        pageOffset = (_currentPage - index).toDouble();
-                      }
+                    // Dynamic 3D depth and scale transformation during swiping
+                    double pageOffset = 0.0;
+                    if (_pageController.position.haveDimensions) {
+                      pageOffset =
+                          (_pageController.page ??
+                              _selectedPlanIndex.toDouble()) -
+                          index;
+                    } else {
+                      pageOffset = (_selectedPlanIndex - index).toDouble();
+                    }
 
-                      final double scale =
-                          (1.0 - (pageOffset.abs() * 0.08)).clamp(0.90, 1.0);
-                      final double opacity =
-                          (1.0 - (pageOffset.abs() * 0.25)).clamp(0.65, 1.0);
-                      final double translateY = pageOffset.abs() * 6.0;
+                    final double scale =
+                        (1.0 - (pageOffset.abs() * 0.08)).clamp(0.88, 1.0);
+                    final double opacity =
+                        (1.0 - (pageOffset.abs() * 0.25)).clamp(0.65, 1.0);
+                    final double translateY = pageOffset.abs() * 6.0;
 
-                      return Transform.translate(
-                        offset: Offset(0, translateY),
-                        child: Transform.scale(
-                          scale: scale,
-                          child: Opacity(
-                            opacity: opacity,
+                    return Transform.translate(
+                      offset: Offset(0, translateY),
+                      child: Transform.scale(
+                        scale: scale,
+                        child: Opacity(
+                          opacity: opacity,
+                          child: Padding(
+                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
                             child: _buildPlanCard(plan, isCurrentActive),
                           ),
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
 
               // Page indicator dots
               Padding(
-                padding: const EdgeInsets.only(top: 6, bottom: 4),
+                padding: const EdgeInsets.only(top: 8, bottom: 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: List.generate(plans.length, (index) {
-                    final isSelected = _currentPage == index;
+                    final isSelected = _selectedPlanIndex == index;
                     return AnimatedContainer(
                       duration: const Duration(milliseconds: 200),
                       margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -538,7 +381,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
               // Trust badge footer
               Padding(
-                padding: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.only(bottom: 8),
                 child: Text(
                   '🔒 100% Safe & Secure Checkout • Instant Activation',
                   style: GoogleFonts.plusJakartaSans(
@@ -557,282 +400,179 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
   Widget _buildPlanCard(_PlanModel plan, bool isCurrentActive) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
-      padding: const EdgeInsets.all(2.0),
+      margin: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
       decoration: BoxDecoration(
-        gradient: AppColors.primaryGradient,
-        borderRadius: BorderRadius.circular(20),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: isCurrentActive ? AppColors.primary : const Color(0xFFC7D0DC),
+          width: isCurrentActive ? 2.2 : 1.5,
+        ),
         boxShadow: [
           BoxShadow(
-            color: const Color(0x1F7A102A),
-            blurRadius: 14,
-            offset: const Offset(0, 5),
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(18),
-        ),
-        child: ClipRRect(
-          borderRadius: BorderRadius.circular(18),
-          child: Column(
-            children: [
-              // Top Gradient Banner Container for all plans
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 4.5),
-                decoration: const BoxDecoration(
-                  gradient: AppColors.primaryGradient,
-                ),
-                alignment: Alignment.center,
-                child: Text(
-                  plan.badgeText,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(18, 18, 18, 18),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            // 1. Plan Name Title
+            Text(
+              AppLanguageController.text(plan.name),
+              style: GoogleFonts.plusJakartaSans(
+                fontSize: 18,
+                fontWeight: FontWeight.w800,
+                color: AppColors.primary,
+                letterSpacing: 0.2,
+              ),
+            ),
+            const SizedBox(height: 4),
+
+            // 2. Price Row (Big Final Price)
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.baseline,
+              textBaseline: TextBaseline.alphabetic,
+              children: [
+                Text(
+                  plan.finalPrice,
                   style: GoogleFonts.plusJakartaSans(
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    letterSpacing: 1.2,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    color: Colors.black,
+                    letterSpacing: -0.5,
                   ),
                 ),
-              ),
+              ],
+            ),
 
-              // Card Body
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      // Header: Plan Title & Original Price
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        crossAxisAlignment: CrossAxisAlignment.center,
+            const SizedBox(height: 8),
+
+            // 3. Monthly Price Pill Container
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5),
+              decoration: BoxDecoration(
+                color: const Color(0xFFFDF0F2),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: const Color(0xFFF5C2C7), width: 0.8),
+              ),
+              child: Text(
+                AppLanguageController.text(plan.monthlyPillText),
+                style: GoogleFonts.plusJakartaSans(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  color: const Color(0xFF4A4A4A),
+                ),
+              ),
+            ),
+
+            const SizedBox(height: 14),
+
+            // 4. Feature Checklist
+            Expanded(
+              child: SingleChildScrollView(
+                physics: const BouncingScrollPhysics(),
+                child: Column(
+                  children: plan.features.map((feature) {
+                    final isNegative = feature.startsWith('Cannot');
+
+                    return Padding(
+                      padding: const EdgeInsets.only(bottom: 9),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
-                            plan.name,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.primary,
-                            ),
+                          Icon(
+                            isNegative ? Icons.close_rounded : Icons.check_rounded,
+                            size: 18,
+                            color: isNegative ? Colors.red.shade400 : const Color(0xFF2E7D32),
                           ),
-                          Text(
-                            plan.originalPrice,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              AppLanguageController.text(feature),
+                              style: GoogleFonts.plusJakartaSans(
+                                fontSize: 12.5,
+                                fontWeight: FontWeight.w500,
+                                color: const Color(0xFF333333),
+                                height: 1.25,
+                              ),
                             ),
                           ),
                         ],
                       ),
+                    );
+                  }).toList(),
+                ),
+              ),
+            ),
 
-                      const SizedBox(height: 8),
-                      const Divider(height: 1, color: AppColors.divider),
-                      const SizedBox(height: 10),
+            const SizedBox(height: 12),
 
-                      // Feature Checklist
-                      Expanded(
-                        child: SingleChildScrollView(
-                          physics: const BouncingScrollPhysics(),
-                          child: Column(
-                            children: plan.features.map((feature) {
-                              IconData iconData = Icons.chat_bubble_outline_rounded;
-                              if (feature.contains('mobile numbers')) {
-                                iconData = Icons.phone_android_rounded;
-                              } else if (feature.contains('horoscopes')) {
-                                iconData = Icons.auto_awesome_outlined;
-                              } else if (feature.contains('Highlighter') || feature.contains('Priority')) {
-                                iconData = Icons.verified_user_outlined;
-                              } else if (feature.contains('Relationship Manager')) {
-                                iconData = Icons.support_agent_rounded;
-                              } else if (feature.contains('Kongu community')) {
-                                iconData = Icons.people_outline_rounded;
-                              } else if (feature.contains('chance of finding')) {
-                                iconData = Icons.volunteer_activism_outlined;
-                              }
-
-                              return Padding(
-                                padding: const EdgeInsets.only(bottom: 8),
-                                child: Row(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Icon(
-                                      iconData,
-                                      size: 16,
-                                      color: AppColors.primary,
-                                    ),
-                                    const SizedBox(width: 10),
-                                    Expanded(
-                                      child: Text(
-                                        feature,
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 12,
-                                          color: AppColors.textPrimary,
-                                          height: 1.35,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              );
-                            }).toList(),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 8),
-
-                      // Pricing breakdown Box
-                      Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                        decoration: BoxDecoration(
-                          color: AppColors.backgroundAlt,
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: AppColors.border),
-                        ),
-                        child: Column(
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'Total',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                                Text(
-                                  plan.originalPrice,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 12,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                            if (plan.discountText != null && plan.discountAmount != null) ...[
-                              const SizedBox(height: 3),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    plan.discountText!,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.success,
-                                    ),
-                                  ),
-                                  Text(
-                                    plan.discountAmount!,
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 12,
-                                      fontWeight: FontWeight.w600,
-                                      color: AppColors.success,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ],
-                            const SizedBox(height: 5),
-                            const Divider(height: 1, color: AppColors.border),
-                            const SizedBox(height: 5),
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  'You pay',
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.textPrimary,
-                                  ),
-                                ),
-                                Text(
-                                  plan.finalPrice,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 18,
-                                    fontWeight: FontWeight.bold,
-                                    color: AppColors.primary,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 10),
-
-                      // PAY NOW > Action Button
-                      Container(
-                        width: double.infinity,
-                        height: 44,
-                        decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: const Color(0x337A102A),
-                              blurRadius: 8,
-                              offset: const Offset(0, 3),
-                            ),
-                          ],
-                        ),
-                        child: Material(
-                          color: Colors.transparent,
-                          child: InkWell(
-                            onTap: () => _onPayNow(plan),
-                            borderRadius: BorderRadius.circular(12),
-                            child: Center(
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Text(
-                                    'PAY NOW',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                      letterSpacing: 0.8,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 5),
-                                  const Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    size: 13,
-                                    color: Colors.white,
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 6),
-
-                      // Offer validity footer
-                      Center(
-                        child: Text(
-                          'Offer valid for limited period',
+            // 5. Orange Action Button
+            Container(
+              width: double.infinity,
+              height: 44,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(25),
+                gradient: isCurrentActive
+                    ? null
+                    : (plan.planCode.toLowerCase().contains('free')
+                        ? AppColors.primaryGradient
+                        : const LinearGradient(
+                            colors: [Color(0xFFE65100), Color(0xFFF57C00)],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
+                          )),
+                color: isCurrentActive ? Colors.teal.shade700 : null,
+                boxShadow: [
+                  BoxShadow(
+                    color: isCurrentActive
+                        ? Colors.teal.withValues(alpha: 0.3)
+                        : (plan.planCode.toLowerCase().contains('free')
+                            ? const Color(0x337A102A)
+                            : const Color(0x40E65100)),
+                    blurRadius: 8,
+                    offset: const Offset(0, 3),
+                  ),
+                ],
+              ),
+              child: Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: isCurrentActive ? null : () => _onPayNow(plan),
+                  borderRadius: BorderRadius.circular(25),
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        if (isCurrentActive) ...[
+                          const Icon(Icons.check_circle_rounded, size: 16, color: Colors.white),
+                          const SizedBox(width: 6),
+                        ],
+                        Text(
+                          isCurrentActive
+                              ? AppLanguageController.text('CURRENT PLAN')
+                              : (plan.planCode.toLowerCase().contains('free')
+                                  ? AppLanguageController.text('SELECT FREE PLAN')
+                                  : AppLanguageController.text('Pay Now')),
                           style: GoogleFonts.plusJakartaSans(
-                            fontSize: 10,
-                            color: AppColors.textLight,
+                            fontSize: 14,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -842,10 +582,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
 class _PlanModel {
   final String name;
   final String planCode;
-  final String originalPrice;
-  final String? discountText;
-  final String? discountAmount;
   final String finalPrice;
+  final String monthlyPillText;
   final bool isPopular;
   final String badgeText;
   final int downloads;
@@ -854,10 +592,8 @@ class _PlanModel {
   _PlanModel({
     required this.name,
     required this.planCode,
-    required this.originalPrice,
-    required this.discountText,
-    required this.discountAmount,
     required this.finalPrice,
+    required this.monthlyPillText,
     required this.isPopular,
     required this.badgeText,
     required this.downloads,

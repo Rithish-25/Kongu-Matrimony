@@ -132,17 +132,17 @@ class CustomBottomNavigationBar extends StatelessWidget {
                                                 isSelected
                                                     ? Colors.white
                                                     : AppColors.textSecondary,
-                                            size: 22,
+                                            size: 20,
                                           ),
                                         ),
-                                        const SizedBox(height: 3),
+                                        const SizedBox(height: 2),
                                         AnimatedDefaultTextStyle(
                                           duration: const Duration(
                                             milliseconds: 180,
                                           ),
                                           curve: Curves.easeOut,
                                           style: TextStyle(
-                                            fontSize: 9.8,
+                                            fontSize: 9.0,
                                             fontWeight:
                                                 isSelected
                                                     ? FontWeight.w700
@@ -151,13 +151,18 @@ class CustomBottomNavigationBar extends StatelessWidget {
                                                 isSelected
                                                     ? Colors.white
                                                     : AppColors.textSecondary,
-                                            letterSpacing: 0.1,
+                                            letterSpacing: 0.0,
+                                            height: 1.1,
                                           ),
-                                          child: FittedBox(
-                                            fit: BoxFit.scaleDown,
-                                            child: Text(
-                                              item.label,
-                                              maxLines: 1,
+                                          child: Padding(
+                                            padding: const EdgeInsets.symmetric(horizontal: 2),
+                                            child: FittedBox(
+                                              fit: BoxFit.scaleDown,
+                                              child: Text(
+                                                item.label,
+                                                maxLines: 1,
+                                                textAlign: TextAlign.center,
+                                              ),
                                             ),
                                           ),
                                         ),

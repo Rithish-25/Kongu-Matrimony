@@ -21,7 +21,6 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
   bool _showResults = false;
   List<Profile> _searchResults = [];
 
-
   // Form State Values
   String _selectedGender = 'All';
   final String _selectedMinAge = '18';
@@ -35,8 +34,6 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
   final String _selectedEducation = 'Any';
   final String _selectedOccupation = 'Any';
   final String _selectedLocation = 'Any';
-
-
 
   @override
   void initState() {
@@ -264,9 +261,9 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
             children: [
               _buildGenderFilterChip('All', AppLanguageController.text('all_profiles')),
               const SizedBox(width: 6),
-              _buildGenderFilterChip('Female', AppLanguageController.text('women_profiles')),
-              const SizedBox(width: 6),
               _buildGenderFilterChip('Male', AppLanguageController.text('men_profiles')),
+              const SizedBox(width: 6),
+              _buildGenderFilterChip('Female', AppLanguageController.text('women_profiles')),
             ],
           ),
         ),
@@ -302,7 +299,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
                       crossAxisCount: 2,
                       crossAxisSpacing: 12,
                       mainAxisSpacing: 14,
-                      childAspectRatio: 0.53,
+                      childAspectRatio: 0.55,
                     ),
                     itemCount: _searchResults.length,
                     itemBuilder: (context, index) {
@@ -365,187 +362,212 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
   }
 
   Widget _buildGridProfileCard(BuildContext context, Profile profile) {
-    final translatedEducation = AppLanguageController.text(profile.education.toLowerCase());
-    final displayEducation = (translatedEducation == profile.education.toLowerCase())
-        ? profile.education
-        : translatedEducation;
-
-    final translatedLocation = AppLanguageController.text(profile.location.toLowerCase());
-    final displayLocation = (translatedLocation == profile.location.toLowerCase())
-        ? profile.location
-        : translatedLocation;
+    final translatedOccupation = AppLanguageController.text(profile.occupation.toLowerCase());
+    final displayOccupation = (translatedOccupation == profile.occupation.toLowerCase())
+        ? profile.occupation
+        : translatedOccupation;
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: Colors.grey.shade900,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border, width: 0.8),
+        border: Border.all(color: AppColors.border.withValues(alpha: 0.6), width: 0.8),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: Colors.black.withValues(alpha: 0.15),
             blurRadius: 10,
             offset: const Offset(0, 4),
           ),
         ],
       ),
       clipBehavior: Clip.antiAlias,
-      child: Material(
-        color: Colors.transparent,
-        child: InkWell(
-          onTap: () {
-            Navigator.of(context).push(
-              appPageRoute(
-                ProfileDetailsScreen(
-                  profile: profile,
-                  heroTag: 'profile-image-${profile.id}-searchresult',
+      child: Stack(
+        children: [
+          // 1. Full Card Image Background
+          Positioned.fill(
+            child: Hero(
+              tag: 'profile-image-${profile.id}-searchresult',
+              child: Image.network(
+                profile.profileImageUrl,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => Container(
+                  color: Colors.grey.shade300,
+                  child: const Icon(Icons.person, size: 50, color: Colors.grey),
                 ),
               ),
-            );
-          },
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Image Area with fixed height
-              SizedBox(
-                height: 160,
-                width: double.infinity,
-                child: Hero(
-                  tag: 'profile-image-${profile.id}-searchresult',
-                  child: Container(
-                    decoration: BoxDecoration(
-                      image: DecorationImage(
-                        image: NetworkImage(profile.profileImageUrl),
-                        fit: BoxFit.cover,
+            ),
+          ),
+
+          // 2. Dark Gradient Overlay at the bottom
+          Positioned.fill(
+            child: DecoratedBox(
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
+                  stops: const [0.35, 0.65, 1.0],
+                  colors: [
+                    Colors.transparent,
+                    Colors.black.withValues(alpha: 0.45),
+                    Colors.black.withValues(alpha: 0.88),
+                  ],
+                ),
+              ),
+            ),
+          ),
+
+          // 3. Top-Right "1/1" Pill Badge
+          Positioned(
+            top: 8,
+            right: 8,
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              decoration: BoxDecoration(
+                color: Colors.black.withValues(alpha: 0.55),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '1/1',
+                style: GoogleFonts.poppins(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                ),
+              ),
+            ),
+          ),
+
+          // 4. InkWell overlay for card tap navigation
+          Positioned.fill(
+            child: Material(
+              color: Colors.transparent,
+              child: InkWell(
+                onTap: () {
+                  Navigator.of(context).push(
+                    appPageRoute(
+                      ProfileDetailsScreen(
+                        profile: profile,
+                        heroTag: 'profile-image-${profile.id}-searchresult',
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+          ),
+
+          // 5. Bottom Overlay Info & Action Buttons
+          Positioned(
+            left: 8,
+            right: 8,
+            bottom: 8,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // 1. Name Line
+                Text(
+                  AppLanguageController.text(profile.name),
+                  style: GoogleFonts.poppins(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                    shadows: [
+                      const Shadow(
+                        color: Colors.black54,
+                        blurRadius: 4,
+                        offset: Offset(0, 1),
+                      ),
+                    ],
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+
+                // 2. Age Line (Second Line under Name)
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.person_outline_rounded,
+                      color: Colors.white70,
+                      size: 11.5,
+                    ),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${profile.age} ${AppLanguageController.text('yrs')}',
+                      style: GoogleFonts.poppins(
+                        fontSize: 10.5,
+                        color: Colors.white.withValues(alpha: 0.9),
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+
+                // 3. Profession Line (Third Line)
+                Row(
+                  children: [
+                    const Icon(
+                      Icons.work_outline_rounded,
+                      color: Colors.white70,
+                      size: 11.5,
+                    ),
+                    const SizedBox(width: 4),
+                    Expanded(
+                      child: Text(
+                        displayOccupation,
+                        style: GoogleFonts.poppins(
+                          fontSize: 10.5,
+                          color: Colors.white.withValues(alpha: 0.9),
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 6),
+
+                // Single Full Width Button: View Full Profile
+                SizedBox(
+                  width: double.infinity,
+                  height: 32,
+                  child: ElevatedButton(
+                    onPressed: () {
+                      Navigator.of(context).push(
+                        appPageRoute(
+                          ProfileDetailsScreen(
+                            profile: profile,
+                            heroTag: 'profile-image-${profile.id}-searchresult',
+                          ),
+                        ),
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: EdgeInsets.zero,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                    ),
+                    child: Text(
+                      AppLanguageController.text('view_full_profile'),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
                       ),
                     ),
                   ),
                 ),
-              ),
-              // Info Area
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            profile.name,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 12.5,
-                              fontWeight: FontWeight.bold,
-                              color: AppColors.textPrimary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                          ),
-                          const SizedBox(height: 3),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.school_outlined,
-                                color: AppColors.primary,
-                                size: 13,
-                              ),
-                              const SizedBox(width: 4),
-                              Expanded(
-                                child: Text(
-                                  displayEducation,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 10.5,
-                                    fontWeight: FontWeight.w600,
-                                    color: AppColors.primary,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                          const SizedBox(height: 3),
-                          Row(
-                            children: [
-                              const Icon(
-                                Icons.person_outline_rounded,
-                                color: AppColors.textLight,
-                                size: 13,
-                              ),
-                              const SizedBox(width: 2),
-                              Text(
-                                '${profile.age} ${AppLanguageController.text('yrs')}',
-                                style: GoogleFonts.plusJakartaSans(
-                                  fontSize: 10,
-                                  color: AppColors.textSecondary,
-                                ),
-                              ),
-                              const SizedBox(width: 6),
-                              const Icon(
-                                Icons.location_on_outlined,
-                                color: AppColors.textLight,
-                                size: 13,
-                              ),
-                              const SizedBox(width: 2),
-                              Expanded(
-                                child: Text(
-                                  displayLocation,
-                                  style: GoogleFonts.plusJakartaSans(
-                                    fontSize: 10,
-                                    color: AppColors.textSecondary,
-                                  ),
-                                  maxLines: 1,
-                                  overflow: TextOverflow.ellipsis,
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                      // View Full Profile Button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 32,
-                        child: ElevatedButton(
-                          onPressed: () {
-                            Navigator.of(context).push(
-                              appPageRoute(
-                                ProfileDetailsScreen(
-                                  profile: profile,
-                                  heroTag: 'profile-image-${profile.id}-searchresult',
-                                ),
-                              ),
-                            );
-                          },
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppColors.primary,
-                            foregroundColor: Colors.white,
-                            padding: EdgeInsets.zero,
-                            elevation: 0,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(10),
-                            ),
-                          ),
-                          child: Text(
-                            AppLanguageController.text('view_full_profile'),
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 10.5,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
-
 }
