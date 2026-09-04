@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../core/colors/colors.dart';
+import '../core/theme/theme.dart';
 
 import '../core/navigation/tab_page_transition.dart';
 import '../widgets/bottom_navigation/custom_bottom_navigation.dart';
@@ -22,13 +22,11 @@ class _MainLayoutState extends State<MainLayout> {
   int _currentIndex = 0;
   bool _navigationForward = true;
   final List<int> _tabHistory = [];
-  final GlobalKey<HoroscopeScreenState> _horoscopeKey = GlobalKey<HoroscopeScreenState>();
-
   late final List<Widget> _screens = [
     HomeScreen(onNavigateToTab: _navigateToTab),
-    HoroscopeScreen(key: _horoscopeKey),
-    const FavouritesScreen(),
+    const HoroscopeScreen(),
     const InterestsScreen(),
+    const FavouritesScreen(),
     const ProfileScreen(),
   ];
 
@@ -51,73 +49,78 @@ class _MainLayoutState extends State<MainLayout> {
         isMainScreen: _currentIndex == 0,
         showNotification: _currentIndex == 0,
         title: _currentIndex == 0
-            ? 'Kongu Matrimony'
+            ? 'Kongu Kootamaipu'
             : _currentIndex == 1
                 ? 'Horoscope'
                 : _currentIndex == 2
-                    ? 'Favorites'
+                    ? 'Interests'
                     : _currentIndex == 3
-                        ? 'Interests'
+                        ? 'Favorites'
                         : 'Profile',
       ),
-      body: WillPopScope(
-        onWillPop: () async {
-          // If not on Home tab, go to Home and consume the back event
-          if (_currentIndex != 0) {
-            setState(() {
-              _navigationForward = 0 > _currentIndex ? false : true;
-              _tabHistory.add(_currentIndex);
-              _currentIndex = 0;
-            });
-            return false;
-          }
+      body: ValueListenableBuilder<ThemeMode>(
+        valueListenable: AppThemeModeController.notifier,
+        builder: (context, _, __) {
+          return WillPopScope(
+            onWillPop: () async {
+              // If not on Home tab, go to Home and consume the back event
+              if (_currentIndex != 0) {
+                setState(() {
+                  _navigationForward = 0 > _currentIndex ? false : true;
+                  _tabHistory.add(_currentIndex);
+                  _currentIndex = 0;
+                });
+                return false;
+              }
 
-          // On Home tab: show non-dismissible exit confirmation
-          final shouldExit = await showDialog<bool>(
-            context: context,
-            barrierDismissible: false,
-            builder: (dialogContext) {
-              return WillPopScope(
-                onWillPop: () async => false,
-                child: AlertDialog(
-                  title: const Text('Exit'),
-                  content: const Text('Are you sure you want to exit?'),
-                  actions: [
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(dialogContext).pop(false);
-                      },
-                      child: const Text('No'),
+              // On Home tab: show non-dismissible exit confirmation
+              final shouldExit = await showDialog<bool>(
+                context: context,
+                barrierDismissible: false,
+                builder: (dialogContext) {
+                  return WillPopScope(
+                    onWillPop: () async => false,
+                    child: AlertDialog(
+                      title: const Text('Exit'),
+                      content: const Text('Are you sure you want to exit?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(dialogContext).pop(false);
+                          },
+                          child: const Text('No'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            Navigator.of(dialogContext).pop(true);
+                          },
+                          child: const Text('Yes'),
+                        ),
+                      ],
                     ),
-                    TextButton(
-                      onPressed: () {
-                        Navigator.of(dialogContext).pop(true);
-                      },
-                      child: const Text('Yes'),
-                    ),
-                  ],
-                ),
+                  );
+                },
               );
-            },
-          );
 
-          if (shouldExit == true) {
-            // Exit the app
-            SystemNavigator.pop();
-          }
-          return false;
-        },
-        child: Column(
-          children: [
-            Expanded(
-              child: TabPageTransition(
-                currentIndex: _currentIndex,
-                forward: _navigationForward,
-                children: _screens,
-              ),
+              if (shouldExit == true) {
+                // Exit the app
+                SystemNavigator.pop();
+              }
+              return false;
+            },
+            child: Column(
+              children: [
+                Expanded(
+                  child: TabPageTransition(
+                    currentIndex: _currentIndex,
+                    forward: _navigationForward,
+                    children: _screens,
+                  ),
+                ),
+              ],
             ),
-          ],
-        ),
+          );
+        },
       ),
       bottomNavigationBar: CustomBottomNavigationBar(
         currentIndex: _currentIndex,

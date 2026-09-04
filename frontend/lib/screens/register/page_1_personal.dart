@@ -349,7 +349,7 @@ class _Page1PersonalState extends State<Page1Personal> {
                     canRequestFocus: false,
                     decoration: _buildInputDecoration(
                       hintText: 'Select your Date of Birth',
-                      suffixIcon: const Icon(Icons.calendar_today_outlined, color: AppColors.textLight, size: 20),
+                      suffixIcon: Icon(Icons.calendar_today_outlined, color: AppColors.textLight, size: 20),
                     ),
                     style: GoogleFonts.plusJakartaSans(
                       fontSize: 14,

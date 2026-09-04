@@ -118,7 +118,7 @@ class ProfileCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 6),
-            const Divider(color: AppColors.border, height: 1),
+            Divider(color: AppColors.border, height: 1),
             const SizedBox(height: 6),
 
             // Bottom Actions Section
@@ -143,7 +143,7 @@ class ProfileCard extends StatelessWidget {
                 onPressed: () => onInterestAction?.call('rejected'),
                 style: OutlinedButton.styleFrom(
                   foregroundColor: AppColors.textSecondary,
-                  side: const BorderSide(color: AppColors.border, width: 1.2),
+                  side: BorderSide(color: AppColors.border, width: 1.2),
                   padding: const EdgeInsets.symmetric(vertical: 7.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),

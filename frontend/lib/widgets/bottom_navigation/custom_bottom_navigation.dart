@@ -30,14 +30,14 @@ class CustomBottomNavigationBar extends StatelessWidget {
             label: AppLanguageController.text('nav_horoscope'),
           ),
           _NavigationItem(
-            icon: Icons.favorite_border_rounded,
-            activeIcon: Icons.favorite_rounded,
-            label: AppLanguageController.text('nav_favourites'),
-          ),
-          _NavigationItem(
             icon: Icons.handshake_outlined,
             activeIcon: Icons.handshake,
             label: AppLanguageController.text('nav_interests'),
+          ),
+          _NavigationItem(
+            icon: Icons.favorite_border_rounded,
+            activeIcon: Icons.favorite_rounded,
+            label: AppLanguageController.text('nav_favourites'),
           ),
           _NavigationItem(
             icon: Icons.person_outline_rounded,

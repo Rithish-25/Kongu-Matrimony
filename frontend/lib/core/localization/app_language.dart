@@ -3,6 +3,45 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 enum AppLanguage { english, tamil }
 
+class AppFontSizeController {
+  static const String _kFontSizePrefKey = 'selected_app_font_scale';
+  static final ValueNotifier<double> notifier = ValueNotifier<double>(1.0);
+
+  static double get scale => notifier.value;
+
+  static Future<void> init() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final savedScale = prefs.getDouble(_kFontSizePrefKey);
+      if (savedScale != null) {
+        notifier.value = double.parse(savedScale.toStringAsFixed(2)).clamp(0.85, 1.35);
+      }
+    } catch (_) {}
+  }
+
+  static Future<void> increase() async {
+    final next = double.parse((notifier.value + 0.10).toStringAsFixed(2)).clamp(0.85, 1.35);
+    await setScale(next);
+  }
+
+  static Future<void> decrease() async {
+    final next = double.parse((notifier.value - 0.10).toStringAsFixed(2)).clamp(0.85, 1.35);
+    await setScale(next);
+  }
+
+  static Future<void> reset() async {
+    await setScale(1.0);
+  }
+
+  static Future<void> setScale(double value) async {
+    notifier.value = value;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble(_kFontSizePrefKey, value);
+    } catch (_) {}
+  }
+}
+
 class AppLanguageController {
   static const String _kLanguagePrefKey = 'selected_app_language';
 
@@ -76,7 +115,7 @@ class AppLanguageController {
   // English Dictionary
   static final Map<String, String> _englishTranslations = {
     // Navigation & App Bar
-    'app_title': 'Kongu Matrimony',
+    'app_title': 'Kongu Kootamaipu',
     'nav_home': 'Home',
     'nav_horoscope': 'Horoscope',
     'nav_favourites': 'Favourites',
@@ -204,7 +243,7 @@ class AppLanguageController {
   // Tamil Dictionary
   static final Map<String, String> _tamilTranslations = {
     // Navigation & App Bar
-    'app_title': 'கொங்கு மேட்ரிமோனி',
+    'app_title': 'கொங்கு கூட்டமைப்பு',
     'nav_home': 'முகப்பு',
     'nav_horoscope': 'ஜாதகம்',
     'nav_favourites': 'விருப்பம்',

@@ -14,8 +14,10 @@ Future<void> main() async {
   // Preserve splash screen during initialization
   FlutterNativeSplash.preserve(widgetsBinding: widgetsBinding);
 
-  // Load persisted language preference & mock user state before launching the app
+  // Load persisted language preference, font scale, theme mode & mock user state before launching the app
   await AppLanguageController.init();
+  await AppFontSizeController.init();
+  await AppThemeModeController.init();
   await ProfileDatabase.init();
 
   // Set orientation lock to Portrait Up (Android-only compliance requested)
@@ -34,11 +36,31 @@ class KonguMatrimonyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Kongu Matrimony',
-      debugShowCheckedModeBanner: false,
-      theme: AppTheme.lightTheme,
-      home: ProfileDatabase.isLoggedIn ? const MainLayout() : const LoginScreen(),
+    return ValueListenableBuilder<ThemeMode>(
+      valueListenable: AppThemeModeController.notifier,
+      builder: (context, themeMode, _) {
+        return ValueListenableBuilder<double>(
+          valueListenable: AppFontSizeController.notifier,
+          builder: (context, fontScale, _) {
+            return MaterialApp(
+              title: 'Kongu Kootamaipu',
+              debugShowCheckedModeBanner: false,
+              theme: AppTheme.lightTheme,
+              darkTheme: AppTheme.darkTheme,
+              themeMode: themeMode,
+              builder: (context, child) {
+                return MediaQuery(
+                  data: MediaQuery.of(context).copyWith(
+                    textScaler: TextScaler.linear(fontScale),
+                  ),
+                  child: child!,
+                );
+              },
+              home: ProfileDatabase.isLoggedIn ? const MainLayout() : const LoginScreen(),
+            );
+          },
+        );
+      },
     );
   }
 }

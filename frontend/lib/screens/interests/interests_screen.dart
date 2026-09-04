@@ -397,8 +397,8 @@ class _InterestsScreenState extends State<InterestsScreen> {
                             curve: Curves.easeInOut,
                           );
                         },
-                        child: const Padding(
-                          padding: EdgeInsets.all(10),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
                           child: Icon(
                             Icons.arrow_back_ios_new_rounded,
                             size: 18,
@@ -430,8 +430,8 @@ class _InterestsScreenState extends State<InterestsScreen> {
                             curve: Curves.easeInOut,
                           );
                         },
-                        child: const Padding(
-                          padding: EdgeInsets.all(10),
+                        child: Padding(
+                          padding: const EdgeInsets.all(10),
                           child: Icon(
                             Icons.arrow_forward_ios_rounded,
                             size: 18,

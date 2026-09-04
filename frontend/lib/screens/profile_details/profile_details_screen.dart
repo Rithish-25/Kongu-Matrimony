@@ -521,53 +521,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
 
 
 
-        // Favourite button (Top Right) - Placed in the image header Stack
-        Positioned(
-          top: 16,
-          right: 16,
-          child: GestureDetector(
-            onTap: () {
-              final wasFav = isFav;
-              ProfileDatabase.toggleFavorite(profile.id);
-              setState(() {});
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(
-                  content: Text(
-                    wasFav ? 'Removed from favourites' : 'Added to favourites',
-                  ),
-                  behavior: SnackBarBehavior.floating,
-                  backgroundColor: AppColors.primary,
-                  duration: const Duration(milliseconds: 1200),
-                ),
-              );
-            },
-            child: AnimatedContainer(
-              duration: const Duration(milliseconds: 250),
-              width: 42,
-              height: 42,
-              decoration: BoxDecoration(
-                color: isFav ? const Color(0xFFFFF0F2) : Colors.white.withValues(alpha: 0.95),
-                shape: BoxShape.circle,
-                boxShadow: [
-                  BoxShadow(
-                    color: isFav
-                        ? const Color(0xFFE53935).withValues(alpha: 0.3)
-                        : Colors.black.withValues(alpha: 0.12),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
-              ),
-              child: Center(
-                child: Icon(
-                  isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
-                  color: isFav ? const Color(0xFFE53935) : const Color(0xFF64748B),
-                  size: 22,
-                ),
-              ),
-            ),
-          ),
-        ),
+
 
         // Slideshow Arrow Left
         if (images.length > 1)
@@ -677,7 +631,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
             ],
           ),
           const SizedBox(height: AppConstants.spacingM),
-          const Divider(color: AppColors.border, height: 1),
+          Divider(color: AppColors.border, height: 1),
           const SizedBox(height: AppConstants.spacingM),
           ListView.separated(
             shrinkWrap: true,
@@ -685,7 +639,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
             physics: const NeverScrollableScrollPhysics(),
             itemCount: items.length,
             separatorBuilder: (context, index) =>
-                const Divider(color: AppColors.divider, height: 18),
+                Divider(color: AppColors.divider, height: 18),
             itemBuilder: (context, index) {
               final item = items[index];
               if (item.isLocked) {
@@ -833,7 +787,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
             ],
           ),
           const SizedBox(height: AppConstants.spacingM),
-          const Divider(color: AppColors.border, height: 1),
+          Divider(color: AppColors.border, height: 1),
           const SizedBox(height: AppConstants.spacingM),
           Text(
             content.trim().isEmpty ? 'Not specified' : content,
@@ -920,7 +874,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                 ),
               ),
               const SizedBox(height: AppConstants.spacingM),
-              const Divider(color: AppColors.border, height: 1),
+              Divider(color: AppColors.border, height: 1),
               const SizedBox(height: AppConstants.spacingS),
               SizedBox(
                 width: double.infinity,
@@ -1257,11 +1211,16 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
     Profile currentProfile,
     String interestStatus,
   ) {
+    final isFav = ProfileDatabase.currentProfiles.firstWhere(
+      (p) => p.id == currentProfile.id,
+      orElse: () => currentProfile,
+    ).isFavourite;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
       decoration: BoxDecoration(
         color: Colors.white,
-        border: const Border(
+        border: Border(
           top: BorderSide(color: AppColors.border, width: 0.5),
         ),
         boxShadow: [
@@ -1475,80 +1434,60 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                   ),
                 ),
               ] else ...[
-                // Not Interested Button
+                // Add to Favourites Button (Replaces Not Interested)
                 Expanded(
                   child: Container(
                     height: 44,
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isFav ? AppColors.primary.withValues(alpha: 0.1) : Colors.white,
                       borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: AppColors.border, width: 1),
+                      border: Border.all(
+                        color: isFav ? AppColors.primary : AppColors.border,
+                        width: 1.2,
+                      ),
                     ),
                     child: Material(
                       color: Colors.transparent,
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
                         onTap: () {
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              backgroundColor: Colors.white,
-                              title: Text(
-                                'Not Interested?',
-                                style: GoogleFonts.plusJakartaSans(fontWeight: FontWeight.bold),
-                              ),
+                          final wasFav = isFav;
+                          ProfileDatabase.toggleFavorite(currentProfile.id);
+                          setState(() {});
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
                               content: Text(
-                                'Are you sure you want to remove ${currentProfile.name} from your list? This profile will not be shown to you again.',
-                                style: GoogleFonts.plusJakartaSans(
-                                  color: AppColors.textSecondary,
-                                  fontSize: 13,
-                                ),
+                                wasFav
+                                    ? (AppLanguageController.isTamil ? 'பிடித்தவைகளிலிருந்து நீக்கப்பட்டது' : 'Removed from favourites')
+                                    : (AppLanguageController.isTamil ? 'பிடித்தவைகளில் சேர்க்கப்பட்டது' : 'Added to favourites'),
                               ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.of(context).pop(),
-                                  child: Text(
-                                    'Cancel',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      color: AppColors.textSecondary,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed: () {
-                                    Navigator.of(context).pop();
-                                    ScaffoldMessenger.of(context).showSnackBar(
-                                      SnackBar(
-                                        content: Text('Removed ${currentProfile.name} from your list.'),
-                                        behavior: SnackBarBehavior.floating,
-                                        backgroundColor: AppColors.primary,
-                                        duration: const Duration(milliseconds: 1200),
-                                      ),
-                                    );
-                                    Navigator.of(context).pop();
-                                    ProfileDatabase.blockProfile(currentProfile.id);
-                                  },
-                                  child: Text(
-                                    'Yes, Remove',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      color: Colors.red,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: AppColors.primary,
+                              duration: const Duration(milliseconds: 1200),
                             ),
                           );
                         },
                         child: Center(
-                          child: Text(
-                            AppLanguageController.text('not_interested'),
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 13,
-                              fontWeight: FontWeight.w600,
-                              color: AppColors.textPrimary,
-                            ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Icon(
+                                isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
+                                size: 18,
+                                color: isFav ? AppColors.primary : AppColors.textPrimary,
+                              ),
+                              const SizedBox(width: 6),
+                              Text(
+                                isFav
+                                    ? (AppLanguageController.isTamil ? 'பிடித்தவை' : 'Favourites')
+                                    : (AppLanguageController.isTamil ? 'பிடித்தவை சேர்க்க' : 'Add to Favourites'),
+                                style: GoogleFonts.roboto(
+                                  fontSize: 12.5,
+                                  fontWeight: FontWeight.w700,
+                                  color: isFav ? AppColors.primary : AppColors.textPrimary,
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

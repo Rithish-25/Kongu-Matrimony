@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/assets/mock_data.dart';
 import '../../core/colors/colors.dart';
-import '../../core/constants/constants.dart';
 import '../../core/localization/app_language.dart';
+import '../../core/theme/theme.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -50,16 +49,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   ),
                   onPressed: () => Navigator.of(context).pop(),
                 )
-              : IconButton(
-                  tooltip: 'Translate / மொழி',
-                  icon: const Icon(
-                    Icons.g_translate_rounded,
-                    color: Colors.white,
-                    size: 22,
-                  ),
-                  onPressed: () => _showLanguageSelectorSheet(context),
-                )),
-      leadingWidth: 56,
+              : null),
+      leadingWidth: (ModalRoute.of(context)?.canPop ?? false) ? 56 : 16,
       title: ValueListenableBuilder<AppLanguage>(
         valueListenable: AppLanguageController.notifier,
         builder: (context, currentLang, _) {
@@ -82,50 +73,72 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           return Text(
             displayTitle,
             style: GoogleFonts.roboto(
-              fontSize: 17,
+              fontSize: 17.5,
               fontWeight: FontWeight.w700,
               color: Colors.white,
-              letterSpacing: isTamil ? 0.0 : 0.8,
+              letterSpacing: isTamil ? 0.0 : 0.6,
             ),
           );
         },
       ),
-      centerTitle: true,
+      centerTitle: false,
+      titleSpacing: (ModalRoute.of(context)?.canPop ?? false) ? 0 : 16,
       actions: actions ??
           [
-            if (showNotification)
-              Padding(
-                padding: const EdgeInsets.only(right: AppConstants.spacingM),
-                child: Stack(
-                  alignment: Alignment.center,
-                  children: [
-                    IconButton(
-                      icon: const Icon(
-                        Icons.notifications_outlined,
-                        color: Colors.white,
-                        size: 24,
+            // 1. Dark Mode / Normal Mode Toggle Switch Button
+            ValueListenableBuilder<ThemeMode>(
+              valueListenable: AppThemeModeController.notifier,
+              builder: (context, themeMode, _) {
+                final isDark = themeMode == ThemeMode.dark;
+                return Tooltip(
+                  message: isDark ? 'Normal Mode / பகல் நிலை' : 'Dark Mode / இரவு நிலை',
+                  child: Transform.scale(
+                    scale: 0.75,
+                    child: Switch(
+                      value: isDark,
+                      onChanged: (val) => AppThemeModeController.setThemeMode(
+                        val ? ThemeMode.dark : ThemeMode.light,
                       ),
-                      onPressed: () => _showNotificationsSheet(context),
-                    ),
-                    Positioned(
-                      right: 10,
-                      top: 10,
-                      child: Container(
-                        width: 10,
-                        height: 10,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFFFFD700),
-                          shape: BoxShape.circle,
-                          border: Border.all(
-                            color: AppColors.primary,
-                            width: 1.5,
-                          ),
-                        ),
+                      activeThumbColor: Colors.white,
+                      activeTrackColor: const Color(0xFF1E293B),
+                      inactiveThumbColor: Colors.white,
+                      inactiveTrackColor: Colors.white.withValues(alpha: 0.35),
+                      trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
+                      trackOutlineWidth: WidgetStateProperty.all(0.0),
+                      thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
+                        (states) {
+                          if (states.contains(WidgetState.selected)) {
+                            return const Icon(Icons.nightlight_round, color: Color(0xFFF59E0B), size: 14);
+                          }
+                          return const Icon(Icons.wb_sunny_rounded, color: Color(0xFFD35400), size: 14);
+                        },
                       ),
                     ),
-                  ],
-                ),
+                  ),
+                );
+              },
+            ),
+            // 2. Text Size Adjuster Button
+            IconButton(
+              tooltip: 'Adjust Text Size / எழுத்து அளவு',
+              icon: const Icon(
+                Icons.format_size_rounded,
+                color: Colors.white,
+                size: 22,
               ),
+              onPressed: () => _showFontSizeAdjusterSheet(context),
+            ),
+            // 3. Language Translator Button
+            IconButton(
+              tooltip: 'Translate / மொழி மாறா',
+              icon: const Icon(
+                Icons.g_translate_rounded,
+                color: Colors.white,
+                size: 22,
+              ),
+              onPressed: () => _showLanguageSelectorSheet(context),
+            ),
+            const SizedBox(width: 4),
           ],
     );
   }
@@ -133,104 +146,146 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight + 1);
 
-  void _showNotificationsSheet(BuildContext context) {
-    final profiles = ProfileDatabase.currentProfiles;
-    final userState = ProfileDatabase.userProfileNotifier.value;
-    final receivedCount =
-        profiles
-            .where((profile) => profile.interestStatus == 'received')
-            .length;
-    final acceptedCount =
-        profiles
-            .where((profile) => profile.interestStatus == 'accepted')
-            .length;
-    final favouriteCount =
-        profiles.where((profile) => profile.isFavourite).length;
-
-    final notifications = <Map<String, String>>[];
-
-    if (receivedCount > 0) {
-      notifications.add({
-        'title':
-            '$receivedCount interest request${receivedCount > 1 ? 's' : ''} waiting',
-        'subtitle': 'Open the Interests tab to accept or decline new requests.',
-      });
-    }
-    if (acceptedCount > 0) {
-      notifications.add({
-        'title':
-            '$acceptedCount match connection${acceptedCount > 1 ? 's' : ''} accepted',
-        'subtitle': 'You now have active conversations ready to continue.',
-      });
-    }
-    if (favouriteCount > 0) {
-      notifications.add({
-        'title':
-            '$favouriteCount profile${favouriteCount > 1 ? 's' : ''} saved',
-        'subtitle': 'Your shortlist is available in the Favourites tab.',
-      });
-    }
-    notifications.add({
-      'title': 'Membership: ${userState.plan}',
-      'subtitle': 'Horoscope downloads used: ${userState.downloadedCount}',
-    });
-
+  void _showFontSizeAdjusterSheet(BuildContext context) {
     showModalBottomSheet(
       context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
       showDragHandle: true,
       builder: (context) {
-        return SafeArea(
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(20, 8, 20, 20),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Notifications',
-                  style: GoogleFonts.poppins(
-                    fontSize: 16,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.textPrimary,
-                  ),
+        return ValueListenableBuilder<double>(
+          valueListenable: AppFontSizeController.notifier,
+          builder: (context, fontScale, _) {
+            final percent = (fontScale * 100).round();
+            final isTamil = AppLanguageController.isTamil;
+
+            return SafeArea(
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(20, 4, 20, 24),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          isTamil ? 'எழுத்து அளவு கட்டுப்பாடு' : 'App Text Size',
+                          style: GoogleFonts.roboto(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Text(
+                            '$percent%',
+                            style: GoogleFonts.roboto(
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 18),
+                    Row(
+                      children: [
+                        // Decrease Button
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: fontScale <= 0.85
+                                ? null
+                                : () => AppFontSizeController.decrease(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.white,
+                              foregroundColor: AppColors.textPrimary,
+                              elevation: 0,
+                              side: BorderSide(color: AppColors.border, width: 1.2),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            icon: const Icon(Icons.remove_circle_outline_rounded, size: 18),
+                            label: Text(
+                              isTamil ? 'சிறிதாக்கு' : 'Decrease',
+                              style: GoogleFonts.roboto(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Reset Button
+                        Expanded(
+                          child: OutlinedButton.icon(
+                            onPressed: () => AppFontSizeController.reset(),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: AppColors.primary,
+                              side: const BorderSide(color: AppColors.primary, width: 1.2),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            icon: const Icon(Icons.restart_alt_rounded, size: 18),
+                            label: Text(
+                              isTamil ? 'இயல்பு நிலை' : 'Reset',
+                              style: GoogleFonts.roboto(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        // Increase Button
+                        Expanded(
+                          child: ElevatedButton.icon(
+                            onPressed: fontScale >= 1.35
+                                ? null
+                                : () => AppFontSizeController.increase(),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                            ),
+                            icon: const Icon(Icons.add_circle_outline_rounded, size: 18),
+                            label: Text(
+                              isTamil ? 'பெரிதாக்கு' : 'Increase',
+                              style: GoogleFonts.roboto(
+                                fontSize: 13,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
-                const SizedBox(height: 12),
-                ...notifications.map(
-                  (item) => ListTile(
-                    contentPadding: EdgeInsets.zero,
-                    leading: const CircleAvatar(
-                      backgroundColor: AppColors.primarySoft,
-                      child: Icon(
-                        Icons.notifications_active_rounded,
-                        color: AppColors.primary,
-                        size: 18,
-                      ),
-                    ),
-                    title: Text(
-                      item['title'] ?? '',
-                      style: GoogleFonts.poppins(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w600,
-                        color: AppColors.textPrimary,
-                      ),
-                    ),
-                    subtitle: Text(
-                      item['subtitle'] ?? '',
-                      style: GoogleFonts.poppins(
-                        fontSize: 11,
-                        color: AppColors.textSecondary,
-                        height: 1.4,
-                      ),
-                    ),
-                  ),
-                ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         );
       },
     );
   }
+
+
 
   void _showLanguageSelectorSheet(BuildContext context) {
     showModalBottomSheet(

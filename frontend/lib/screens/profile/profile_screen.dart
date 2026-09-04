@@ -197,7 +197,7 @@ class ProfileScreen extends StatelessWidget {
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
               itemCount: options.length,
-              separatorBuilder: (_, __) => const Divider(color: AppColors.border, height: 1),
+              separatorBuilder: (_, __) => Divider(color: AppColors.border, height: 1),
               itemBuilder: (context, index) {
                 final option = options[index];
                 return ListTile(
@@ -224,7 +224,7 @@ class ProfileScreen extends StatelessWidget {
                       color: AppColors.textLight,
                     ),
                   ),
-                  trailing: const Icon(
+                  trailing: Icon(
                     Icons.arrow_forward_ios_rounded,
                     size: 12,
                     color: AppColors.textLight,

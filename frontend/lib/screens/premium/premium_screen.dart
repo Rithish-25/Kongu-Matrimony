@@ -256,17 +256,13 @@ class _PremiumScreenState extends State<PremiumScreen> {
                                       begin: Alignment.centerLeft,
                                       end: Alignment.centerRight,
                                     )
-                                  : const LinearGradient(
-                                      colors: [Color(0xFFE65100), Color(0xFFF57C00)],
-                                      begin: Alignment.centerLeft,
-                                      end: Alignment.centerRight,
-                                    ),
+                                  : AppColors.primaryGradient,
                               borderRadius: BorderRadius.circular(24),
                               boxShadow: [
                                 BoxShadow(
                                   color: isSelectedTabActivePlan
                                       ? const Color(0x40026135)
-                                      : const Color(0x40E65100),
+                                      : AppColors.primary.withValues(alpha: 0.3),
                                   blurRadius: 6,
                                   offset: const Offset(0, 2),
                                 ),
@@ -565,7 +561,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
 
                     const SizedBox(height: 12),
 
-                    // 5. Orange Action Button
+                    // 5. Action Button
                     Container(
                       width: double.infinity,
                       height: 44,
@@ -573,17 +569,13 @@ class _PremiumScreenState extends State<PremiumScreen> {
                         borderRadius: BorderRadius.circular(25),
                         gradient: isCurrentActive
                             ? null
-                            : const LinearGradient(
-                                colors: [Color(0xFFE65100), Color(0xFFF57C00)],
-                                begin: Alignment.centerLeft,
-                                end: Alignment.centerRight,
-                              ),
-                        color: isCurrentActive ? Colors.teal.shade700 : null,
+                            : AppColors.primaryGradient,
+                        color: isCurrentActive ? Colors.teal.shade800 : null,
                         boxShadow: [
                           BoxShadow(
                             color: isCurrentActive
                                 ? Colors.teal.withValues(alpha: 0.3)
-                                : const Color(0x40E65100),
+                                : AppColors.primary.withValues(alpha: 0.3),
                             blurRadius: 8,
                             offset: const Offset(0, 3),
                           ),

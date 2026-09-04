@@ -22,7 +22,7 @@ class CustomSearchBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
+        gradient: LinearGradient(
           colors: [AppColors.surface, AppColors.surfaceMuted],
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -34,13 +34,13 @@ class CustomSearchBar extends StatelessWidget {
       child: TextField(
         controller: controller,
         onChanged: onChanged,
-        style: const TextStyle(
+        style: TextStyle(
           color: AppColors.textPrimary,
           fontSize: 14,
         ),
         decoration: InputDecoration(
           hintText: hintText,
-          hintStyle: const TextStyle(
+          hintStyle: TextStyle(
             color: AppColors.textLight,
             fontSize: 14,
           ),
@@ -54,7 +54,7 @@ class CustomSearchBar extends StatelessWidget {
             children: [
               if (controller != null && controller!.text.isNotEmpty)
                 IconButton(
-                  icon: const Icon(Icons.close_rounded, size: 18, color: AppColors.textSecondary),
+                  icon: Icon(Icons.close_rounded, size: 18, color: AppColors.textSecondary),
                   onPressed: onClear,
                 ),
               if (onFilterPressed != null)
