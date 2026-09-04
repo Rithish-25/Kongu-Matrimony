@@ -104,6 +104,16 @@ class ProfileScreen extends StatelessWidget {
                       },
                     ),
                     _ProfileOption(
+                      icon: Icons.workspace_premium_outlined,
+                      title: isTamil ? 'பிரீமியம் உறுப்பினர்' : 'Premium Membership',
+                      subtitle: isTamil ? 'உறுப்பினர் திட்டங்களைப் பார்க்க' : 'View and change your membership plans',
+                      onTap: () {
+                        Navigator.of(context).push(
+                          appPageRoute(const PremiumScreen()),
+                        );
+                      },
+                    ),
+                    _ProfileOption(
                       icon: Icons.info_outline_rounded,
                       title: isTamil ? 'கொங்கு கூட்டமைப்பு பற்றி' : 'About Kongu Kootamaipu',
                       subtitle: isTamil ? 'எங்கள் வரலாறு மற்றும் சேவைகள்' : 'Learn about our community trust',
@@ -114,14 +124,22 @@ class ProfileScreen extends StatelessWidget {
                       },
                     ),
                     _ProfileOption(
-                      icon: Icons.workspace_premium_outlined,
-                      title: isTamil ? 'பிரீமியம் உறுப்பினர்' : 'Premium Membership',
-                      subtitle: isTamil ? 'உறுப்பினர் திட்டங்களைப் பார்க்க' : 'View and change your membership plans',
-                      onTap: () {
-                        Navigator.of(context).push(
-                          appPageRoute(const PremiumScreen()),
-                        );
-                      },
+                      icon: Icons.privacy_tip_outlined,
+                      title: isTamil ? 'தனியுரிமைக் கொள்கை' : 'Privacy Policy',
+                      subtitle: isTamil ? 'எங்கள் தனியுரிமை கொள்கைகள்' : 'Read our privacy policy and terms',
+                      onTap: () => _showPolicyDialog(context, 'Privacy Policy'),
+                    ),
+                    _ProfileOption(
+                      icon: Icons.gavel_outlined,
+                      title: isTamil ? 'விதிமுறைகள் & நிபந்தனைகள்' : 'Terms & Conditions',
+                      subtitle: isTamil ? 'பயன்பாட்டு விதிமுறைகள்' : 'Terms of service and usage rules',
+                      onTap: () => _showPolicyDialog(context, 'Terms & Conditions'),
+                    ),
+                    _ProfileOption(
+                      icon: Icons.receipt_long_outlined,
+                      title: isTamil ? 'திரும்பப்பெறும் கொள்கை' : 'Refund Policy',
+                      subtitle: isTamil ? 'பணம் திரும்பப் பெறும் விதிமுறைகள்' : 'Refund rules and payment terms',
+                      onTap: () => _showPolicyDialog(context, 'Refund Policy'),
                     ),
                   ],
                 ),
@@ -129,36 +147,81 @@ class ProfileScreen extends StatelessWidget {
                 SizedBox(
                   width: double.infinity,
                   height: 54,
-                  child: OutlinedButton(
-                    onPressed: () => _showLogoutDialog(context),
-                    style: OutlinedButton.styleFrom(
-                      foregroundColor: AppColors.error,
-                      side: const BorderSide(color: AppColors.error, width: 1.2),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
-                      ),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.logout_rounded, size: 18),
-                        const SizedBox(width: 8),
-                        Text(
-                          'Logout Account',
-                          style: GoogleFonts.poppins(
-                            fontWeight: FontWeight.bold,
-                            color: AppColors.error,
+                  child: ProfileDatabase.isLoggedIn
+                      ? OutlinedButton.icon(
+                          onPressed: () => _showLogoutDialog(context),
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.error,
+                            side: const BorderSide(color: AppColors.error, width: 1.2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
+                            ),
+                          ),
+                          icon: const Icon(Icons.logout_rounded, size: 18),
+                          label: Text(
+                            isTamil ? 'கணக்கிலிருந்து வெளியேறு' : 'Logout Account',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.error,
+                            ),
+                          ),
+                        )
+                      : ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.of(context).push(
+                              appPageRoute(
+                                const RegisterFlow(
+                                  initialStep: 0,
+                                  initialData: {},
+                                ),
+                              ),
+                            );
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(AppConstants.buttonRadius),
+                            ),
+                          ),
+                          icon: const Icon(Icons.login_rounded, size: 18),
+                          label: Text(
+                            isTamil ? 'உள்நுழைவு / பதிவு செய்ய' : 'Login / Register',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
                           ),
                         ),
-                      ],
-                    ),
-                  ),
                 ),
-                const SizedBox(height: AppConstants.spacingXXL),
+                const SizedBox(height: AppConstants.spacingL),
               ],
             ),
           );
         },
+      ),
+    );
+  }
+
+  void _showPolicyDialog(BuildContext context, String title) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: Colors.white,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        title: Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
+        content: SingleChildScrollView(
+          child: Text(
+            'Official $title for Kongu Kootamaipu™. We are committed to transparency, security, and member satisfaction.',
+            style: GoogleFonts.poppins(fontSize: 13.5, color: AppColors.textSecondary),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text('Close', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: AppColors.primary)),
+          ),
+        ],
       ),
     );
   }
@@ -239,9 +302,6 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-
-
-
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -272,19 +332,12 @@ class ProfileScreen extends StatelessWidget {
             ),
             TextButton(
               onPressed: () async {
-                // Clear persisted user data and navigate to LoginScreen
+                // Clear persisted user data and notify listeners of guest mode
+                await ProfileDatabase.logout();
                 await ProfileDatabase.clearUserProfile();
-                Navigator.of(context).pushAndRemoveUntil(
-                  PageRouteBuilder(
-                    pageBuilder: (context, animation, secondaryAnimation) => const LoginScreen(),
-                    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-                      final fade = CurvedAnimation(parent: animation, curve: Curves.easeInOut);
-                      return FadeTransition(opacity: fade, child: child);
-                    },
-                    transitionDuration: const Duration(milliseconds: 350),
-                  ),
-                  (route) => false,
-                );
+                if (context.mounted) {
+                  Navigator.of(context).pop();
+                }
               },
               child: Text(
                 'Logout',

@@ -7,17 +7,11 @@ import '../../core/assets/mock_data.dart';
 import '../../core/localization/app_language.dart';
 import '../main_layout.dart';
 
-// Import all 10 modular pages
-import 'page_1_personal.dart';
-import 'page_2_physical.dart';
-import 'page_3_astrology.dart';
-import 'page_4_lifestyle.dart';
-import 'page_5_family.dart';
-import 'page_6_education_occupation.dart';
-import 'page_7_communication.dart';
-import 'page_8_partner.dart';
-import 'page_9_about.dart';
-import 'page_10_expectation.dart';
+// Import the 4 consolidated modular pages
+import 'page_1_astrology_family.dart';
+import 'page_2_education_communication.dart';
+import 'page_3_partner_expectations.dart';
+import 'page_4_about_physical.dart';
 
 class RegisterFlow extends StatefulWidget {
   final int initialStep;
@@ -39,12 +33,20 @@ class _RegisterFlowState extends State<RegisterFlow> {
   late int _currentStep;
   late Map<String, String> _formData;
   late PageController _pageController;
-  final List<GlobalKey<FormState>> _formKeys = List.generate(10, (index) => GlobalKey<FormState>());
+  final List<GlobalKey<FormState>> _formKeys = List.generate(4, (index) => GlobalKey<FormState>());
+
+  final List<String> _pageTitles = const [
+    'Astrological Profile & Family Details',
+    'Education, Occupation & Communication',
+    'Partner Details & Expectations',
+    'About Myself & Physical Details',
+  ];
 
   @override
   void initState() {
     super.initState();
-    _currentStep = widget.initialStep;
+    // Clamp initialStep between 0 and 3
+    _currentStep = widget.initialStep.clamp(0, 3);
     _formData = Map<String, String>.from(widget.initialData);
     _pageController = PageController(initialPage: _currentStep);
   }
@@ -106,10 +108,7 @@ class _RegisterFlowState extends State<RegisterFlow> {
 
   Future<void> _submitRegistration() async {
     if (widget.isEditing) {
-      // Save completed profile details
       await RegistrationDraft.saveProfileDetails(_formData);
-
-      // Update the user display name in the database/notifiers
       final registeredName = _formData['name']?.trim() ?? 'User';
       await ProfileDatabase.updateUserProfile(
         displayName: registeredName,
@@ -126,14 +125,10 @@ class _RegisterFlowState extends State<RegisterFlow> {
         Navigator.of(context).pop();
       }
     } else {
-      // Clear draft on successful completion
       await RegistrationDraft.clearDraft();
-
-      // Also save to profile details so edit profile has them
       await RegistrationDraft.saveProfileDetails(_formData);
 
-      // Log the user in with the registered name
-      final registeredName = _formData['name']?.trim() ?? 'New User';
+      final registeredName = _formData['name']?.trim() ?? 'New Member';
       await ProfileDatabase.updateUserProfile(
         displayName: registeredName,
         plan: 'Free',
@@ -160,17 +155,11 @@ class _RegisterFlowState extends State<RegisterFlow> {
     if (_formKeys[_currentStep].currentState!.validate()) {
       if (widget.isEditing) {
         await RegistrationDraft.saveProfileDetails(_formData);
-        final registeredName = _formData['name']?.trim();
-        if (registeredName != null && registeredName.isNotEmpty) {
-          await ProfileDatabase.updateUserProfile(displayName: registeredName);
-        }
       } else {
         await RegistrationDraft.saveDraft(_formData, _currentStep);
       }
 
-      if (!widget.isEditing && _currentStep == 0) {
-        _submitRegistration();
-      } else if (_currentStep < 9) {
+      if (_currentStep < 3) {
         setState(() {
           _currentStep++;
         });
@@ -182,6 +171,21 @@ class _RegisterFlowState extends State<RegisterFlow> {
       } else {
         _submitRegistration();
       }
+    }
+  }
+
+  void _skipAndContinue() async {
+    if (_currentStep < 3) {
+      setState(() {
+        _currentStep++;
+      });
+      _pageController.animateToPage(
+        _currentStep,
+        duration: const Duration(milliseconds: 400),
+        curve: Curves.easeInOutCubic,
+      );
+    } else {
+      _submitRegistration();
     }
   }
 
@@ -200,217 +204,179 @@ class _RegisterFlowState extends State<RegisterFlow> {
 
   @override
   Widget build(BuildContext context) {
-    final progress = (_currentStep + 1) / 10;
+    final double progress = (_currentStep + 1) / 4;
+    final int progressPercent = ((_currentStep + 1) * 25);
 
     return Scaffold(
-      appBar: (_currentStep == 0 && !widget.isEditing)
-          ? AppBar(
-              backgroundColor: Colors.transparent,
-              elevation: 0,
-              scrolledUnderElevation: 0,
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back, color: AppColors.appBarPrimary),
-                onPressed: () => Navigator.of(context).pop(),
+      backgroundColor: const Color(0xFFF4F6F9),
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        scrolledUnderElevation: 0,
+        title: Text(
+          widget.isEditing ? 'Edit Profile' : 'Profile Registration',
+          style: GoogleFonts.plusJakartaSans(
+            fontSize: 16,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        leading: IconButton(
+          icon: Icon(Icons.arrow_back, color: AppColors.textPrimary),
+          onPressed: _currentStep > 0 ? _prevStep : () => Navigator.of(context).pop(),
+        ),
+        actions: [
+          TextButton.icon(
+            onPressed: _saveAsDraft,
+            icon: const Icon(
+              Icons.save_outlined,
+              size: 18,
+              color: AppColors.primary,
+            ),
+            label: Text(
+              AppLanguageController.text('Save Draft'),
+              style: GoogleFonts.plusJakartaSans(
+                fontWeight: FontWeight.bold,
+                color: AppColors.primary,
               ),
-              title: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+            ),
+          ),
+        ],
+      ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Top Progress Card Header (Matching Login Page Style)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+              child: Container(
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: Colors.white,
                   borderRadius: BorderRadius.circular(18),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: AppConstants.softShadow,
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      'KONGU',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 15,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.appBarPrimary,
-                        letterSpacing: 1.2,
-                      ),
+                  border: Border.all(color: const Color(0xFFE2E8F0)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: const Color(0x08000000),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
                     ),
+                  ],
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'STEP ${_currentStep + 1} OF 4',
+                          style: GoogleFonts.roboto(
+                            fontSize: 11.5,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textSecondary,
+                            letterSpacing: 0.8,
+                          ),
+                        ),
+                        Text(
+                          '$progressPercent% (${_currentStep + 1}/4)',
+                          style: GoogleFonts.roboto(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 4),
                     Text(
-                      ' MATRIMONY',
-                      style: GoogleFonts.cinzel(
-                        fontSize: 15,
+                      AppLanguageController.text(_pageTitles[_currentStep]),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: AppColors.appBarSecondaryDark,
-                        letterSpacing: 1.2,
+                        color: AppColors.textPrimary,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 10),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(8),
+                      child: LinearProgressIndicator(
+                        value: progress,
+                        minHeight: 8,
+                        backgroundColor: const Color(0xFFE2E8F0),
+                        valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
                       ),
                     ),
                   ],
                 ),
               ),
-              centerTitle: true,
-            )
-          : AppBar(
-              title: Text(
-                widget.isEditing
-                    ? '${AppLanguageController.text('Edit Profile')} (${_currentStep + 1}/10)'
-                    : '${AppLanguageController.text('Step')} ${_currentStep + 1} / 10',
-                style: GoogleFonts.plusJakartaSans(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-              leading: IconButton(
-                icon: const Icon(Icons.arrow_back),
-                onPressed: _currentStep > 0 ? _prevStep : () => Navigator.of(context).pop(),
-              ),
-              actions: [
-                TextButton.icon(
-                  onPressed: _saveAsDraft,
-                  icon: const Icon(
-                    Icons.save_outlined,
-                    size: 18,
-                    color: AppColors.primary,
-                  ),
-                  label: Text(
-                    AppLanguageController.text('Save Draft'),
-                    style: GoogleFonts.plusJakartaSans(
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.primary,
-                    ),
-                  ),
-                ),
-              ],
-              bottom: PreferredSize(
-                preferredSize: const Size.fromHeight(4),
-                child: LinearProgressIndicator(
-                  value: progress,
-                  backgroundColor: AppColors.border,
-                  color: AppColors.primary,
-                ),
-              ),
             ),
-      body: SafeArea(
-        child: Column(
-          children: [
+
+            // Main Form Pages
             Expanded(
               child: PageView(
                 controller: _pageController,
                 physics: const NeverScrollableScrollPhysics(),
                 children: [
+                  // PAGE 1: Astrological Profile & Family Details
                   SingleChildScrollView(
                     padding: const EdgeInsets.all(AppConstants.spacingM),
                     child: Form(
                       key: _formKeys[0],
-                      child: Page1Personal(
+                      child: Page1AstrologyFamily(
                         formData: _formData,
                         onChanged: _onFieldChanged,
                         currentStep: 0,
-                        isEditing: widget.isEditing,
-                        onNext: _nextStep,
                       ),
                     ),
                   ),
+
+                  // PAGE 2: Education, Occupation & Communication Details
                   SingleChildScrollView(
                     padding: const EdgeInsets.all(AppConstants.spacingM),
                     child: Form(
                       key: _formKeys[1],
-                      child: Page2Physical(
+                      child: Page2EducationCommunication(
                         formData: _formData,
                         onChanged: _onFieldChanged,
                         currentStep: 1,
                       ),
                     ),
                   ),
+
+                  // PAGE 3: Partner Details & Expectations (Skippable)
                   SingleChildScrollView(
                     padding: const EdgeInsets.all(AppConstants.spacingM),
                     child: Form(
                       key: _formKeys[2],
-                      child: Page3Astrology(
+                      child: Page3PartnerExpectations(
                         formData: _formData,
                         onChanged: _onFieldChanged,
                         currentStep: 2,
+                        onSkipExpectation: _skipAndContinue,
                       ),
                     ),
                   ),
+
+                  // PAGE 4: About Myself & Physical Details (Skippable)
                   SingleChildScrollView(
                     padding: const EdgeInsets.all(AppConstants.spacingM),
                     child: Form(
                       key: _formKeys[3],
-                      child: Page4Lifestyle(
+                      child: Page4AboutPhysical(
                         formData: _formData,
                         onChanged: _onFieldChanged,
                         currentStep: 3,
-                      ),
-                    ),
-                  ),
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppConstants.spacingM),
-                    child: Form(
-                      key: _formKeys[4],
-                      child: Page5Family(
-                        formData: _formData,
-                        onChanged: _onFieldChanged,
-                        currentStep: 4,
-                      ),
-                    ),
-                  ),
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppConstants.spacingM),
-                    child: Form(
-                      key: _formKeys[5],
-                      child: Page6EducationOccupation(
-                        formData: _formData,
-                        onChanged: _onFieldChanged,
-                        currentStep: 5,
-                      ),
-                    ),
-                  ),
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppConstants.spacingM),
-                    child: Form(
-                      key: _formKeys[6],
-                      child: Page7Communication(
-                        formData: _formData,
-                        onChanged: _onFieldChanged,
-                        currentStep: 6,
-                      ),
-                    ),
-                  ),
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppConstants.spacingM),
-                    child: Form(
-                      key: _formKeys[7],
-                      child: Page8Partner(
-                        formData: _formData,
-                        onChanged: _onFieldChanged,
-                        currentStep: 7,
-                      ),
-                    ),
-                  ),
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppConstants.spacingM),
-                    child: Form(
-                      key: _formKeys[8],
-                      child: Page9About(
-                        formData: _formData,
-                        onChanged: _onFieldChanged,
-                        currentStep: 8,
-                      ),
-                    ),
-                  ),
-                  SingleChildScrollView(
-                    padding: const EdgeInsets.all(AppConstants.spacingM),
-                    child: Form(
-                      key: _formKeys[9],
-                      child: Page10Expectation(
-                        formData: _formData,
-                        onChanged: _onFieldChanged,
-                        currentStep: 9,
+                        onSkipSection: _skipAndContinue,
                       ),
                     ),
                   ),
                 ],
               ),
             ),
-            if (_currentStep > 0) _buildBottomNavigation(),
+            _buildBottomNavigation(),
           ],
         ),
       ),
@@ -418,10 +384,11 @@ class _RegisterFlowState extends State<RegisterFlow> {
   }
 
   Widget _buildBottomNavigation() {
-    final isLastStep = _currentStep == 9;
+    final bool isLastStep = _currentStep == 3;
+    final bool hasSkipOptions = _currentStep >= 2;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
       decoration: BoxDecoration(
         color: Colors.white,
         border: Border(top: BorderSide(color: AppColors.border)),
@@ -430,35 +397,74 @@ class _RegisterFlowState extends State<RegisterFlow> {
         children: [
           if (_currentStep > 0) ...[
             Expanded(
-              child: OutlinedButton(
-                onPressed: _prevStep,
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppColors.primary,
-                  side: const BorderSide(color: AppColors.primary, width: 1.2),
-                  padding: const EdgeInsets.symmetric(vertical: 12),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
+              flex: 3,
+              child: SizedBox(
+                height: 46,
+                child: OutlinedButton(
+                  onPressed: _prevStep,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.textPrimary,
+                    side: BorderSide(color: AppColors.border, width: 1.2),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
                   ),
-                ),
-                child: Text(
-                  AppLanguageController.text('Back'),
-                  style: GoogleFonts.plusJakartaSans(
-                    fontWeight: FontWeight.bold,
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      AppLanguageController.text('Back'),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ),
                 ),
               ),
             ),
-            const SizedBox(width: 12),
+            const SizedBox(width: 8),
+          ],
+          if (hasSkipOptions) ...[
+            Expanded(
+              flex: 3,
+              child: SizedBox(
+                height: 46,
+                child: OutlinedButton(
+                  onPressed: _skipAndContinue,
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: AppColors.primary,
+                    side: const BorderSide(color: AppColors.primary, width: 1.2),
+                    padding: const EdgeInsets.symmetric(horizontal: 4),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      AppLanguageController.text(isLastStep ? 'Skip & Finish' : 'Skip Step'),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
           ],
           Expanded(
+            flex: 4,
             child: Container(
-              height: 48,
+              height: 46,
               decoration: BoxDecoration(
                 gradient: AppColors.primaryGradient,
                 borderRadius: BorderRadius.circular(12),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withValues(alpha: 0.12),
+                    color: const Color(0x1F000000),
                     blurRadius: 10,
                     offset: const Offset(0, 4),
                   ),
@@ -473,14 +479,17 @@ class _RegisterFlowState extends State<RegisterFlow> {
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  padding: EdgeInsets.zero,
+                  padding: const EdgeInsets.symmetric(horizontal: 6),
                 ),
-                child: Text(
-                  AppLanguageController.text(isLastStep ? 'Submit' : 'Next'),
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 0.5,
+                child: FittedBox(
+                  fit: BoxFit.scaleDown,
+                  child: Text(
+                    AppLanguageController.text(isLastStep ? 'Submit & Finish' : 'Next Step'),
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 14.5,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 0.3,
+                    ),
                   ),
                 ),
               ),

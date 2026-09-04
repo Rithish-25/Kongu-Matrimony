@@ -5,7 +5,6 @@ import 'core/theme/theme.dart';
 import 'core/assets/mock_data.dart';
 import 'core/localization/app_language.dart';
 import 'screens/main_layout.dart';
-import 'screens/auth/login_screen.dart';
 
 Future<void> main() async {
   // Ensure Flutter engine is initialized before setup
@@ -56,7 +55,7 @@ class KonguMatrimonyApp extends StatelessWidget {
                   child: child!,
                 );
               },
-              home: ProfileDatabase.isLoggedIn ? const MainLayout() : const LoginScreen(),
+              home: const MainLayout(),
             );
           },
         );

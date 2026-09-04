@@ -11,6 +11,9 @@ import 'favourites/favourites_screen.dart';
 import 'interests/interests_screen.dart';
 import 'profile/profile_screen.dart';
 
+import '../core/assets/mock_data.dart';
+import '../widgets/auth_required_dialog.dart';
+
 class MainLayout extends StatefulWidget {
   const MainLayout({super.key});
 
@@ -32,6 +35,16 @@ class _MainLayoutState extends State<MainLayout> {
 
   void _navigateToTab(int index) {
     if (index == _currentIndex) {
+      return;
+    }
+
+    // Interests (2) and Favourites (3) require Login / Registration
+    if ((index == 2 || index == 3) && !ProfileDatabase.isLoggedIn) {
+      String? featureName;
+      if (index == 2) featureName = 'Interests';
+      if (index == 3) featureName = 'Favourites';
+
+      AuthRequiredDialog.show(context, featureName: featureName);
       return;
     }
 
@@ -58,67 +71,83 @@ class _MainLayoutState extends State<MainLayout> {
                         ? 'Favorites'
                         : 'Profile',
       ),
-      body: ValueListenableBuilder<ThemeMode>(
-        valueListenable: AppThemeModeController.notifier,
-        builder: (context, _, __) {
-          return WillPopScope(
-            onWillPop: () async {
-              // If not on Home tab, go to Home and consume the back event
-              if (_currentIndex != 0) {
+      body: ValueListenableBuilder<bool>(
+        valueListenable: ProfileDatabase.authNotifier,
+        builder: (context, isLoggedIn, _) {
+          // Reset tab to Home if logged out while viewing protected tab
+          if (!isLoggedIn && (_currentIndex == 2 || _currentIndex == 3)) {
+            WidgetsBinding.instance.addPostFrameCallback((_) {
+              if (mounted) {
                 setState(() {
-                  _navigationForward = 0 > _currentIndex ? false : true;
-                  _tabHistory.add(_currentIndex);
                   _currentIndex = 0;
                 });
-                return false;
               }
+            });
+          }
 
-              // On Home tab: show non-dismissible exit confirmation
-              final shouldExit = await showDialog<bool>(
-                context: context,
-                barrierDismissible: false,
-                builder: (dialogContext) {
-                  return WillPopScope(
-                    onWillPop: () async => false,
-                    child: AlertDialog(
-                      title: const Text('Exit'),
-                      content: const Text('Are you sure you want to exit?'),
-                      actions: [
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop(false);
-                          },
-                          child: const Text('No'),
+          return ValueListenableBuilder<ThemeMode>(
+            valueListenable: AppThemeModeController.notifier,
+            builder: (context, _, __) {
+              return WillPopScope(
+                onWillPop: () async {
+                  // If not on Home tab, go to Home and consume the back event
+                  if (_currentIndex != 0) {
+                    setState(() {
+                      _navigationForward = 0 > _currentIndex ? false : true;
+                      _tabHistory.add(_currentIndex);
+                      _currentIndex = 0;
+                    });
+                    return false;
+                  }
+
+                  // On Home tab: show non-dismissible exit confirmation
+                  final shouldExit = await showDialog<bool>(
+                    context: context,
+                    barrierDismissible: false,
+                    builder: (dialogContext) {
+                      return WillPopScope(
+                        onWillPop: () async => false,
+                        child: AlertDialog(
+                          title: const Text('Exit'),
+                          content: const Text('Are you sure you want to exit?'),
+                          actions: [
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop(false);
+                              },
+                              child: const Text('No'),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.of(dialogContext).pop(true);
+                              },
+                              child: const Text('Yes'),
+                            ),
+                          ],
                         ),
-                        TextButton(
-                          onPressed: () {
-                            Navigator.of(dialogContext).pop(true);
-                          },
-                          child: const Text('Yes'),
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   );
-                },
-              );
 
-              if (shouldExit == true) {
-                // Exit the app
-                SystemNavigator.pop();
-              }
-              return false;
-            },
-            child: Column(
-              children: [
-                Expanded(
-                  child: TabPageTransition(
-                    currentIndex: _currentIndex,
-                    forward: _navigationForward,
-                    children: _screens,
-                  ),
+                  if (shouldExit == true) {
+                    // Exit the app
+                    SystemNavigator.pop();
+                  }
+                  return false;
+                },
+                child: Column(
+                  children: [
+                    Expanded(
+                      child: TabPageTransition(
+                        currentIndex: _currentIndex,
+                        forward: _navigationForward,
+                        children: _screens,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              );
+            },
           );
         },
       ),

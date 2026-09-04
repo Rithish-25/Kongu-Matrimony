@@ -2,11 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
 import '../../core/constants/constants.dart';
-import '../../core/assets/mock_data.dart';
 import '../../core/localization/app_language.dart';
 import '../../core/navigation/app_page_route.dart';
-import '../../widgets/app_profile_image.dart';
-import '../profile_details/profile_details_screen.dart';
+import '../register/register_flow.dart';
 
 class HomeScreen extends StatelessWidget {
   final ValueChanged<int> onNavigateToTab;
@@ -15,29 +13,6 @@ class HomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final profiles = ProfileDatabase.currentProfiles;
-
-    // Filter Men and Women profiles
-    final allMen = profiles.where((p) => p.gender.toLowerCase() == 'male').toList();
-    final allWomen = profiles.where((p) => p.gender.toLowerCase() == 'female').toList();
-
-    // Ensure 6 profiles for each list
-    final List<Profile> displayMen = [];
-    if (allMen.isNotEmpty) {
-      while (displayMen.length < 6) {
-        displayMen.addAll(allMen);
-      }
-    }
-    final men6 = displayMen.take(6).toList();
-
-    final List<Profile> displayWomen = [];
-    if (allWomen.isNotEmpty) {
-      while (displayWomen.length < 6) {
-        displayWomen.addAll(allWomen);
-      }
-    }
-    final women6 = displayWomen.take(6).toList();
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: ValueListenableBuilder<AppLanguage>(
@@ -53,7 +28,7 @@ class HomeScreen extends StatelessWidget {
                   // --- TOP HERO LOGO BANNER ---
                   SizedBox(
                     width: double.infinity,
-                    height: 165,
+                    height: 155,
                     child: Image.asset(
                       'assets/logo.jpeg',
                       fit: BoxFit.contain,
@@ -69,139 +44,173 @@ class HomeScreen extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 8),
+                  const SizedBox(height: 16),
 
-                  const SizedBox(height: 6),
-
-                  // Subtitle
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      AppLanguageController.text('home_subtitle'),
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.roboto(
-                        fontSize: 12.5,
-                        color: AppColors.textSecondary,
-                        height: 1.45,
+                  // --- WELCOME TO KONGU KOOTAMAIPU BANNER (IMAGE 3) ---
+                  Container(
+                    padding: const EdgeInsets.all(18),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFDFBF7),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: const Color(0xFFF3EFE6)),
+                    ),
+                    child: RichText(
+                      textAlign: TextAlign.left,
+                      text: TextSpan(
+                        style: GoogleFonts.roboto(
+                          fontSize: 13.5,
+                          height: 1.6,
+                          color: const Color(0xFF4A4A4A),
+                        ),
+                        children: [
+                          TextSpan(text: AppLanguageController.text('Welcome to ')),
+                          TextSpan(
+                            text: 'Kongu Kootamaipu™',
+                            style: GoogleFonts.roboto(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          TextSpan(
+                            text: AppLanguageController.text(
+                              ' — your trusted partner in finding lifelong companionship and happiness. We believe every individual deserves a loving, compatible life partner. Our mission is to make your journey to marriage ',
+                            ),
+                          ),
+                          TextSpan(
+                            text: AppLanguageController.text('simple, safe, and successful'),
+                            style: GoogleFonts.roboto(
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                          TextSpan(
+                            text: AppLanguageController.text(
+                              ' by combining timeless traditional values with modern, intuitive technology.',
+                            ),
+                          ),
+                        ],
                       ),
                     ),
                   ),
 
                   const SizedBox(height: 24),
 
-                  // --- SECTION 1: MEN PROFILES (GROOMS) ---
-                  _buildSectionHeader(
-                    title: AppLanguageController.isTamil
-                        ? AppLanguageController.text('men_profiles_section')
-                        : 'Men Profiles (Grooms)',
-                    icon: Icons.male_rounded,
-                    color: AppColors.secondaryDark,
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  SizedBox(
-                    height: 240,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: men6.length,
-                      separatorBuilder: (context, index) => const SizedBox(width: 12),
-                      itemBuilder: (context, index) {
-                        return _buildHorizontalProfileCard(context, men6[index], 'men-$index');
-                      },
+                  // --- PLATFORM AT A GLANCE (IMAGE 3) ---
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      AppLanguageController.text('PLATFORM AT A GLANCE'),
+                      style: GoogleFonts.roboto(
+                        fontSize: 11,
+                        fontWeight: FontWeight.bold,
+                        color: const Color(0xFF888888),
+                        letterSpacing: 0.8,
+                      ),
                     ),
                   ),
 
-                  const SizedBox(height: 28),
+                  const SizedBox(height: 12),
 
-                  // --- SECTION 2: WOMEN PROFILES (BRIDES) ---
-                  _buildSectionHeader(
-                    title: AppLanguageController.isTamil
-                        ? AppLanguageController.text('women_profiles_section')
-                        : 'Women Profiles (Brides)',
-                    icon: Icons.female_rounded,
-                    color: AppColors.primary,
-                  ),
-
-                  const SizedBox(height: 10),
-
-                  SizedBox(
-                    height: 240,
-                    child: ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      itemCount: women6.length,
-                      separatorBuilder: (context, index) => const SizedBox(width: 12),
-                      itemBuilder: (context, index) {
-                        return _buildHorizontalProfileCard(context, women6[index], 'women-$index');
-                      },
-                    ),
-                  ),
-
-                  const SizedBox(height: 28),
-
-                  // --- VIEW ALL PROFILES BUTTON (Navigates to Horoscope Screen) ---
-                  Container(
-                    width: double.infinity,
-                    height: 48,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      border: Border.all(color: AppColors.primary, width: 1.8),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppColors.primary.withValues(alpha: 0.12),
-                          blurRadius: 10,
-                          offset: const Offset(0, 4),
+                  IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        Expanded(
+                          child: _buildStatCard(
+                            count: '50K+',
+                            label: AppLanguageController.text('REGISTERED\nMEMBERS'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _buildStatCard(
+                            count: '5K+',
+                            label: AppLanguageController.text('SUCCESSFUL\nMATCHES'),
+                          ),
+                        ),
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: _buildStatCard(
+                            count: '365',
+                            label: AppLanguageController.text('DAYS OF\nSUPPORT'),
+                          ),
                         ),
                       ],
                     ),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: InkWell(
-                        onTap: () => onNavigateToTab(1), // Navigates to Horoscope Screen
-                        borderRadius: BorderRadius.circular(16),
-                        child: Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 14),
-                          child: Center(
-                            child: FittedBox(
-                              fit: BoxFit.scaleDown,
-                              child: Row(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                children: [
-                                  const Icon(
-                                    Icons.grid_view_rounded,
-                                    size: 18,
-                                    color: AppColors.primary,
+                  ),
+
+                  const SizedBox(height: 32),
+
+                  // --- READY TO FIND YOUR PARTNER CTA CARD (IMAGE 4) ---
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFFFF6ED),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: const Color(0xFFFFE5D0)),
+                    ),
+                    child: Column(
+                      children: [
+                        Text(
+                          AppLanguageController.text('Ready to Find Your Partner?'),
+                          style: GoogleFonts.roboto(
+                            fontSize: 17,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.textPrimary,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 8),
+                        Text(
+                          AppLanguageController.text(
+                            'Join thousands of happy members who found their life partner on Kongu Kootamaipu™.',
+                          ),
+                          style: GoogleFonts.roboto(
+                            fontSize: 12.5,
+                            color: const Color(0xFF666666),
+                            height: 1.4,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 18),
+                        SizedBox(
+                          height: 44,
+                          child: ElevatedButton.icon(
+                            onPressed: () {
+                              Navigator.of(context).push(
+                                appPageRoute(
+                                  const RegisterFlow(
+                                    initialStep: 0,
+                                    initialData: {},
                                   ),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    AppLanguageController.isTamil
-                                        ? AppLanguageController.text('view_all_profiles_button')
-                                        : 'View All Profiles',
-                                    style: GoogleFonts.plusJakartaSans(
-                                      fontSize: 13.5,
-                                      fontWeight: FontWeight.w800,
-                                      color: AppColors.primary,
-                                    ),
-                                  ),
-                                  const SizedBox(width: 8),
-                                  const Icon(
-                                    Icons.arrow_forward_ios_rounded,
-                                    size: 13,
-                                    color: AppColors.primary,
-                                  ),
-                                ],
+                                ),
+                              );
+                            },
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: AppColors.primary,
+                              foregroundColor: Colors.white,
+                              elevation: 0,
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(22),
+                              ),
+                            ),
+                            icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+                            label: Text(
+                              AppLanguageController.text('Create Free Profile'),
+                              style: GoogleFonts.roboto(
+                                fontSize: 14,
+                                fontWeight: FontWeight.bold,
                               ),
                             ),
                           ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
 
-                  const SizedBox(height: 24),
+                  const SizedBox(height: 32),
                 ],
               ),
             ),
@@ -211,194 +220,41 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSectionHeader({
-    required String title,
-    required IconData icon,
-    required Color color,
-  }) {
-    return Row(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(6),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, size: 18, color: color),
-        ),
-        const SizedBox(width: 8),
-        Expanded(
-          child: Text(
-            title,
-            style: GoogleFonts.poppins(
-              fontSize: 15,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-        ),
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-          decoration: BoxDecoration(
-            color: color.withValues(alpha: 0.1),
-            borderRadius: BorderRadius.circular(12),
-          ),
-          child: Text(
-            '6 ${AppLanguageController.text('profiles')}',
-            style: GoogleFonts.plusJakartaSans(
-              fontSize: 11,
-              fontWeight: FontWeight.bold,
-              color: color,
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-
-
-
-  Widget _buildHorizontalProfileCard(BuildContext context, Profile profile, String tagPrefix) {
+  Widget _buildStatCard({required String count, required String label}) {
     return Container(
-      width: 155,
+      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: AppColors.border, width: 0.9),
+        border: Border.all(color: const Color(0xFFEBEBEB)),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.08),
-            blurRadius: 8,
-            offset: const Offset(0, 3),
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          // 1. Full Image Background
-          Positioned.fill(
-            child: Hero(
-              tag: 'profile-image-${profile.id}-$tagPrefix',
-              child: AppProfileImage(
-                imageUrl: profile.profileImageUrl,
-                fit: BoxFit.cover,
-              ),
+          Text(
+            count,
+            style: GoogleFonts.roboto(
+              fontSize: 19,
+              fontWeight: FontWeight.w900,
+              color: AppColors.primary,
             ),
           ),
-
-          // 2. Dark Gradient Overlay at bottom
-          Positioned.fill(
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  stops: const [0.3, 0.65, 1.0],
-                  colors: [
-                    Colors.transparent,
-                    Colors.black.withValues(alpha: 0.45),
-                    Colors.black.withValues(alpha: 0.88),
-                  ],
-                ),
-              ),
-            ),
-          ),
-
-          // 3. Tap Navigation Overlay
-          Positioned.fill(
-            child: Material(
-              color: Colors.transparent,
-              child: InkWell(
-                onTap: () {
-                  Navigator.of(context).push(
-                    appPageRoute(
-                      ProfileDetailsScreen(
-                        profile: profile,
-                        heroTag: 'profile-image-${profile.id}-$tagPrefix',
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          ),
-
-          // 4. Bottom Overlay Info Text (Name, Age, Occupation) - NO View Details Button
-          Positioned(
-            left: 10,
-            right: 10,
-            bottom: 10,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text(
-                  profile.name,
-                  style: GoogleFonts.poppins(
-                    fontSize: 13.5,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
-                    shadows: const [
-                      Shadow(
-                        color: Colors.black54,
-                        blurRadius: 4,
-                        offset: Offset(0, 1),
-                      ),
-                    ],
-                  ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 3),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.person_outline_rounded,
-                      size: 12,
-                      color: Colors.white70,
-                    ),
-                    const SizedBox(width: 3),
-                    Expanded(
-                      child: Text(
-                        '${profile.age} ${AppLanguageController.text('yrs')}',
-                        style: GoogleFonts.poppins(
-                          fontSize: 10.5,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white70,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 2),
-                Row(
-                  children: [
-                    const Icon(
-                      Icons.business_center_outlined,
-                      size: 12,
-                      color: Colors.white70,
-                    ),
-                    const SizedBox(width: 3),
-                    Expanded(
-                      child: Text(
-                        profile.occupation,
-                        style: GoogleFonts.poppins(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.white70,
-                        ),
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ),
-                  ],
-                ),
-              ],
+          const SizedBox(height: 6),
+          Text(
+            label,
+            textAlign: TextAlign.center,
+            style: GoogleFonts.roboto(
+              fontSize: 9.5,
+              fontWeight: FontWeight.bold,
+              color: const Color(0xFF888888),
+              height: 1.2,
             ),
           ),
         ],

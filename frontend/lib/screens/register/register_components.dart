@@ -68,61 +68,72 @@ class RegisterComponents {
     int maxLines = 1,
     String? hint,
     List<TextInputFormatter>? inputFormatters,
+    bool marginBottom = true,
   }) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
-      child: TextFormField(
-        key: ValueKey('${fieldKey}_$currentStep'),
-        initialValue: formData[fieldKey] ?? '',
-        onChanged: (val) => onChanged(fieldKey, val),
-        validator: validator,
-        keyboardType: keyboardType,
-        maxLines: maxLines,
-        inputFormatters: inputFormatters,
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
+    final fieldWidget = TextFormField(
+      key: ValueKey('${fieldKey}_$currentStep'),
+      initialValue: formData[fieldKey] ?? '',
+      onChanged: (val) => onChanged(fieldKey, val),
+      validator: validator,
+      keyboardType: keyboardType,
+      maxLines: maxLines,
+      inputFormatters: inputFormatters,
+      style: GoogleFonts.plusJakartaSans(
+        fontSize: 14,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      ),
+      decoration: InputDecoration(
+        isDense: true,
+        labelText: AppLanguageController.text(label),
+        hintText: hint != null ? AppLanguageController.text(hint) : null,
+        labelStyle: GoogleFonts.plusJakartaSans(
+          color: AppColors.textSecondary,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
         ),
-        decoration: InputDecoration(
-          labelText: AppLanguageController.text(label),
-          hintText: hint != null ? AppLanguageController.text(hint) : null,
-          labelStyle: GoogleFonts.plusJakartaSans(
-            color: AppColors.textPrimary,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-          floatingLabelStyle: GoogleFonts.plusJakartaSans(
-            color: AppColors.textPrimary,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-          errorStyle: GoogleFonts.plusJakartaSans(
-            color: AppColors.error,
-            fontSize: 11.5,
-            fontWeight: FontWeight.w500,
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          filled: true,
-          fillColor: const Color(0xFFFAFAFA),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.error, width: 1),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.error, width: 1.5),
-          ),
+        hintStyle: GoogleFonts.plusJakartaSans(
+          color: const Color(0xFF94A3B8),
+          fontSize: 13,
+          fontWeight: FontWeight.normal,
+        ),
+        floatingLabelStyle: GoogleFonts.plusJakartaSans(
+          color: AppColors.primary,
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+        ),
+        errorStyle: GoogleFonts.plusJakartaSans(
+          color: AppColors.error,
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        filled: true,
+        fillColor: const Color(0xFFFAFAFA),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.error, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
         ),
       ),
+    );
+
+    if (!marginBottom) return fieldWidget;
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
+      child: fieldWidget,
     );
   }
 
@@ -133,81 +144,127 @@ class RegisterComponents {
     required Function(String, String) onChanged,
     required int currentStep,
     required List<String> items,
+    List<String>? dividerAfterItems,
     String? Function(String?)? validator,
+    bool marginBottom = true,
   }) {
     final value = formData[fieldKey];
     final selected = items.contains(value) ? value : null;
 
+    final fieldWidget = DropdownButtonFormField<String>(
+      key: ValueKey('${fieldKey}_$currentStep'),
+      initialValue: selected,
+      isExpanded: true,
+      onChanged: (val) => onChanged(fieldKey, val ?? ''),
+      validator: (val) {
+        final err = validator?.call(val);
+        if (err != null) {
+          return AppLanguageController.text(err);
+        }
+        return null;
+      },
+      icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary, size: 24),
+      style: GoogleFonts.plusJakartaSans(
+        fontSize: 13.5,
+        fontWeight: FontWeight.w600,
+        color: AppColors.textPrimary,
+      ),
+      selectedItemBuilder: (context) {
+        return items.map((item) {
+          return Text(
+            AppLanguageController.text(item),
+            style: GoogleFonts.plusJakartaSans(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+            ),
+            overflow: TextOverflow.ellipsis,
+          );
+        }).toList();
+      },
+      decoration: InputDecoration(
+        isDense: true,
+        labelText: label.isNotEmpty ? AppLanguageController.text(label) : null,
+        labelStyle: GoogleFonts.plusJakartaSans(
+          color: AppColors.textSecondary,
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
+        hintStyle: GoogleFonts.plusJakartaSans(
+          color: const Color(0xFF94A3B8),
+          fontSize: 13,
+          fontWeight: FontWeight.normal,
+        ),
+        floatingLabelStyle: GoogleFonts.plusJakartaSans(
+          color: AppColors.primary,
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
+        ),
+        errorStyle: GoogleFonts.plusJakartaSans(
+          color: AppColors.error,
+          fontSize: 11,
+          fontWeight: FontWeight.w500,
+        ),
+        contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+        filled: true,
+        fillColor: const Color(0xFFFAFAFA),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.error, width: 1),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: AppColors.error, width: 1.5),
+        ),
+      ),
+      items: items
+          .map((item) {
+            final bool hasDivider = dividerAfterItems != null && dividerAfterItems.contains(item);
+            return DropdownMenuItem(
+              value: item,
+              child: hasDivider
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          AppLanguageController.text(item),
+                          style: GoogleFonts.plusJakartaSans(
+                            fontSize: 14,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textPrimary,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        const Divider(height: 1, thickness: 1, color: Color(0xFFCBD5E1)),
+                      ],
+                    )
+                  : Text(
+                      AppLanguageController.text(item),
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+            );
+          })
+          .toList(),
+    );
+
+    if (!marginBottom) return fieldWidget;
+
     return Padding(
       padding: const EdgeInsets.only(bottom: AppConstants.spacingM),
-      child: DropdownButtonFormField<String>(
-        key: ValueKey('${fieldKey}_$currentStep'),
-        initialValue: selected,
-        onChanged: (val) => onChanged(fieldKey, val ?? ''),
-        validator: (val) {
-          final err = validator?.call(val);
-          if (err != null) {
-            return AppLanguageController.text(err);
-          }
-          return null;
-        },
-        icon: const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary, size: 24),
-        style: GoogleFonts.plusJakartaSans(
-          fontSize: 14,
-          fontWeight: FontWeight.w600,
-          color: AppColors.textPrimary,
-        ),
-        decoration: InputDecoration(
-          labelText: AppLanguageController.text(label),
-          labelStyle: GoogleFonts.plusJakartaSans(
-            color: AppColors.textPrimary,
-            fontSize: 14,
-            fontWeight: FontWeight.w600,
-          ),
-          floatingLabelStyle: GoogleFonts.plusJakartaSans(
-            color: AppColors.textPrimary,
-            fontSize: 14,
-            fontWeight: FontWeight.bold,
-          ),
-          errorStyle: GoogleFonts.plusJakartaSans(
-            color: AppColors.error,
-            fontSize: 11.5,
-            fontWeight: FontWeight.w500,
-          ),
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-          filled: true,
-          fillColor: const Color(0xFFFAFAFA),
-          enabledBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-          ),
-          focusedBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
-          ),
-          errorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.error, width: 1),
-          ),
-          focusedErrorBorder: OutlineInputBorder(
-            borderRadius: BorderRadius.circular(12),
-            borderSide: const BorderSide(color: AppColors.error, width: 1.5),
-          ),
-        ),
-        items: items
-            .map((item) => DropdownMenuItem(
-                  value: item,
-                  child: Text(
-                    AppLanguageController.text(item),
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
-                    ),
-                  ),
-                ))
-            .toList(),
-      ),
+      child: fieldWidget,
     );
   }
 

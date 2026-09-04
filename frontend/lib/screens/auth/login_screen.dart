@@ -5,7 +5,6 @@ import '../../core/colors/colors.dart';
 import '../../core/assets/mock_data.dart';
 import '../../core/assets/registration_draft.dart';
 import '../main_layout.dart';
-import '../register/register_flow.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -15,427 +14,695 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  final _formKey = GlobalKey<FormState>();
-  final TextEditingController _mobileController = TextEditingController();
+  int _currentStep = 1; // 1: BASIC DETAILS, 2: LOGIN & ACCESS
+
+  final _step1FormKey = GlobalKey<FormState>();
+  final _step2FormKey = GlobalKey<FormState>();
+
+  final TextEditingController _firstNameController = TextEditingController();
+  final TextEditingController _lastNameController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
 
+  bool _autoLogin = true;
+  bool _obscurePassword = true;
   bool _loading = false;
 
   @override
+  void initState() {
+    super.initState();
+    _loadExistingDraft();
+  }
+
+  Future<void> _loadExistingDraft() async {
+    final details = await RegistrationDraft.loadProfileDetails();
+    if (details.isNotEmpty) {
+      final nameParts = (details['name'] ?? '').split(' ');
+      if (nameParts.isNotEmpty) {
+        _firstNameController.text = nameParts.first;
+        if (nameParts.length > 1) {
+          _lastNameController.text = nameParts.sublist(1).join(' ');
+        }
+      }
+      if (details['mobile'] != null) {
+        _phoneController.text = details['mobile']!;
+      }
+      if (details['email'] != null) {
+        _emailController.text = details['email']!;
+      }
+    }
+  }
+
+  @override
   void dispose() {
-    _mobileController.dispose();
+    _firstNameController.dispose();
+    _lastNameController.dispose();
+    _phoneController.dispose();
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  void _submit() async {
-    if (!_formKey.currentState!.validate()) return;
+  void _goToStep2() {
+    if (_step1FormKey.currentState!.validate()) {
+      setState(() {
+        _currentStep = 2;
+      });
+    }
+  }
+
+  void _goToStep1() {
+    setState(() {
+      _currentStep = 1;
+    });
+  }
+
+  void _submitRegisterAndLogin() async {
+    if (!_step2FormKey.currentState!.validate()) return;
 
     setState(() => _loading = true);
 
-    // Simulate authentication delay
-    await Future.delayed(const Duration(milliseconds: 700));
+    await Future.delayed(const Duration(milliseconds: 600));
 
-    final enteredMobile = _mobileController.text.trim();
-    final enteredPassword = _passwordController.text;
+    final firstName = _firstNameController.text.trim();
+    final lastName = _lastNameController.text.trim();
+    final fullName = '$firstName $lastName'.trim();
+    final phone = _phoneController.text.trim();
+    final email = _emailController.text.trim();
+    final password = _passwordController.text;
 
-    final profileDetails = await RegistrationDraft.loadProfileDetails();
-    var registeredMobile = profileDetails['mobile'];
-    var registeredPassword = profileDetails['password'];
-    var registeredName = profileDetails['name'] ?? 'User';
+    final profileData = {
+      'name': fullName.isNotEmpty ? fullName : 'User',
+      'mobile': phone,
+      'email': email,
+      'password': password,
+    };
 
-    if (registeredMobile == null || enteredMobile != registeredMobile) {
-      final draftData = await RegistrationDraft.loadDraftData();
-      final draftMobile = draftData['mobile'];
-      if (draftMobile != null && enteredMobile == draftMobile) {
-        registeredMobile = draftMobile;
-        registeredPassword = draftData['password'];
-        registeredName = draftData['name'] ?? 'User';
-        await RegistrationDraft.saveProfileDetails(draftData);
-      }
+    await RegistrationDraft.saveProfileDetails(profileData);
+    await ProfileDatabase.updateUserProfile(displayName: fullName.isNotEmpty ? fullName : 'User');
+
+    if (_autoLogin) {
+      await ProfileDatabase.login();
     }
 
-    // Auto-registration fallback for testing convenience if SharedPreferences/local storage is cleared on web reload
-    if (registeredMobile == null || enteredMobile != registeredMobile) {
-      registeredMobile = enteredMobile;
-      registeredPassword = enteredPassword;
-      registeredName = 'User';
-      await RegistrationDraft.saveProfileDetails({
-        'mobile': enteredMobile,
-        'password': enteredPassword,
-        'name': registeredName,
-      });
-    }
-
-    if (enteredMobile != registeredMobile) {
-      setState(() => _loading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Mobile number not registered. Please register first!'),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-      return;
-    }
-
-    if (registeredPassword != null && registeredPassword.isNotEmpty && enteredPassword != registeredPassword) {
-      setState(() => _loading = false);
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('Incorrect password. Please try again.'),
-            behavior: SnackBarBehavior.floating,
-            backgroundColor: AppColors.error,
-          ),
-        );
-      }
-      return;
-    }
-
-    // Save the name to the mock user state and mark logged in
-    await ProfileDatabase.updateUserProfile(displayName: registeredName);
-    await ProfileDatabase.login();
-
-    // Navigate to MainLayout with a slide+fade transition
     if (mounted) {
-      Navigator.of(context).pushReplacement(PageRouteBuilder(
-        transitionDuration: const Duration(milliseconds: 500),
-        pageBuilder: (context, animation, secondaryAnimation) => const MainLayout(),
-        transitionsBuilder: (context, animation, secondaryAnimation, child) {
-          final offsetAnimation = Tween<Offset>(begin: const Offset(0.25, 0), end: Offset.zero)
-              .chain(CurveTween(curve: Curves.easeOutCubic))
-              .animate(animation);
-          final fade = CurvedAnimation(parent: animation, curve: Curves.easeIn);
-          return SlideTransition(
-            position: offsetAnimation,
-            child: FadeTransition(opacity: fade, child: child),
-          );
-        },
-      ));
-    }
+      setState(() => _loading = false);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_autoLogin ? 'Account created and logged in successfully!' : 'Account setup completed!'),
+          behavior: SnackBarBehavior.floating,
+          backgroundColor: AppColors.primary,
+        ),
+      );
 
-    setState(() => _loading = false);
+      Navigator.of(context).pushReplacement(
+        MaterialPageRoute(builder: (context) => const MainLayout()),
+      );
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
-      body: Container(
-        color: Colors.white,
-        child: SafeArea(
-          child: Center(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  // App Branding / Splash Illustration
-                  Container(
-                    width: 260,
-                    height: 190,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(24),
-                      border: Border.all(
-                        color: const Color(0xFFE5E7EB),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
+      backgroundColor: const Color(0xFFF4F6F9),
+      body: SafeArea(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              physics: const BouncingScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight,
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+                  child: IntrinsicHeight(
+                    child: Column(
+                      children: [
+                        const Spacer(flex: 1),
+                        // Top Progress Card & Header
+                        _buildProgressHeader(),
+                        const SizedBox(height: 16),
+
+                        // Form Content Card
+                        _currentStep == 1 ? _buildStep1BasicDetails() : _buildStep2LoginAndAccess(),
+                        const Spacer(flex: 3),
                       ],
-                      image: const DecorationImage(
-                        image: AssetImage('assets/login.png'),
-                        fit: BoxFit.cover,
-                      ),
                     ),
                   ),
-                  const SizedBox(height: 20),
-                  
-                  // Welcome Header
+                ),
+              ),
+            );
+          },
+        ),
+      ),
+    );
+  }
+
+  // --- TOP PROGRESS HEADER ---
+  Widget _buildProgressHeader() {
+    final double progressPercent = _currentStep == 1 ? 0.5 : 1.0;
+    final String progressText = _currentStep == 1 ? '50% (1/2)' : '100% (2/2)';
+    final String stepTitle = _currentStep == 1 ? 'STEP 1: BASIC DETAILS' : 'STEP 2: LOGIN & ACCESS';
+
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(18),
+        border: Border.all(color: const Color(0xFFE2E8F0)),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.03),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Expanded(
+                child: Text(
+                  stepTitle,
+                  style: GoogleFonts.roboto(
+                    fontSize: 12.5,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                    letterSpacing: 0.5,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ),
+              const SizedBox(width: 8),
+              Text(
+                'PROGRESS BAR $progressText',
+                style: GoogleFonts.roboto(
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.primary,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(8),
+            child: LinearProgressIndicator(
+              value: progressPercent,
+              minHeight: 8,
+              backgroundColor: const Color(0xFFE2E8F0),
+              valueColor: const AlwaysStoppedAnimation<Color>(AppColors.primary),
+            ),
+          ),
+          const SizedBox(height: 12),
+          InkWell(
+            onTap: () {
+              if (_currentStep == 2) {
+                _goToStep1();
+              } else {
+                Navigator.of(context).maybePop();
+              }
+            },
+            borderRadius: BorderRadius.circular(8),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 4, horizontal: 2),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  const Icon(Icons.arrow_back_ios_new_rounded, size: 14, color: AppColors.primary),
+                  const SizedBox(width: 6),
                   Text(
-                    'Welcome',
-                    style: GoogleFonts.playfairDisplay(
-                      fontSize: 34,
+                    'BACK',
+                    style: GoogleFonts.roboto(
+                      fontSize: 13,
                       fontWeight: FontWeight.bold,
                       color: AppColors.primary,
-                      letterSpacing: 0.5,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    'Login to discover your soulmate',
-                    style: GoogleFonts.plusJakartaSans(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w500,
-                      color: AppColors.textSecondary,
-                    ),
-                  ),
-                  const SizedBox(height: 24),
-
-                  // Login Form Card
-                  Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(28),
-                      border: Border.all(
-                        color: const Color(0xFFE5E7EB),
-                        width: 1.5,
-                      ),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.04),
-                          blurRadius: 24,
-                          offset: const Offset(0, 12),
-                        ),
-                      ],
-                    ),
-                    child: Form(
-                      key: _formKey,
-                      child: Column(
-                        children: [
-
-
-                          // Mobile Input
-                          TextFormField(
-                            controller: _mobileController,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 15,
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: 'Mobile',
-                              labelStyle: GoogleFonts.plusJakartaSans(
-                                color: AppColors.textLight,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              prefixIcon: const Icon(
-                                Icons.phone_android_rounded,
-                                color: AppColors.primary,
-                                size: 22,
-                              ),
-                              filled: true,
-                              fillColor: const Color(0xFFFAFAFA),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: AppColors.primary, width: 1.6),
-                              ),
-                              errorBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: AppColors.error),
-                              ),
-                              focusedErrorBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: AppColors.error, width: 1.6),
-                              ),
-                            ),
-                            keyboardType: TextInputType.phone,
-                            textInputAction: TextInputAction.next,
-                            inputFormatters: [
-                              FilteringTextInputFormatter.digitsOnly,
-                              LengthLimitingTextInputFormatter(10),
-                              TextInputFormatter.withFunction((oldValue, newValue) {
-                                if (newValue.text.startsWith('0')) {
-                                  return oldValue;
-                                }
-                                return newValue;
-                              }),
-                            ],
-                            validator: (val) {
-                              if (val == null || val.trim().isEmpty) {
-                                return 'Please enter mobile number';
-                              }
-                              final trimmed = val.trim();
-                              if (trimmed.startsWith('0')) {
-                                return 'Mobile number cannot start with 0';
-                              }
-                              if (trimmed.length != 10) {
-                                return 'Mobile number must be exactly 10 digits';
-                              }
-                              return null;
-                            },
-                          ),
-                          const SizedBox(height: 16),
-
-                          // Password Input
-                          TextFormField(
-                            controller: _passwordController,
-                            style: GoogleFonts.plusJakartaSans(
-                              fontSize: 15,
-                              color: AppColors.textPrimary,
-                              fontWeight: FontWeight.w600,
-                            ),
-                            decoration: InputDecoration(
-                              labelText: 'Password',
-                              labelStyle: GoogleFonts.plusJakartaSans(
-                                color: AppColors.textLight,
-                                fontWeight: FontWeight.w500,
-                              ),
-                              prefixIcon: const Icon(
-                                Icons.lock_outline_rounded,
-                                color: AppColors.primary,
-                                size: 22,
-                              ),
-                              filled: true,
-                              fillColor: const Color(0xFFFAFAFA),
-                              contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-                              enabledBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: Color(0xFFE5E7EB)),
-                              ),
-                              focusedBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: AppColors.primary, width: 1.6),
-                              ),
-                              errorBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: AppColors.error),
-                              ),
-                              focusedErrorBorder: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(16),
-                                borderSide: const BorderSide(color: AppColors.error, width: 1.6),
-                              ),
-                            ),
-                            obscureText: true,
-                            textInputAction: TextInputAction.done,
-                            validator: (val) {
-                              return null;
-                            },
-                          ),
-                           const SizedBox(height: 18),
-
-                           // Premium Login Button
-                           Container(
-                             width: double.infinity,
-                             height: 48,
-                             decoration: BoxDecoration(
-                               gradient: AppColors.primaryGradient,
-                               borderRadius: BorderRadius.circular(12),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: Colors.black.withValues(alpha: 0.12),
-                                  blurRadius: 16,
-                                  offset: const Offset(0, 6),
-                                ),
-                              ],
-                            ),
-                            child: ElevatedButton(
-                              onPressed: _loading ? null : _submit,
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.transparent,
-                                foregroundColor: Colors.white,
-                                shadowColor: Colors.transparent,
-                                 shape: RoundedRectangleBorder(
-                                   borderRadius: BorderRadius.circular(12),
-                                 ),
-                                 padding: EdgeInsets.zero,
-                              ),
-                              child: _loading
-                                  ? const SizedBox(
-                                      height: 20,
-                                      width: 20,
-                                      child: CircularProgressIndicator(
-                                        strokeWidth: 2.5,
-                                        color: Colors.white,
-                                      ),
-                                    )
-                                  : Text(
-                                      'Login',
-                                      style: GoogleFonts.plusJakartaSans(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w700,
-                                        letterSpacing: 0.5,
-                                      ),
-                                    ),
-                            ),
-                          ),
-                           const SizedBox(height: 16),
-                           Text(
-                             'New Member? Join Now',
-                             style: GoogleFonts.plusJakartaSans(
-                               fontSize: 13,
-                               fontWeight: FontWeight.w600,
-                               color: AppColors.textSecondary,
-                             ),
-                           ),
-                           const SizedBox(height: 12),
-                           Container(
-                             width: double.infinity,
-                             height: 44,
-                             decoration: BoxDecoration(
-                               gradient: AppColors.primaryGradient,
-                               borderRadius: BorderRadius.circular(12),
-                               boxShadow: [
-                                 BoxShadow(
-                                   color: Colors.black.withValues(alpha: 0.12),
-                                   blurRadius: 16,
-                                   offset: const Offset(0, 6),
-                                 ),
-                               ],
-                             ),
-                             child: ElevatedButton(
-                                onPressed: () async {
-                                  final hasDraft = await RegistrationDraft.hasDraft();
-                                  int initialStep = 0;
-                                  Map<String, String> initialData = {};
-                                  if (hasDraft) {
-                                    initialStep = await RegistrationDraft.loadDraftStep();
-                                    initialData = await RegistrationDraft.loadDraftData();
-                                  }
-                                  if (context.mounted) {
-                                    Navigator.of(context).push(
-                                      MaterialPageRoute(
-                                        builder: (context) => RegisterFlow(
-                                          initialStep: initialStep,
-                                          initialData: initialData,
-                                        ),
-                                      ),
-                                    );
-                                  }
-                                },
-                               style: ElevatedButton.styleFrom(
-                                 backgroundColor: Colors.transparent,
-                                 foregroundColor: Colors.white,
-                                 shadowColor: Colors.transparent,
-                                 shape: RoundedRectangleBorder(
-                                   borderRadius: BorderRadius.circular(12),
-                                 ),
-                                 padding: EdgeInsets.zero,
-                               ),
-                               child: Text(
-                                 'Register',
-                                 style: GoogleFonts.plusJakartaSans(
-                                   fontSize: 14,
-                                   fontWeight: FontWeight.bold,
-                                   letterSpacing: 0.5,
-                                 ),
-                               ),
-                             ),
-                           ),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 20),
                 ],
               ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  // --- STEP 1: BASIC DETAILS ---
+  Widget _buildStep1BasicDetails() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Form(
+        key: _step1FormKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  'Basic Details',
+                  style: GoogleFonts.roboto(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                Container(
+                  width: 46,
+                  height: 46,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.08),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.person_outline_rounded,
+                    color: AppColors.primary,
+                    size: 26,
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+
+            // First Name & Last Name Side by Side
+            Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'First Name',
+                        style: GoogleFonts.roboto(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _firstNameController,
+                        style: GoogleFonts.roboto(fontSize: 13.5, color: AppColors.textPrimary),
+                        decoration: InputDecoration(
+                          hintText: 'First name',
+                          hintStyle: GoogleFonts.roboto(fontSize: 13, color: const Color(0xFF94A3B8)),
+                          filled: true,
+                          fillColor: const Color(0xFFFAFAFA),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                          ),
+                        ),
+                        validator: (val) {
+                          if (val == null || val.trim().isEmpty) {
+                            return 'First name required';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Last Name',
+                        style: GoogleFonts.roboto(
+                          fontSize: 13.5,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      TextFormField(
+                        controller: _lastNameController,
+                        style: GoogleFonts.roboto(fontSize: 13.5, color: AppColors.textPrimary),
+                        decoration: InputDecoration(
+                          hintText: 'Last name',
+                          hintStyle: GoogleFonts.roboto(fontSize: 13, color: const Color(0xFF94A3B8)),
+                          filled: true,
+                          fillColor: const Color(0xFFFAFAFA),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                          ),
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                            borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                          ),
+                        ),
+                        validator: (val) {
+                          if (val == null || val.trim().isEmpty) {
+                            return 'Last name required';
+                          }
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+
+            // Phone Number Field
+            Text(
+              'Phone Number',
+              style: GoogleFonts.roboto(
+                fontSize: 13.5,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: _phoneController,
+              keyboardType: TextInputType.phone,
+              style: GoogleFonts.roboto(fontSize: 14, color: AppColors.textPrimary),
+              inputFormatters: [
+                FilteringTextInputFormatter.digitsOnly,
+                LengthLimitingTextInputFormatter(10),
+              ],
+              decoration: InputDecoration(
+                hintText: 'Phone Number',
+                prefixIcon: const Icon(Icons.phone_android_rounded, size: 20, color: AppColors.primary),
+                filled: true,
+                fillColor: const Color(0xFFFAFAFA),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                ),
+              ),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return 'Phone number required';
+                }
+                if (val.trim().length != 10) {
+                  return 'Must be 10 digits';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 32),
+
+            // Continue Primary Sticky Action Button
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _goToStep2,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'CONTINUE',
+                  style: GoogleFonts.roboto(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- STEP 2: SETUP YOUR ACCOUNT ---
+  Widget _buildStep2LoginAndAccess() {
+    return Container(
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.04),
+            blurRadius: 16,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Form(
+        key: _step2FormKey,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Setup Your Account',
+              style: GoogleFonts.roboto(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Choose Email Address
+            Text(
+              'Choose Email Address',
+              style: GoogleFonts.roboto(
+                fontSize: 13.5,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: _emailController,
+              keyboardType: TextInputType.emailAddress,
+              style: GoogleFonts.roboto(fontSize: 14, color: AppColors.textPrimary),
+              decoration: InputDecoration(
+                hintText: 'Enter email address',
+                prefixIcon: const Icon(Icons.email_outlined, size: 20, color: AppColors.primary),
+                filled: true,
+                fillColor: const Color(0xFFFAFAFA),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                ),
+              ),
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) {
+                  return 'Email address required';
+                }
+                if (!val.contains('@') || !val.contains('.')) {
+                  return 'Enter valid email address';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 20),
+
+            // Create Password
+            Text(
+              'Create Password',
+              style: GoogleFonts.roboto(
+                fontSize: 13.5,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 6),
+            TextFormField(
+              controller: _passwordController,
+              obscureText: _obscurePassword,
+              style: GoogleFonts.roboto(fontSize: 14, color: AppColors.textPrimary),
+              decoration: InputDecoration(
+                hintText: 'Create password',
+                prefixIcon: const Icon(Icons.lock_outline_rounded, size: 20, color: AppColors.primary),
+                suffixIcon: IconButton(
+                  icon: Icon(
+                    _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
+                    color: AppColors.textSecondary,
+                    size: 20,
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _obscurePassword = !_obscurePassword;
+                    });
+                  },
+                ),
+                filled: true,
+                fillColor: const Color(0xFFFAFAFA),
+                contentPadding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                ),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: Color(0xFFCBD5E1)),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: const BorderSide(color: AppColors.primary, width: 1.5),
+                ),
+              ),
+              validator: (val) {
+                if (val == null || val.isEmpty) {
+                  return 'Password required';
+                }
+                if (val.length < 4) {
+                  return 'Password must be at least 4 characters';
+                }
+                return null;
+              },
+            ),
+            const SizedBox(height: 16),
+
+            // Auto-login Option Checkbox
+            Row(
+              children: [
+                SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: Checkbox(
+                    value: _autoLogin,
+                    activeColor: AppColors.primary,
+                    onChanged: (val) {
+                      setState(() {
+                        _autoLogin = val ?? true;
+                      });
+                    },
+                  ),
+                ),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    'Log me in immediately after registration',
+                    style: GoogleFonts.roboto(
+                      fontSize: 13,
+                      color: AppColors.textPrimary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 28),
+
+            // Primary CTA: REGISTER & LOGIN
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: ElevatedButton(
+                onPressed: _loading ? null : _submitRegisterAndLogin,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: _loading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2.5,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Text(
+                        'REGISTER & LOGIN',
+                        style: GoogleFonts.roboto(
+                          fontSize: 15,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 0.8,
+                        ),
+                      ),
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // Secondary CTA: BACK
+            SizedBox(
+              width: double.infinity,
+              height: 48,
+              child: OutlinedButton(
+                onPressed: _goToStep1,
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppColors.primary,
+                  side: const BorderSide(color: AppColors.primary, width: 1.5),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                child: Text(
+                  'BACK',
+                  style: GoogleFonts.roboto(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 0.8,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

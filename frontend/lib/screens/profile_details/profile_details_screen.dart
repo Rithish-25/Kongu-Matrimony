@@ -6,6 +6,7 @@ import '../../core/assets/mock_data.dart';
 import '../../core/localization/app_language.dart';
 import '../../widgets/appbar/custom_app_bar.dart';
 import '../../widgets/app_profile_image.dart';
+import '../../widgets/auth_required_dialog.dart';
 
 class ProfileDetailsScreen extends StatefulWidget {
   final Profile profile;
@@ -1151,6 +1152,11 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   }
 
   Future<void> _handleHoroscopeDownload(BuildContext context, Profile profile) async {
+    if (!ProfileDatabase.isLoggedIn) {
+      AuthRequiredDialog.show(context, featureName: 'Horoscope');
+      return;
+    }
+
     final userState = ProfileDatabase.userProfileNotifier.value;
     final plan = userState.plan.toLowerCase();
 
@@ -1451,6 +1457,10 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
                         onTap: () {
+                          if (!ProfileDatabase.isLoggedIn) {
+                            AuthRequiredDialog.show(context, featureName: 'Favourites');
+                            return;
+                          }
                           final wasFav = isFav;
                           ProfileDatabase.toggleFavorite(currentProfile.id);
                           setState(() {});
@@ -1515,6 +1525,10 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                       child: InkWell(
                         borderRadius: BorderRadius.circular(12),
                         onTap: () {
+                          if (!ProfileDatabase.isLoggedIn) {
+                            AuthRequiredDialog.show(context, featureName: 'Interests');
+                            return;
+                          }
                           ProfileDatabase.updateInterest(currentProfile.id, 'sent');
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(

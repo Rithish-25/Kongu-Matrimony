@@ -313,6 +313,7 @@ class ProfileDatabase {
   static const _kIsLoggedIn = 'user_is_logged_in';
 
   static bool _isLoggedIn = false;
+  static final ValueNotifier<bool> authNotifier = ValueNotifier<bool>(false);
 
   static const _kFavourites = 'user_favourites';
   static const _kInterests = 'user_interests';
@@ -328,6 +329,7 @@ class ProfileDatabase {
       final isLogged = prefs.getBool(_kIsLoggedIn);
 
       _isLoggedIn = isLogged ?? false;
+      authNotifier.value = _isLoggedIn;
 
       final profileDetails = await RegistrationDraft.loadProfileDetails();
       final savedName = profileDetails['name']?.trim();
@@ -381,6 +383,16 @@ class ProfileDatabase {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_kIsLoggedIn, true);
       _isLoggedIn = true;
+      authNotifier.value = true;
+    } catch (_) {}
+  }
+
+  static Future<void> logout() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool(_kIsLoggedIn, false);
+      _isLoggedIn = false;
+      authNotifier.value = false;
     } catch (_) {}
   }
 

@@ -139,9 +139,19 @@ class AppTheme {
         filled: true,
         fillColor: const Color(0xFFFFFFFF),
         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        labelStyle: GoogleFonts.poppins(
+          color: const Color(0xFF64748B),
+          fontSize: 13,
+          fontWeight: FontWeight.w500,
+        ),
         hintStyle: GoogleFonts.poppins(
           color: const Color(0xFF94A3B8),
           fontSize: 13,
+        ),
+        floatingLabelStyle: GoogleFonts.poppins(
+          color: AppColors.primary,
+          fontSize: 13,
+          fontWeight: FontWeight.bold,
         ),
         prefixIconColor: AppColors.primary,
         suffixIconColor: AppColors.secondaryDark,

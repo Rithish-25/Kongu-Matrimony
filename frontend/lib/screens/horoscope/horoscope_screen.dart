@@ -9,6 +9,7 @@ import '../../core/localization/app_language.dart';
 import '../../widgets/cards/empty_state_widget.dart';
 import '../../widgets/app_profile_image.dart';
 import '../profile_details/profile_details_screen.dart';
+import '../../widgets/auth_required_dialog.dart';
 
 class HoroscopeScreen extends StatefulWidget {
   const HoroscopeScreen({super.key});
@@ -362,6 +363,21 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     );
   }
 
+  void _openProfile(BuildContext context, Profile profile) {
+    if (!ProfileDatabase.isLoggedIn) {
+      AuthRequiredDialog.show(context, featureName: 'Profile Details');
+      return;
+    }
+    Navigator.of(context).push(
+      appPageRoute(
+        ProfileDetailsScreen(
+          profile: profile,
+          heroTag: 'profile-image-${profile.id}-searchresult',
+        ),
+      ),
+    );
+  }
+
   Widget _buildGridProfileCard(BuildContext context, Profile profile) {
     final translatedOccupation = AppLanguageController.text(profile.occupation.toLowerCase());
     final displayOccupation = (translatedOccupation == profile.occupation.toLowerCase())
@@ -413,23 +429,12 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
             ),
           ),
 
-
-
           // 4. InkWell overlay for card tap navigation
           Positioned.fill(
             child: Material(
               color: Colors.transparent,
               child: InkWell(
-                onTap: () {
-                  Navigator.of(context).push(
-                    appPageRoute(
-                      ProfileDetailsScreen(
-                        profile: profile,
-                        heroTag: 'profile-image-${profile.id}-searchresult',
-                      ),
-                    ),
-                  );
-                },
+                onTap: () => _openProfile(context, profile),
               ),
             ),
           ),
@@ -512,16 +517,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
                   width: double.infinity,
                   height: 32,
                   child: ElevatedButton(
-                    onPressed: () {
-                      Navigator.of(context).push(
-                        appPageRoute(
-                          ProfileDetailsScreen(
-                            profile: profile,
-                            heroTag: 'profile-image-${profile.id}-searchresult',
-                          ),
-                        ),
-                      );
-                    },
+                    onPressed: () => _openProfile(context, profile),
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
