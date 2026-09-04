@@ -19,8 +19,6 @@ class HoroscopeScreen extends StatefulWidget {
 }
 
 class HoroscopeScreenState extends State<HoroscopeScreen> {
-  // Results view trigger
-  bool _showResults = false;
   List<Profile> _searchResults = [];
 
   // Form State Values
@@ -44,12 +42,14 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     _initializeDefaultSearch();
     ProfileDatabase.notifier.addListener(_onDatabaseChanged);
     ProfileDatabase.userProfileNotifier.addListener(_onDatabaseChanged);
+    ProfileDatabase.authNotifier.addListener(_onDatabaseChanged);
   }
 
   @override
   void dispose() {
     ProfileDatabase.notifier.removeListener(_onDatabaseChanged);
     ProfileDatabase.userProfileNotifier.removeListener(_onDatabaseChanged);
+    ProfileDatabase.authNotifier.removeListener(_onDatabaseChanged);
     super.dispose();
   }
 
@@ -60,68 +60,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
   }
 
   void _initializeDefaultSearch() {
-    final allProfiles = ProfileDatabase.currentProfiles;
-    final minAge = int.tryParse(_selectedMinAge) ?? 18;
-    final maxAge = int.tryParse(_selectedMaxAge) ?? 40;
-
-    int? minHeight = _parseHeightToInches(_selectedMinHeight);
-    int? maxHeight = _parseHeightToInches(_selectedMaxHeight);
-    if (minHeight != null && maxHeight != null && minHeight > maxHeight) {
-      final temp = minHeight;
-      minHeight = maxHeight;
-      maxHeight = temp;
-    }
-
-    final bool isLoggedIn = ProfileDatabase.isLoggedIn;
-    final String userGender = isLoggedIn ? ProfileDatabase.userProfileNotifier.value.userGender.trim().toLowerCase() : '';
-
-    final results = allProfiles.where((profile) {
-      final pGender = profile.gender.trim().toLowerCase();
-
-      // Gender filter logic:
-      if (_selectedGender == 'Female') {
-        if (pGender != 'female') return false;
-      } else if (_selectedGender == 'Male') {
-        if (pGender != 'male') return false;
-      } else {
-        // Default ('All'): Show opposite gender only when logged in
-        if (isLoggedIn) {
-          if (userGender == 'male' && pGender != 'female') return false;
-          if (userGender == 'female' && pGender != 'male') return false;
-        }
-      }
-
-      final age = profile.age;
-      if (age < minAge || age > maxAge) return false;
-
-      final profileHeight = _parseHeightToInches(profile.heightText);
-      if (profileHeight != null) {
-        if (minHeight != null && profileHeight < minHeight) return false;
-        if (maxHeight != null && profileHeight > maxHeight) return false;
-      }
-
-      if (_selectedMaritalStatus != 'Any' && _selectedMaritalStatus != 'Never Married') return false;
-
-      if (_selectedReligion != 'Any' && _selectedReligion != 'Hindu') return false;
-
-      if (_selectedCaste != 'Any' && !profile.subsect.toLowerCase().contains(_selectedCaste.toLowerCase())) return false;
-
-      if (_selectedKoottam != 'Any' && profile.koottam != _selectedKoottam) return false;
-      if (_selectedLocation != 'Any' && profile.location != _selectedLocation) return false;
-      if (!_matchesEducation(profile)) return false;
-      if (!_matchesOccupation(profile)) return false;
-
-      return true;
-    }).toList()
-      ..sort((a, b) {
-        if (a.isPremium != b.isPremium) {
-          return a.isPremium ? -1 : 1;
-        }
-        return a.age.compareTo(b.age);
-      });
-
-    _searchResults = results;
-    _showResults = true;
+    _performAdvancedSearch(ProfileDatabase.currentProfiles);
   }
 
   int? _parseHeightToInches(String height) {
@@ -193,22 +132,28 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     }
 
     final bool isLoggedIn = ProfileDatabase.isLoggedIn;
-    final String userGender = isLoggedIn ? ProfileDatabase.userProfileNotifier.value.userGender.trim().toLowerCase() : '';
+    final String rawGender = ProfileDatabase.userProfileNotifier.value.userGender.trim().toLowerCase();
+    final String effectiveUserGender = (isLoggedIn && rawGender.isEmpty) ? 'male' : rawGender;
 
     final results = allProfiles.where((profile) {
       final pGender = profile.gender.trim().toLowerCase();
 
-      // Gender filter logic:
-      if (_selectedGender == 'Female') {
-        if (pGender != 'female') return false;
-      } else if (_selectedGender == 'Male') {
-        if (pGender != 'male') return false;
-      } else {
-        // Default ('All'): Show opposite gender only when logged in
-        if (isLoggedIn) {
-          if (userGender == 'male' && pGender != 'female') return false;
-          if (userGender == 'female' && pGender != 'male') return false;
+      // ABSOLUTE RULE: When logged in, NEVER show same-gender profiles!
+      // Male login -> Female profiles ONLY
+      // Female login -> Male profiles ONLY
+      if (isLoggedIn) {
+        if (effectiveUserGender == 'female' || effectiveUserGender.contains('female')) {
+          if (pGender != 'male') return false;
+        } else {
+          // Defaults to Male user -> show Female profiles ONLY
+          if (pGender != 'female') return false;
         }
+
+        if (_selectedGender == 'Female' && pGender != 'female') return false;
+        if (_selectedGender == 'Male' && pGender != 'male') return false;
+      } else {
+        if (_selectedGender == 'Female' && pGender != 'female') return false;
+        if (_selectedGender == 'Male' && pGender != 'male') return false;
       }
 
       final age = profile.age;
@@ -240,10 +185,13 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
         return a.age.compareTo(b.age);
       });
 
-    setState(() {
+    if (mounted) {
+      setState(() {
+        _searchResults = results;
+      });
+    } else {
       _searchResults = results;
-      _showResults = true;
-    });
+    }
   }
 
   bool handleBackPress() {
@@ -275,7 +223,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
   }
 
   Widget _buildResultsView(BuildContext context, ThemeData theme, UserProfileState userProfile) {
-    final isFreeUser = userProfile.plan.toLowerCase().contains('free');
+    final bool showGenderChips = !ProfileDatabase.isLoggedIn;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -293,8 +241,8 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
           ),
         ),
 
-        // Gender Filter Pills Bar (All, Women, Men) - SHOWN ONLY FOR FREE USERS
-        if (isFreeUser)
+        // Gender Filter Pills Bar (All, Women, Men) - SHOWN ONLY FOR FREE NON-LOGGED-IN USERS
+        if (showGenderChips)
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
@@ -309,7 +257,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
               ],
             ),
           ),
-        if (isFreeUser) const SizedBox(height: 4),
+        if (showGenderChips) const SizedBox(height: 4),
 
         // Profiles grid with smooth AnimatedSwitcher transition
         Expanded(

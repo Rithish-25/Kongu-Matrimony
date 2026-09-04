@@ -15,7 +15,22 @@ class FavouritesScreen extends StatelessWidget {
     return ValueListenableBuilder<List<Profile>>(
       valueListenable: ProfileDatabase.notifier,
       builder: (context, profiles, _) {
-        final favouriteProfiles = profiles.where((p) => p.isFavourite).toList();
+        final bool isLoggedIn = ProfileDatabase.isLoggedIn;
+        final String rawGender = ProfileDatabase.userProfileNotifier.value.userGender.trim().toLowerCase();
+        final String effectiveUserGender = (isLoggedIn && rawGender.isEmpty) ? 'male' : rawGender;
+
+        final favouriteProfiles = profiles.where((p) {
+          if (!p.isFavourite) return false;
+          if (isLoggedIn) {
+            final pGender = p.gender.trim().toLowerCase();
+            if (effectiveUserGender == 'female' || effectiveUserGender.contains('female')) {
+              if (pGender != 'male') return false;
+            } else {
+              if (pGender != 'female') return false;
+            }
+          }
+          return true;
+        }).toList();
 
         return Scaffold(
           body: favouriteProfiles.isEmpty

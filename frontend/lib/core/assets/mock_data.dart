@@ -340,14 +340,15 @@ class ProfileDatabase {
       final effectiveName = (savedName != null && savedName.isNotEmpty && savedName != 'User')
           ? savedName
           : (displayName != null && displayName.isNotEmpty ? displayName : 'User');
-      final savedGender = profileDetails['gender'] ?? prefs.getString('user_gender') ?? '';
+      final savedGender = profileDetails['gender'] ?? prefs.getString('user_gender') ?? 'Male';
+      final effectiveGender = savedGender.trim().isNotEmpty ? savedGender.trim() : 'Male';
 
       userProfileNotifier.value = userProfileNotifier.value.copyWith(
         displayName: effectiveName,
         profileImageUrl: imageUrl ?? userProfileNotifier.value.profileImageUrl,
         plan: (plan != null && plan.isNotEmpty) ? plan : 'Free Plan',
         downloadedCount: downloadedCount ?? userProfileNotifier.value.downloadedCount,
-        userGender: savedGender,
+        userGender: effectiveGender,
       );
 
       // Load persisted favourites & interests
@@ -390,9 +391,13 @@ class ProfileDatabase {
       await prefs.setBool(_kIsLoggedIn, true);
       _isLoggedIn = true;
       final profileDetails = await RegistrationDraft.loadProfileDetails();
-      final savedGender = profileDetails['gender'] ?? prefs.getString('user_gender') ?? '';
+      final savedGender = (profileDetails['gender'] != null && profileDetails['gender']!.trim().isNotEmpty)
+          ? profileDetails['gender']!.trim()
+          : (prefs.getString('user_gender')?.trim() ?? (userProfileNotifier.value.userGender.trim().isNotEmpty ? userProfileNotifier.value.userGender.trim() : 'Male'));
+      final effectiveGender = (savedGender.isNotEmpty) ? savedGender : 'Male';
+
       userProfileNotifier.value = userProfileNotifier.value.copyWith(
-        userGender: savedGender,
+        userGender: effectiveGender,
       );
       authNotifier.value = true;
     } catch (_) {}
