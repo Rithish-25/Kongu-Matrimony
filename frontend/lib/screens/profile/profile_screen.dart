@@ -169,12 +169,7 @@ class ProfileScreen extends StatelessWidget {
                       : ElevatedButton.icon(
                           onPressed: () {
                             Navigator.of(context).push(
-                              appPageRoute(
-                                const RegisterFlow(
-                                  initialStep: 0,
-                                  initialData: {},
-                                ),
-                              ),
+                              appPageRoute(const LoginScreen()),
                             );
                           },
                           style: ElevatedButton.styleFrom(
