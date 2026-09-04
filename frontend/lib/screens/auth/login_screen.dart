@@ -440,7 +440,10 @@ class _LoginScreenState extends State<LoginScreen> {
     };
 
     await RegistrationDraft.saveProfileDetails(profileData);
-    await ProfileDatabase.updateUserProfile(displayName: fullName.isNotEmpty ? fullName : 'User');
+    await ProfileDatabase.updateUserProfile(
+      displayName: fullName.isNotEmpty ? fullName : 'User',
+      gender: _gender,
+    );
 
     if (_autoLogin) {
       await ProfileDatabase.login();
@@ -680,9 +683,9 @@ class _LoginScreenState extends State<LoginScreen> {
                         label: 'DOB',
                         hint: 'DD/MM/YYYY',
                         controller: _dobController,
-                        suffixIcon: IconButton(
-                          icon: const Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF64748B)),
-                          onPressed: () => _selectDob(context),
+                        suffixIcon: const Padding(
+                          padding: EdgeInsets.only(right: 8),
+                          child: Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF64748B)),
                         ),
                       ),
                     ),
@@ -1030,16 +1033,17 @@ class _LoginScreenState extends State<LoginScreen> {
           controller: controller,
           keyboardType: keyboardType,
           inputFormatters: inputFormatters,
-          style: GoogleFonts.roboto(fontSize: 13.5, color: AppColors.textPrimary),
+          style: GoogleFonts.roboto(fontSize: 12.5, color: AppColors.textPrimary),
           decoration: InputDecoration(
             isDense: true,
             hintText: hint,
             hintStyle: GoogleFonts.roboto(fontSize: 12.5, color: const Color(0xFF94A3B8)),
             prefixIcon: prefixIcon,
             suffixIcon: suffixIcon,
+            suffixIconConstraints: const BoxConstraints(minWidth: 28, minHeight: 28),
             filled: true,
             fillColor: const Color(0xFFFAFAFA),
-            contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 10, vertical: 12),
             border: OutlineInputBorder(
               borderRadius: BorderRadius.circular(12),
               borderSide: const BorderSide(color: Color(0xFFCBD5E1)),

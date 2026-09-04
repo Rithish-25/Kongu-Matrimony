@@ -43,11 +43,13 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     // Perform initial search synchronously to prevent screen flickering
     _initializeDefaultSearch();
     ProfileDatabase.notifier.addListener(_onDatabaseChanged);
+    ProfileDatabase.userProfileNotifier.addListener(_onDatabaseChanged);
   }
 
   @override
   void dispose() {
     ProfileDatabase.notifier.removeListener(_onDatabaseChanged);
+    ProfileDatabase.userProfileNotifier.removeListener(_onDatabaseChanged);
     super.dispose();
   }
 
@@ -70,7 +72,25 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       maxHeight = temp;
     }
 
+    final bool isLoggedIn = ProfileDatabase.isLoggedIn;
+    final String userGender = isLoggedIn ? ProfileDatabase.userProfileNotifier.value.userGender.trim().toLowerCase() : '';
+
     final results = allProfiles.where((profile) {
+      final pGender = profile.gender.trim().toLowerCase();
+
+      // Gender filter logic:
+      if (_selectedGender == 'Female') {
+        if (pGender != 'female') return false;
+      } else if (_selectedGender == 'Male') {
+        if (pGender != 'male') return false;
+      } else {
+        // Default ('All'): Show opposite gender only when logged in
+        if (isLoggedIn) {
+          if (userGender == 'male' && pGender != 'female') return false;
+          if (userGender == 'female' && pGender != 'male') return false;
+        }
+      }
+
       final age = profile.age;
       if (age < minAge || age > maxAge) return false;
 
@@ -79,9 +99,6 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
         if (minHeight != null && profileHeight < minHeight) return false;
         if (maxHeight != null && profileHeight > maxHeight) return false;
       }
-
-      if (_selectedGender == 'Female' && profile.gender.toLowerCase() != 'female') return false;
-      if (_selectedGender == 'Male' && profile.gender.toLowerCase() != 'male') return false;
 
       if (_selectedMaritalStatus != 'Any' && _selectedMaritalStatus != 'Never Married') return false;
 
@@ -175,7 +192,25 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       maxHeight = temp;
     }
 
+    final bool isLoggedIn = ProfileDatabase.isLoggedIn;
+    final String userGender = isLoggedIn ? ProfileDatabase.userProfileNotifier.value.userGender.trim().toLowerCase() : '';
+
     final results = allProfiles.where((profile) {
+      final pGender = profile.gender.trim().toLowerCase();
+
+      // Gender filter logic:
+      if (_selectedGender == 'Female') {
+        if (pGender != 'female') return false;
+      } else if (_selectedGender == 'Male') {
+        if (pGender != 'male') return false;
+      } else {
+        // Default ('All'): Show opposite gender only when logged in
+        if (isLoggedIn) {
+          if (userGender == 'male' && pGender != 'female') return false;
+          if (userGender == 'female' && pGender != 'male') return false;
+        }
+      }
+
       final age = profile.age;
       if (age < minAge || age > maxAge) return false;
 
@@ -184,9 +219,6 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
         if (minHeight != null && profileHeight < minHeight) return false;
         if (maxHeight != null && profileHeight > maxHeight) return false;
       }
-
-      if (_selectedGender == 'Female' && profile.gender.toLowerCase() != 'female') return false;
-      if (_selectedGender == 'Male' && profile.gender.toLowerCase() != 'male') return false;
 
       if (_selectedMaritalStatus != 'Any' && _selectedMaritalStatus != 'Never Married') return false;
 
@@ -226,10 +258,15 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       body: ValueListenableBuilder<List<Profile>>(
         valueListenable: ProfileDatabase.notifier,
         builder: (context, allProfiles, _) {
-          return ValueListenableBuilder<AppLanguage>(
-            valueListenable: AppLanguageController.notifier,
-            builder: (context, lang, _) {
-              return _buildResultsView(context, theme);
+          return ValueListenableBuilder<UserProfileState>(
+            valueListenable: ProfileDatabase.userProfileNotifier,
+            builder: (context, userProfile, _) {
+              return ValueListenableBuilder<AppLanguage>(
+                valueListenable: AppLanguageController.notifier,
+                builder: (context, lang, _) {
+                  return _buildResultsView(context, theme, userProfile);
+                },
+              );
             },
           );
         },
@@ -237,7 +274,9 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     );
   }
 
-  Widget _buildResultsView(BuildContext context, ThemeData theme) {
+  Widget _buildResultsView(BuildContext context, ThemeData theme, UserProfileState userProfile) {
+    final isFreeUser = userProfile.plan.toLowerCase().contains('free');
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -254,22 +293,23 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
           ),
         ),
 
-        // Gender Filter Pills Bar (All, Women, Men) - Scrollable to prevent right overflow
-        SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          physics: const BouncingScrollPhysics(),
-          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: 4.0),
-          child: Row(
-            children: [
-              _buildGenderFilterChip('All', AppLanguageController.text('all_profiles')),
-              const SizedBox(width: 6),
-              _buildGenderFilterChip('Male', AppLanguageController.text('men_profiles')),
-              const SizedBox(width: 6),
-              _buildGenderFilterChip('Female', AppLanguageController.text('women_profiles')),
-            ],
+        // Gender Filter Pills Bar (All, Women, Men) - SHOWN ONLY FOR FREE USERS
+        if (isFreeUser)
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: 4.0),
+            child: Row(
+              children: [
+                _buildGenderFilterChip('All', AppLanguageController.text('all_profiles')),
+                const SizedBox(width: 6),
+                _buildGenderFilterChip('Male', AppLanguageController.text('men_profiles')),
+                const SizedBox(width: 6),
+                _buildGenderFilterChip('Female', AppLanguageController.text('women_profiles')),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
+        if (isFreeUser) const SizedBox(height: 4),
 
         // Profiles grid with smooth AnimatedSwitcher transition
         Expanded(

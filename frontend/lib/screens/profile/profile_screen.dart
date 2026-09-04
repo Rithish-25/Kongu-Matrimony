@@ -181,7 +181,7 @@ class ProfileScreen extends StatelessWidget {
                           ),
                           icon: const Icon(Icons.login_rounded, size: 18),
                           label: Text(
-                            isTamil ? 'உள்நுழைவு / பதிவு செய்ய' : 'Login / Register',
+                            isTamil ? 'உள்நுழைவு' : 'Login',
                             style: GoogleFonts.poppins(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,

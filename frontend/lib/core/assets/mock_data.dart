@@ -7,12 +7,14 @@ class UserProfileState {
   final String profileImageUrl;
   final String plan; // 'Free', 'Gold', 'Platinum'
   final int downloadedCount;
+  final String userGender;
 
   UserProfileState({
     required this.displayName,
     required this.profileImageUrl,
     required this.plan,
     required this.downloadedCount,
+    this.userGender = '',
   });
 
   UserProfileState copyWith({
@@ -20,12 +22,14 @@ class UserProfileState {
     String? profileImageUrl,
     String? plan,
     int? downloadedCount,
+    String? userGender,
   }) {
     return UserProfileState(
       displayName: displayName ?? this.displayName,
       profileImageUrl: profileImageUrl ?? this.profileImageUrl,
       plan: plan ?? this.plan,
       downloadedCount: downloadedCount ?? this.downloadedCount,
+      userGender: userGender ?? this.userGender,
     );
   }
 }
@@ -336,12 +340,14 @@ class ProfileDatabase {
       final effectiveName = (savedName != null && savedName.isNotEmpty && savedName != 'User')
           ? savedName
           : (displayName != null && displayName.isNotEmpty ? displayName : 'User');
+      final savedGender = profileDetails['gender'] ?? prefs.getString('user_gender') ?? '';
 
       userProfileNotifier.value = userProfileNotifier.value.copyWith(
         displayName: effectiveName,
         profileImageUrl: imageUrl ?? userProfileNotifier.value.profileImageUrl,
         plan: (plan != null && plan.isNotEmpty) ? plan : 'Free Plan',
         downloadedCount: downloadedCount ?? userProfileNotifier.value.downloadedCount,
+        userGender: savedGender,
       );
 
       // Load persisted favourites & interests
@@ -383,6 +389,11 @@ class ProfileDatabase {
       final prefs = await SharedPreferences.getInstance();
       await prefs.setBool(_kIsLoggedIn, true);
       _isLoggedIn = true;
+      final profileDetails = await RegistrationDraft.loadProfileDetails();
+      final savedGender = profileDetails['gender'] ?? prefs.getString('user_gender') ?? '';
+      userProfileNotifier.value = userProfileNotifier.value.copyWith(
+        userGender: savedGender,
+      );
       authNotifier.value = true;
     } catch (_) {}
   }
@@ -1252,12 +1263,14 @@ class ProfileDatabase {
     String? imageUrl,
     String? plan,
     int? downloadedCount,
+    String? gender,
   }) async {
     userProfileNotifier.value = userProfileNotifier.value.copyWith(
       displayName: displayName,
       profileImageUrl: imageUrl,
       plan: plan,
       downloadedCount: downloadedCount,
+      userGender: gender,
     );
 
     try {
@@ -1266,6 +1279,7 @@ class ProfileDatabase {
       if (imageUrl != null) await prefs.setString(_kProfileImageUrl, imageUrl);
       if (plan != null) await prefs.setString(_kPlan, plan);
       if (downloadedCount != null) await prefs.setInt(_kDownloadedCount, downloadedCount);
+      if (gender != null) await prefs.setString('user_gender', gender);
     } catch (_) {}
   }
 

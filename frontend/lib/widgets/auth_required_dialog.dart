@@ -3,8 +3,6 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/colors/colors.dart';
 import '../core/localization/app_language.dart';
 import '../screens/auth/login_screen.dart';
-import '../screens/register/register_flow.dart';
-import '../core/assets/registration_draft.dart';
 
 class AuthRequiredDialog extends StatelessWidget {
   final String? featureName;
@@ -28,16 +26,16 @@ class AuthRequiredDialog extends StatelessWidget {
     final isTamil = AppLanguageController.isTamil;
 
     final String titleText = isTamil
-        ? 'பதிவு அல்லது உள்நுழைவு தேவை'
-        : 'Register or Login Required';
+        ? 'உள்நுழைவு தேவை'
+        : 'Login Required';
 
     final String subtitleText = featureName != null
         ? (isTamil
-            ? '$featureName அம்சத்தைப் பயன்படுத்த தயவுசெய்து பதிவு செய்யவும் அல்லது உள்நுழையவும்.'
-            : 'Please register or login to access $featureName.')
+            ? '$featureName அம்சத்தைப் பயன்படுத்த தயவுசெய்து உள்நுழையவும்.'
+            : 'Please login to access $featureName.')
         : (isTamil
-            ? 'ஜாதகம், விருப்பங்கள் மற்றும் பிடித்தவை அம்சங்களை அணுக தயவுசெய்து பதிவு செய்யவும் அல்லது உள்நுழையவும்.'
-            : 'Please register or login to access Horoscope, Interests, and Favourites features.');
+            ? 'ஜாதகம், விருப்பங்கள் மற்றும் பிடித்தவை அம்சங்களை அணுக தயவுசெய்து உள்நுழையவும்.'
+            : 'Please login to access Horoscope, Interests, and Favourites features.');
 
     return Container(
       decoration: const BoxDecoration(
@@ -129,50 +127,6 @@ class AuthRequiredDialog extends StatelessWidget {
               icon: const Icon(Icons.login_rounded, size: 20),
               label: Text(
                 isTamil ? 'உள்நுழைவு' : 'Login',
-                style: GoogleFonts.roboto(
-                  fontSize: 15,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 12),
-
-          // Register Button
-          SizedBox(
-            width: double.infinity,
-            height: 48,
-            child: OutlinedButton.icon(
-              onPressed: () async {
-                Navigator.of(context).pop();
-                final hasDraft = await RegistrationDraft.hasDraft();
-                int initialStep = 0;
-                Map<String, String> initialData = {};
-                if (hasDraft) {
-                  initialStep = await RegistrationDraft.loadDraftStep();
-                  initialData = await RegistrationDraft.loadDraftData();
-                }
-                if (context.mounted) {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (context) => RegisterFlow(
-                        initialStep: initialStep,
-                        initialData: initialData,
-                      ),
-                    ),
-                  );
-                }
-              },
-              style: OutlinedButton.styleFrom(
-                foregroundColor: AppColors.primary,
-                side: const BorderSide(color: AppColors.primary, width: 1.5),
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(14),
-                ),
-              ),
-              icon: const Icon(Icons.person_add_outlined, size: 20),
-              label: Text(
-                isTamil ? 'புதிய பதிவு' : 'Register Now',
                 style: GoogleFonts.roboto(
                   fontSize: 15,
                   fontWeight: FontWeight.bold,
