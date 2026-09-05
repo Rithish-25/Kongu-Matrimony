@@ -113,11 +113,13 @@ class _LoginScreenState extends State<LoginScreen> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // 1. Top Illustration Card
+                // 1. Top Logo Card
                 Container(
-                  width: 240,
-                  height: 180,
+                  width: 175,
+                  height: 175,
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(24),
                     boxShadow: [
                       BoxShadow(
@@ -127,24 +129,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       ),
                     ],
                   ),
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(24),
-                    child: Image.asset(
-                      'assets/logo.jpeg',
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Container(
-                          color: AppColors.primary.withValues(alpha: 0.1),
-                          child: const Center(
-                            child: Icon(
-                              Icons.favorite_rounded,
-                              color: AppColors.primary,
-                              size: 64,
-                            ),
-                          ),
-                        );
-                      },
-                    ),
+                  child: Image.asset(
+                    'assets/home-logo.png',
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Image.asset(
+                        'assets/app-logo.png',
+                        fit: BoxFit.contain,
+                      );
+                    },
                   ),
                 ),
 
@@ -380,11 +373,10 @@ class _LoginScreenState extends State<LoginScreen> {
                                     )
                                   : Text(
                                       'Login',
-                                      style: GoogleFonts.plusJakartaSans(
+                                      style: GoogleFonts.poppins(
                                         fontSize: 16,
                                         fontWeight: FontWeight.bold,
                                         color: Colors.white,
-                                        height: 1.2,
                                       ),
                                     ),
                             ),
@@ -410,23 +402,23 @@ class _LoginScreenState extends State<LoginScreen> {
                         // New User Register Button (Orange Outline)
                         SizedBox(
                           width: double.infinity,
-                          height: 48,
+                          height: 50,
                           child: OutlinedButton(
                             onPressed: _handleRegister,
                             style: OutlinedButton.styleFrom(
                               foregroundColor: AppColors.primary,
                               side: const BorderSide(color: AppColors.primary, width: 1.8),
+                              padding: const EdgeInsets.symmetric(vertical: 12),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(16),
                               ),
                             ),
                             child: Text(
                               'New User Register',
-                              style: GoogleFonts.plusJakartaSans(
-                                fontSize: 15.5,
+                              style: GoogleFonts.poppins(
+                                fontSize: 15,
                                 fontWeight: FontWeight.bold,
                                 color: AppColors.primary,
-                                height: 1.2,
                               ),
                             ),
                           ),

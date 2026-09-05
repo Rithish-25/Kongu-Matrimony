@@ -1,8 +1,12 @@
+// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
+import 'dart:html' as html;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
 import '../../core/assets/mock_data.dart';
 import '../../core/assets/registration_draft.dart';
+import '../../widgets/app_profile_image.dart';
 import '../main_layout.dart';
 import 'login_screen.dart';
 
@@ -26,6 +30,14 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
   String? _kootam;
   String? _rasi;
   String? _star;
+
+  // 1st Registration Page Upload State
+  String? _communityCertificateName;
+
+  String? _horoscopeFileName;
+
+  // 2nd Registration Page Upload State (Portrait 4:5 Profile Photo)
+  String? _profilePhotoPath;
 
   final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -145,9 +157,9 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
       if (details['gender'] != null) {
         final g = details['gender']!;
         if (g.toLowerCase().contains('female')) {
-          _gender = 'Female (பெண்)';
+          _gender = 'Female';
         } else {
-          _gender = 'Male (ஆண்)';
+          _gender = 'Male';
         }
       }
       if (details['dob'] != null) _dobController.text = details['dob']!;
@@ -156,6 +168,9 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
       if (details['star'] != null) _star = details['star'];
       if (details['mobile'] != null) _phoneController.text = details['mobile']!;
       if (details['email'] != null) _emailController.text = details['email']!;
+      if (details['communityCertificate'] != null) _communityCertificateName = details['communityCertificate'];
+      if (details['horoscopeFile'] != null) _horoscopeFileName = details['horoscopeFile'];
+      if (details['profilePhoto'] != null) _profilePhotoPath = details['profilePhoto'];
     }
   }
 
@@ -181,6 +196,257 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
     setState(() {
       _currentStep = 1;
     });
+  }
+
+  // --- DEVICE FILE PICKERS ---
+  void _pickProfilePhotoFromDevice() {
+    if (kIsWeb) {
+      final html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+      uploadInput.accept = 'image/*';
+      uploadInput.click();
+
+      uploadInput.onChange.listen((e) {
+        final files = uploadInput.files;
+        if (files != null && files.isNotEmpty) {
+          final file = files[0];
+          final reader = html.FileReader();
+          reader.readAsDataUrl(file);
+          reader.onLoadEnd.listen((e) {
+            setState(() {
+              _profilePhotoPath = reader.result as String;
+            });
+          });
+        }
+      });
+    }
+  }
+
+  void _pickCertificateFromDevice({String accept = '.pdf,image/*,.jpg,.jpeg,.png'}) {
+    if (kIsWeb) {
+      final html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+      uploadInput.accept = accept;
+      uploadInput.click();
+
+      uploadInput.onChange.listen((e) {
+        final files = uploadInput.files;
+        if (files != null && files.isNotEmpty) {
+          final file = files[0];
+          setState(() {
+            _communityCertificateName = file.name;
+          });
+        }
+      });
+    }
+  }
+
+  void _pickHoroscopeFromDevice({String accept = '.pdf,image/*,.jpg,.jpeg,.png'}) {
+    if (kIsWeb) {
+      final html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
+      uploadInput.accept = accept;
+      uploadInput.click();
+
+      uploadInput.onChange.listen((e) {
+        final files = uploadInput.files;
+        if (files != null && files.isNotEmpty) {
+          final file = files[0];
+          setState(() {
+            _horoscopeFileName = file.name;
+          });
+        }
+      });
+    }
+  }
+
+  // --- 1st Page Upload Pickers (Device PDF & Photo Uploads Only) ---
+  void _showCertificatePicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Upload Community Certificate',
+                  style: GoogleFonts.roboto(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Upload your own PDF document or photo image from device:',
+                  style: GoogleFonts.roboto(fontSize: 12.5, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _pickCertificateFromDevice();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      alignment: Alignment.center,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    icon: const Icon(Icons.file_upload_outlined, size: 20),
+                    label: Text(
+                      'Choose File from Device / Gallery',
+                      style: GoogleFonts.roboto(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showHoroscopePicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Upload Horoscope Document',
+                  style: GoogleFonts.roboto(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Upload your own PDF document or horoscope photo from device:',
+                  style: GoogleFonts.roboto(fontSize: 12.5, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 20),
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _pickHoroscopeFromDevice();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+                      alignment: Alignment.center,
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                    ),
+                    icon: const Icon(Icons.file_upload_outlined, size: 20),
+                    label: Text(
+                      'Choose File from Device / Gallery',
+                      style: GoogleFonts.roboto(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        height: 1.2,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  // --- 2nd Page Upload Profile Photo Picker (Device Upload Only) ---
+  void _showProfilePhotoPicker() {
+    showModalBottomSheet(
+      context: context,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Upload Portrait Profile Photo (4:5 Ratio)',
+                  style: GoogleFonts.roboto(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 6),
+                Text(
+                  'Upload your own image from your device gallery:',
+                  style: GoogleFonts.roboto(fontSize: 12.5, color: AppColors.textSecondary),
+                ),
+                const SizedBox(height: 20),
+
+                // Button: Choose Photo from Device / Gallery
+                SizedBox(
+                  width: double.infinity,
+                  height: 48,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      Navigator.pop(context);
+                      _pickProfilePhotoFromDevice();
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(14),
+                      ),
+                    ),
+                    icon: const Icon(Icons.photo_library_rounded, size: 20),
+                    label: Text(
+                      'Choose Photo from Device / Gallery',
+                      style: GoogleFonts.roboto(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
   }
 
   Future<void> _selectDob(BuildContext context) async {
@@ -223,7 +489,6 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
               child: Column(
                 children: [
                   const SizedBox(height: 10),
-                  // Drag Handle
                   Container(
                     width: 36,
                     height: 4,
@@ -233,7 +498,6 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
                     ),
                   ),
                   const SizedBox(height: 12),
-                  // Modal Header
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 20),
                     child: Row(
@@ -279,11 +543,9 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
                   ),
                   const SizedBox(height: 10),
                   const Divider(height: 1, color: Color(0xFFE2E8F0)),
-                  // Scroll Pickers Container
                   Expanded(
                     child: Stack(
                       children: [
-                        // Center Highlight Box
                         Center(
                           child: Container(
                             height: 44,
@@ -320,12 +582,10 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
                             ),
                           ),
                         ),
-                        // 3 Columns: Day, Month, Year
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
                           child: Row(
                             children: [
-                              // Day Column
                               Expanded(
                                 child: ListWheelScrollView.useDelegate(
                                   controller: dayController,
@@ -352,7 +612,6 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              // Month Column
                               Expanded(
                                 child: ListWheelScrollView.useDelegate(
                                   controller: monthController,
@@ -379,7 +638,6 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
                                 ),
                               ),
                               const SizedBox(width: 12),
-                              // Year Column
                               Expanded(
                                 child: ListWheelScrollView.useDelegate(
                                   controller: yearController,
@@ -445,13 +703,25 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
       'mobile': phone,
       'email': email,
       'password': password,
+      if (_communityCertificateName != null) 'communityCertificate': _communityCertificateName!,
+      if (_horoscopeFileName != null) 'horoscopeFile': _horoscopeFileName!,
+      if (_profilePhotoPath != null) 'profilePhoto': _profilePhotoPath!,
     };
 
     await RegistrationDraft.saveProfileDetails(profileData);
-    await ProfileDatabase.updateUserProfile(
-      displayName: fullName.isNotEmpty ? fullName : 'User',
-      gender: selectedGenderClean,
-    );
+
+    if (_profilePhotoPath != null && _profilePhotoPath!.isNotEmpty) {
+      await ProfileDatabase.updateUserProfile(
+        displayName: fullName.isNotEmpty ? fullName : 'User',
+        imageUrl: _profilePhotoPath,
+        gender: selectedGenderClean,
+      );
+    } else {
+      await ProfileDatabase.updateUserProfile(
+        displayName: fullName.isNotEmpty ? fullName : 'User',
+        gender: selectedGenderClean,
+      );
+    }
 
     await ProfileDatabase.login();
 
@@ -481,11 +751,8 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
           child: Column(
             children: [
-              // Top Progress Card & Header
               _buildProgressHeader(),
               const SizedBox(height: 16),
-
-              // Form Content Card
               _currentStep == 1 ? _buildStep1BasicDetails() : _buildStep2LoginAndAccess(),
               const SizedBox(height: 20),
             ],
@@ -495,7 +762,6 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
     );
   }
 
-  // --- TOP PROGRESS HEADER ---
   Widget _buildProgressHeader() {
     final double progressPercent = _currentStep == 1 ? 0.5 : 1.0;
     final String progressText = _currentStep == 1 ? '50% (1/2)' : '100% (2/2)';
@@ -658,7 +924,7 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
             ),
             const SizedBox(height: 24),
 
-            // Row 1: Profile For * & Full Name *
+            // Profile For * & Full Name *
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -685,7 +951,7 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Row 2: Gender * & DOB
+            // Gender * & DOB
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -721,7 +987,7 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Row 3: Kulam *
+            // Kulam *
             _buildDropdown(
               label: 'Kulam *',
               hint: 'Select Kulam',
@@ -732,7 +998,7 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Row 4: Rasi & Star
+            // Rasi & Star
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
@@ -757,9 +1023,50 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 24),
+
+            // --- 1ST REGISTRATION PAGE UPLOADS ---
+            Text(
+              'Document Uploads (Optional)',
+              style: GoogleFonts.roboto(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 12),
+
+            // 1. Upload Community Certificate
+            _buildUploadCard(
+              title: 'Upload Community Certificate',
+              subtitle: 'Community proof document (Optional)',
+              icon: Icons.card_membership_rounded,
+              fileName: _communityCertificateName,
+              onUpload: _showCertificatePicker,
+              onRemove: () {
+                setState(() {
+                  _communityCertificateName = null;
+                });
+              },
+            ),
+            const SizedBox(height: 12),
+
+            // 2. Upload Horoscope
+            _buildUploadCard(
+              title: 'Upload Horoscope',
+              subtitle: 'Horoscope chart document (Optional)',
+              icon: Icons.auto_awesome_rounded,
+              fileName: _horoscopeFileName,
+              onUpload: _showHoroscopePicker,
+              onRemove: () {
+                setState(() {
+                  _horoscopeFileName = null;
+                });
+              },
+            ),
             const SizedBox(height: 32),
 
-            // Continue Action Button
+            // Continue Button
             SizedBox(
               width: double.infinity,
               height: 48,
@@ -789,7 +1096,7 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
     );
   }
 
-  // --- STEP 2: SETUP YOUR ACCOUNT ---
+  // --- STEP 2: SETUP YOUR ACCOUNT & PORTRAIT PROFILE PHOTO ---
   Widget _buildStep2LoginAndAccess() {
     return Container(
       padding: const EdgeInsets.all(24),
@@ -835,6 +1142,30 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
                   ),
                 ),
               ],
+            ),
+            const SizedBox(height: 24),
+
+            // --- 2ND REGISTRATION PAGE: UPLOAD PROFILE PHOTO (PORTRAIT 4:5 RATIO) ---
+            Text(
+              'Upload Profile Photo (Optional)',
+              style: GoogleFonts.roboto(
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              'Portrait aspect ratio: 4:5',
+              style: GoogleFonts.roboto(
+                fontSize: 12,
+                color: AppColors.textSecondary,
+              ),
+            ),
+            const SizedBox(height: 14),
+
+            Center(
+              child: _buildProfilePhotoBox(),
             ),
             const SizedBox(height: 24),
 
@@ -904,6 +1235,189 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  // --- PORTRAIT PHOTO UPLOAD BOX (4:5 RATIO) ---
+  Widget _buildProfilePhotoBox() {
+    return Column(
+      children: [
+        Container(
+          width: 160,
+          height: 200, // 4:5 aspect ratio (160 x 200)
+          decoration: BoxDecoration(
+            color: const Color(0xFFF8FAFC),
+            borderRadius: BorderRadius.circular(20),
+            border: Border.all(
+              color: _profilePhotoPath != null ? AppColors.primary : const Color(0xFFCBD5E1),
+              width: _profilePhotoPath != null ? 2.0 : 1.5,
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.05),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
+          ),
+          child: AspectRatio(
+            aspectRatio: 4 / 5,
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(18),
+              child: _profilePhotoPath != null && _profilePhotoPath!.isNotEmpty
+                  ? AppProfileImage(
+                      imageUrl: _profilePhotoPath!,
+                      fit: BoxFit.cover,
+                    )
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppColors.primary.withValues(alpha: 0.1),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.add_a_photo_outlined,
+                            size: 32,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                        const SizedBox(height: 10),
+                        Text(
+                          'Portrait Photo (4:5)',
+                          style: GoogleFonts.roboto(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w600,
+                            color: AppColors.textSecondary,
+                          ),
+                        ),
+                      ],
+                    ),
+            ),
+          ),
+        ),
+        const SizedBox(height: 12),
+        ElevatedButton.icon(
+          onPressed: _showProfilePhotoPicker,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppColors.primary,
+            foregroundColor: Colors.white,
+            elevation: 0,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+          ),
+          icon: const Icon(Icons.upload_file_rounded, size: 16),
+          label: Text(
+            _profilePhotoPath != null ? 'Change Photo' : 'Upload Photo',
+            style: GoogleFonts.roboto(fontSize: 13, fontWeight: FontWeight.bold),
+          ),
+        ),
+      ],
+    );
+  }
+
+  // --- DOCUMENT UPLOAD CARD (1ST PAGE) ---
+  Widget _buildUploadCard({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required String? fileName,
+    required VoidCallback onUpload,
+    required VoidCallback onRemove,
+  }) {
+    final bool hasFile = fileName != null && fileName.isNotEmpty;
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF8FAFC),
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(
+          color: hasFile ? AppColors.success : const Color(0xFFCBD5E1),
+          width: hasFile ? 1.5 : 1.0,
+        ),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: hasFile ? AppColors.successSoft : AppColors.primary.withValues(alpha: 0.08),
+                  shape: BoxShape.circle,
+                ),
+                child: Icon(
+                  hasFile ? Icons.check_circle_rounded : icon,
+                  color: hasFile ? AppColors.success : AppColors.primary,
+                  size: 20,
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: GoogleFonts.roboto(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(
+                      hasFile ? 'Uploaded: $fileName' : subtitle,
+                      style: GoogleFonts.roboto(
+                        fontSize: 11.5,
+                        color: hasFile ? AppColors.success : AppColors.textSecondary,
+                        fontWeight: hasFile ? FontWeight.bold : FontWeight.normal,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: [
+              if (hasFile)
+                TextButton.icon(
+                  onPressed: onRemove,
+                  icon: const Icon(Icons.close_rounded, size: 16, color: AppColors.error),
+                  label: Text(
+                    'Remove',
+                    style: GoogleFonts.roboto(fontSize: 12, color: AppColors.error, fontWeight: FontWeight.bold),
+                  ),
+                )
+              else
+                ElevatedButton.icon(
+                  onPressed: onUpload,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  icon: const Icon(Icons.upload_file_rounded, size: 16),
+                  label: Text('Upload', style: GoogleFonts.roboto(fontSize: 12, fontWeight: FontWeight.bold)),
+                ),
+            ],
+          ),
+        ],
       ),
     );
   }

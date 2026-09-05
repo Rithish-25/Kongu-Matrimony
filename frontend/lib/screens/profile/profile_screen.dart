@@ -10,6 +10,7 @@ import '../auth/login_screen.dart';
 import '../../core/assets/registration_draft.dart';
 import '../register/register_flow.dart';
 
+import '../../widgets/app_profile_image.dart';
 import '../../core/localization/app_language.dart';
 
 class ProfileScreen extends StatelessWidget {
@@ -39,15 +40,18 @@ class ProfileScreen extends StatelessWidget {
                 const SizedBox(height: AppConstants.spacingM),
                 Center(
                   child: Container(
-                    width: 100,
-                    height: 100,
+                    width: 120,
+                    height: 150, // 4:5 portrait ratio (120 x 150)
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(20),
                       border: Border.all(color: AppColors.primary, width: 3),
                       boxShadow: AppConstants.softShadow,
-                      image: DecorationImage(
-                        image: NetworkImage(userProfile.profileImageUrl),
+                    ),
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(17),
+                      child: AppProfileImage(
+                        imageUrl: userProfile.profileImageUrl,
                         fit: BoxFit.cover,
                       ),
                     ),
