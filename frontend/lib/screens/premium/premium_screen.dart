@@ -13,7 +13,7 @@ class PremiumScreen extends StatefulWidget {
 }
 
 class _PremiumScreenState extends State<PremiumScreen> {
-  int _selectedPlanIndex = 0; // 0: Free, 1: Gold, 2: Diamond, 3: Platinum
+  int _selectedPlanIndex = 0; // 0: Free, 1: Diamond, 2: Platinum
   late final PageController _pageController;
 
   @override
@@ -33,71 +33,56 @@ class _PremiumScreenState extends State<PremiumScreen> {
     super.dispose();
   }
 
-  final List<String> _planTabNames = ['Free', 'Gold', 'Platinum', 'Diamond'];
+  final List<String> _planTabNames = ['Free', 'Diamond', 'Platinum'];
 
   List<_PlanModel> _getPlans() {
     return [
       _PlanModel(
         name: 'Free Plan',
         planCode: 'Free',
-        finalPrice: '₹ 0',
-        monthlyPillText: '₹ 0 / free forever',
+        finalPrice: '₹ 0.00',
+        monthlyPillText: '10 Days Validity',
         isPopular: false,
         badgeText: 'BASIC MEMBER',
         downloads: 0,
         features: [
-          'Cannot view Mobile & Email (Locked)',
-          'Cannot view Horoscope charts (Locked)',
-          'Cannot view Family & Income (Locked)',
-          'Basic profile browsing & express interest',
+          'Validity: 10 Days',
+          'Max 20 profiles in search results',
+          '0 Bookmarks allowed (Include Phone & Address)',
+          '0 Express Interests allowed',
+          '1 Photo allowed (to upload)',
         ],
       ),
       _PlanModel(
-        name: 'Gold',
-        planCode: 'Gold',
-        finalPrice: '₹ 2,699',
-        monthlyPillText: '₹ 900 per month',
+        name: 'Diamond Plan',
+        planCode: 'Diamond',
+        finalPrice: '₹ 1,500.00',
+        monthlyPillText: '90 Days Validity',
         isPopular: false,
         badgeText: 'RECOMMENDED',
-        downloads: 40,
+        downloads: 30,
         features: [
-          'Valid for 3 months',
-          'Access 40 verified Phone & Email',
-          'Send unlimited messages & chat',
-          'Unlimited horoscope views & downloads',
-          'View verified profiles with photos',
+          'Validity: 90 Days',
+          'Unlimited profiles in search results',
+          '30 Bookmarks allowed (Include Phone & Address)',
+          'Unlimited Express Interests allowed',
+          '3 Photos allowed (to upload)',
         ],
       ),
       _PlanModel(
-        name: 'Platinum',
+        name: 'Platinum Plan',
         planCode: 'Platinum',
-        finalPrice: '₹ 4,799',
-        monthlyPillText: '₹ 800 per month',
-        isPopular: false,
-        badgeText: 'BEST VALUE',
-        downloads: 100,
-        features: [
-          'Valid for 6 months',
-          'Access 100 verified Phone & Email',
-          'Send unlimited messages & chat',
-          'Unlimited horoscope views & downloads',
-          'FREE Profile Highlighter & Top Rank',
-        ],
-      ),
-      _PlanModel(
-        name: 'Diamond',
-        planCode: 'Diamond',
-        finalPrice: '₹ 4,000',
-        monthlyPillText: '₹ 1,333 per month',
+        finalPrice: '₹ 2,500.00',
+        monthlyPillText: '120 Days Validity',
         isPopular: true,
         badgeText: 'MOST POPULAR',
         downloads: 60,
         features: [
-          'Valid for 3 months',
-          'View unlimited Phone Nos*',
-          'Send unlimited messages',
-          'Unlimited horoscope views',
-          'View verified profiles with photos',
+          'Validity: 120 Days',
+          'Unlimited profiles in search results',
+          '60 Bookmarks allowed (Include Phone & Address)',
+          'Unlimited Express Interests allowed',
+          '4 Photos allowed (to upload)',
         ],
       ),
     ];
@@ -127,7 +112,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
             const SizedBox(width: 8),
             Expanded(
               child: Text(
-                '${plan.name} Plan',
+                plan.name,
                 style: GoogleFonts.plusJakartaSans(
                   fontSize: 18,
                   fontWeight: FontWeight.bold,
@@ -138,7 +123,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
           ],
         ),
         content: Text(
-          'Confirm activation of ${plan.name} Plan for ${plan.finalPrice}?\n\nYou will get ${plan.downloads} horoscope downloads and full premium benefits.',
+          'Confirm activation of ${plan.name} for ${plan.finalPrice}?\n\nYou will get ${plan.downloads} Contact Bookmarks and full premium benefits.',
           style: GoogleFonts.plusJakartaSans(
             fontSize: 13,
             color: AppColors.textSecondary,
@@ -170,7 +155,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Text('Congratulations! ${plan.name} Plan activated successfully.'),
+                      content: Text('Congratulations! ${plan.name} activated successfully.'),
                       behavior: SnackBarBehavior.floating,
                       backgroundColor: AppColors.primary,
                       duration: const Duration(seconds: 2),
@@ -213,206 +198,208 @@ class _PremiumScreenState extends State<PremiumScreen> {
           final isSelectedTabActivePlan = userActivePlanName.contains(selectedTabName) ||
               (userActivePlanName == 'free' && selectedTabName == 'free');
 
-          return Column(
-            children: [
-              const SizedBox(height: 10),
+          return SingleChildScrollView(
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                const SizedBox(height: 10),
 
-              // 4 Plan Boxes Bar (Free, Gold, Platinum, Diamond)
-              Container(
-                margin: const EdgeInsets.symmetric(horizontal: 14),
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(30),
-                  border: Border.all(color: AppColors.border),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.03),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
-                    ),
-                  ],
-                ),
-                child: LayoutBuilder(
-                  builder: (context, constraints) {
-                    final tabWidth = constraints.maxWidth / _planTabNames.length;
+                // 3 Plan Selector Bar (Free, Diamond, Platinum)
+                Container(
+                  margin: const EdgeInsets.symmetric(horizontal: 14),
+                  padding: const EdgeInsets.all(4),
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.circular(30),
+                    border: Border.all(color: AppColors.border),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withValues(alpha: 0.03),
+                        blurRadius: 8,
+                        offset: const Offset(0, 2),
+                      ),
+                    ],
+                  ),
+                  child: LayoutBuilder(
+                    builder: (context, constraints) {
+                      final tabWidth = constraints.maxWidth / _planTabNames.length;
 
-                    return Stack(
-                      children: [
-                        // Smooth sliding active plan indicator
-                        AnimatedPositioned(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOutCubic,
-                          left: _selectedPlanIndex * tabWidth,
-                          top: 0,
-                          bottom: 0,
-                          width: tabWidth,
-                          child: AnimatedContainer(
+                      return Stack(
+                        children: [
+                          // Smooth sliding active plan indicator
+                          AnimatedPositioned(
                             duration: const Duration(milliseconds: 300),
-                            decoration: BoxDecoration(
-                              gradient: isSelectedTabActivePlan
-                                  ? const LinearGradient(
-                                      colors: [Color(0xFF026135), Color(0xFF16A34A)],
-                                      begin: Alignment.centerLeft,
-                                      end: Alignment.centerRight,
-                                    )
-                                  : AppColors.primaryGradient,
-                              borderRadius: BorderRadius.circular(24),
-                              boxShadow: [
-                                BoxShadow(
-                                  color: isSelectedTabActivePlan
-                                      ? const Color(0x40026135)
-                                      : AppColors.primary.withValues(alpha: 0.3),
-                                  blurRadius: 6,
-                                  offset: const Offset(0, 2),
-                                ),
-                              ],
+                            curve: Curves.easeInOutCubic,
+                            left: _selectedPlanIndex * tabWidth,
+                            top: 0,
+                            bottom: 0,
+                            width: tabWidth,
+                            child: AnimatedContainer(
+                              duration: const Duration(milliseconds: 300),
+                              decoration: BoxDecoration(
+                                gradient: isSelectedTabActivePlan
+                                    ? const LinearGradient(
+                                        colors: [Color(0xFF026135), Color(0xFF16A34A)],
+                                        begin: Alignment.centerLeft,
+                                        end: Alignment.centerRight,
+                                      )
+                                    : AppColors.primaryGradient,
+                                borderRadius: BorderRadius.circular(24),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: isSelectedTabActivePlan
+                                        ? const Color(0x40026135)
+                                        : AppColors.primary.withValues(alpha: 0.3),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
-                        ),
 
-                        // Content Row with 4 Boxes
-                        Row(
-                          children: List.generate(_planTabNames.length, (index) {
-                            final isSelected = _selectedPlanIndex == index;
+                          // Content Row with 3 Boxes
+                          Row(
+                            children: List.generate(_planTabNames.length, (index) {
+                              final isSelected = _selectedPlanIndex == index;
 
-                            return Expanded(
-                              child: GestureDetector(
-                                behavior: HitTestBehavior.opaque,
-                                onTap: () {
-                                  setState(() {
-                                    _selectedPlanIndex = index;
-                                  });
-                                  _pageController.animateToPage(
-                                    index,
-                                    duration: const Duration(milliseconds: 300),
-                                    curve: Curves.easeInOutCubic,
-                                  );
-                                },
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
-                                  child: Center(
-                                    child: FittedBox(
-                                      fit: BoxFit.scaleDown,
-                                      child: AnimatedDefaultTextStyle(
-                                        duration: const Duration(milliseconds: 250),
-                                        style: GoogleFonts.plusJakartaSans(
-                                          fontSize: 12,
-                                          fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
-                                          color: isSelected ? Colors.white : AppColors.textPrimary,
-                                        ),
-                                        child: Text(
-                                          AppLanguageController.text(_planTabNames[index]),
+                              return Expanded(
+                                child: GestureDetector(
+                                  behavior: HitTestBehavior.opaque,
+                                  onTap: () {
+                                    setState(() {
+                                      _selectedPlanIndex = index;
+                                    });
+                                    _pageController.animateToPage(
+                                      index,
+                                      duration: const Duration(milliseconds: 300),
+                                      curve: Curves.easeInOutCubic,
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 2),
+                                    child: Center(
+                                      child: FittedBox(
+                                        fit: BoxFit.scaleDown,
+                                        child: AnimatedDefaultTextStyle(
+                                          duration: const Duration(milliseconds: 250),
+                                          style: GoogleFonts.plusJakartaSans(
+                                            fontSize: 12,
+                                            fontWeight: isSelected ? FontWeight.bold : FontWeight.w600,
+                                            color: isSelected ? Colors.white : AppColors.textPrimary,
+                                          ),
+                                          child: Text(
+                                            AppLanguageController.text(_planTabNames[index]),
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            );
-                          }),
-                        ),
-                      ],
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              // Compact Swipeable Cards Container
-              SizedBox(
-                height: 425,
-                child: PageView.builder(
-                  controller: _pageController,
-                  physics: const BouncingScrollPhysics(),
-                  itemCount: plans.length,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _selectedPlanIndex = index;
-                    });
-                  },
-                  itemBuilder: (context, index) {
-                    final plan = plans[index];
-                    final userPlanLower = userProfile.plan.toLowerCase();
-                    final planCodeLower = plan.planCode.toLowerCase();
-                    final planNameLower = plan.name.toLowerCase();
-                    final isCurrentActive = userPlanLower == planCodeLower ||
-                        userPlanLower.contains(planCodeLower) ||
-                        (userPlanLower.contains('free') && (planCodeLower.contains('free') || planNameLower.contains('free')));
-
-                    // Dynamic 3D depth and scale transformation during swiping
-                    double pageOffset = 0.0;
-                    if (_pageController.position.haveDimensions) {
-                      pageOffset =
-                          (_pageController.page ??
-                              _selectedPlanIndex.toDouble()) -
-                          index;
-                    } else {
-                      pageOffset = (_selectedPlanIndex - index).toDouble();
-                    }
-
-                    final double scale =
-                        (1.0 - (pageOffset.abs() * 0.08)).clamp(0.88, 1.0);
-                    final double opacity =
-                        (1.0 - (pageOffset.abs() * 0.25)).clamp(0.65, 1.0);
-                    final double translateY = pageOffset.abs() * 6.0;
-
-                    return Transform.translate(
-                      offset: Offset(0, translateY),
-                      child: Transform.scale(
-                        scale: scale,
-                        child: Opacity(
-                          opacity: opacity,
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                            child: _buildPlanCard(plan, isCurrentActive),
+                              );
+                            }),
                           ),
-                        ),
-                      ),
-                    );
-                  },
-                ),
-              ),
-
-              // Page indicator dots
-              Padding(
-                padding: const EdgeInsets.only(top: 8, bottom: 8),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: List.generate(plans.length, (index) {
-                    final isSelected = _selectedPlanIndex == index;
-                    return AnimatedContainer(
-                      duration: const Duration(milliseconds: 200),
-                      margin: const EdgeInsets.symmetric(horizontal: 4),
-                      width: isSelected ? 22 : 8,
-                      height: 8,
-                      decoration: BoxDecoration(
-                        color: isSelected
-                            ? (isSelectedTabActivePlan
-                                ? const Color(0xFF026135)
-                                : const Color(0xFFE65100))
-                            : AppColors.border,
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                    );
-                  }),
-                ),
-              ),
-
-              // Trust badge footer
-              Padding(
-                padding: const EdgeInsets.only(bottom: 8),
-                child: Text(
-                  '🔒 100% Safe & Secure Checkout • Instant Activation',
-                  style: GoogleFonts.plusJakartaSans(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textLight,
+                        ],
+                      );
+                    },
                   ),
                 ),
-              ),
-            ],
+
+                const SizedBox(height: 12),
+
+                // Compact Swipeable Cards Container
+                SizedBox(
+                  height: 425,
+                  child: PageView.builder(
+                    controller: _pageController,
+                    physics: const BouncingScrollPhysics(),
+                    itemCount: plans.length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _selectedPlanIndex = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      final plan = plans[index];
+                      final userPlanLower = userProfile.plan.toLowerCase();
+                      final planCodeLower = plan.planCode.toLowerCase();
+                      final planNameLower = plan.name.toLowerCase();
+                      final isCurrentActive = userPlanLower == planCodeLower ||
+                          userPlanLower.contains(planCodeLower) ||
+                          (userPlanLower.contains('free') && (planCodeLower.contains('free') || planNameLower.contains('free')));
+
+                      double pageOffset = 0.0;
+                      if (_pageController.position.haveDimensions) {
+                        pageOffset =
+                            (_pageController.page ??
+                                _selectedPlanIndex.toDouble()) -
+                            index;
+                      } else {
+                        pageOffset = (_selectedPlanIndex - index).toDouble();
+                      }
+
+                      final double scale =
+                          (1.0 - (pageOffset.abs() * 0.08)).clamp(0.88, 1.0);
+                      final double opacity =
+                          (1.0 - (pageOffset.abs() * 0.25)).clamp(0.65, 1.0);
+                      final double translateY = pageOffset.abs() * 6.0;
+
+                      return Transform.translate(
+                        offset: Offset(0, translateY),
+                        child: Transform.scale(
+                          scale: scale,
+                          child: Opacity(
+                            opacity: opacity,
+                            child: Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                              child: _buildPlanCard(plan, isCurrentActive),
+                            ),
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                // Page indicator dots
+                Padding(
+                  padding: const EdgeInsets.only(top: 8, bottom: 8),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: List.generate(plans.length, (index) {
+                      final isSelected = _selectedPlanIndex == index;
+                      return AnimatedContainer(
+                        duration: const Duration(milliseconds: 200),
+                        margin: const EdgeInsets.symmetric(horizontal: 4),
+                        width: isSelected ? 22 : 8,
+                        height: 8,
+                        decoration: BoxDecoration(
+                          color: isSelected
+                              ? (isSelectedTabActivePlan
+                                  ? const Color(0xFF026135)
+                                  : const Color(0xFFE65100))
+                              : AppColors.border,
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                      );
+                    }),
+                  ),
+                ),
+
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    '🔒 100% Safe & Secure Checkout • Instant Activation',
+                    style: GoogleFonts.plusJakartaSans(
+                      fontSize: 11,
+                      fontWeight: FontWeight.w600,
+                      color: AppColors.textLight,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+              ],
+            ),
           );
         },
       ),
@@ -443,7 +430,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
         borderRadius: BorderRadius.circular(20),
         child: Column(
           children: [
-            // Top 2 Corners Accent Bar (GREEN for user's current plan, Orange for balance plans)
             Container(
               width: double.infinity,
               height: 6,
@@ -461,15 +447,12 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       ),
               ),
             ),
-
-            // Main Card Content filling available vertical height
             Expanded(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(18, 12, 18, 14),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
-                    // 1. Plan Name Title
                     Text(
                       AppLanguageController.text(plan.name),
                       style: GoogleFonts.plusJakartaSans(
@@ -480,8 +463,6 @@ class _PremiumScreenState extends State<PremiumScreen> {
                       ),
                     ),
                     const SizedBox(height: 4),
-
-                    // 2. Price Row (Big Final Price)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       crossAxisAlignment: CrossAxisAlignment.baseline,
@@ -498,10 +479,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                         ),
                       ],
                     ),
-
                     const SizedBox(height: 8),
-
-                    // 3. Monthly Price Pill Container
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 4.5),
                       decoration: BoxDecoration(
@@ -518,16 +496,13 @@ class _PremiumScreenState extends State<PremiumScreen> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 12),
-
-                    // 4. Feature Checklist
                     Expanded(
                       child: SingleChildScrollView(
                         physics: const BouncingScrollPhysics(),
                         child: Column(
                           children: plan.features.map((feature) {
-                            final isNegative = feature.startsWith('Cannot');
+                            final isNegative = feature.startsWith('0 ');
 
                             return Padding(
                               padding: const EdgeInsets.only(bottom: 9),
@@ -535,9 +510,9 @@ class _PremiumScreenState extends State<PremiumScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Icon(
-                                    isNegative ? Icons.close_rounded : Icons.check_rounded,
+                                    isNegative ? Icons.remove_circle_outline_rounded : Icons.check_circle_rounded,
                                     size: 18,
-                                    color: isNegative ? Colors.red.shade400 : const Color(0xFF2E7D32),
+                                    color: isNegative ? Colors.orange.shade700 : const Color(0xFF2E7D32),
                                   ),
                                   const SizedBox(width: 8),
                                   Expanded(
@@ -558,10 +533,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                         ),
                       ),
                     ),
-
                     const SizedBox(height: 12),
-
-                    // 5. Action Button
                     Container(
                       width: double.infinity,
                       height: 44,

@@ -41,6 +41,7 @@ class Profile {
   final String gender; // 'male' or 'female'
   final String maritalStatus;
   final String dob;
+  final String timeOfBirth;
   final String mobile;
   final String email;
   final String profileCreatedBy;
@@ -121,6 +122,7 @@ class Profile {
     required this.gender,
     this.maritalStatus = 'Single (Never Married)',
     this.dob = '14-06-2000',
+    this.timeOfBirth = '07:30 AM',
     this.mobile = '+91 98765 43210',
     this.email = 'profile.user@example.com',
     this.profileCreatedBy = 'Parents',

@@ -7,6 +7,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
   final bool isMainScreen;
   final bool showNotification;
+  final bool showBackButton;
   final List<Widget>? actions;
   final Widget? leading;
 
@@ -15,12 +16,15 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.title = 'Kongu Matrimony',
     this.isMainScreen = true,
     this.showNotification = false,
+    this.showBackButton = true,
     this.actions,
     this.leading,
   });
 
   @override
   Widget build(BuildContext context) {
+    final bool canShowBack = showBackButton && (ModalRoute.of(context)?.canPop ?? false);
+
     return AppBar(
       backgroundColor: AppColors.primary,
       elevation: 0,
@@ -39,7 +43,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       ),
       automaticallyImplyLeading: false,
       leading: leading ??
-          ((ModalRoute.of(context)?.canPop ?? false)
+          (canShowBack
               ? IconButton(
                   icon: const Icon(
                     Icons.arrow_back,
@@ -49,10 +53,11 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                   onPressed: () => Navigator.of(context).pop(),
                 )
               : null),
-      leadingWidth: (ModalRoute.of(context)?.canPop ?? false) ? 56 : 16,
+      leadingWidth: (leading != null || canShowBack) ? 56 : 16,
       title: ValueListenableBuilder<AppLanguage>(
         valueListenable: AppLanguageController.notifier,
         builder: (context, currentLang, _) {
+          final bool isTamil = currentLang == AppLanguage.tamil;
           String displayTitle = title;
           final lower = title.toLowerCase().trim();
           if (isMainScreen || lower == 'kongu matrimony') {
@@ -65,9 +70,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
             displayTitle = AppLanguageController.text('nav_interests');
           } else if (lower.contains('profile') && !lower.contains('details')) {
             displayTitle = AppLanguageController.text('nav_profile');
+          } else if (lower.contains('about')) {
+            displayTitle = isTamil ? 'கூட்டமைப்பு பற்றி' : 'About Kongu Kootamaipu';
           }
-
-          final bool isTamil = currentLang == AppLanguage.tamil;
 
           return Text(
             displayTitle,
@@ -81,7 +86,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
         },
       ),
       centerTitle: false,
-      titleSpacing: (ModalRoute.of(context)?.canPop ?? false) ? 0 : 16,
+      titleSpacing: (canShowBack || leading != null) ? 0 : 16,
       actions: actions ??
           [
             // 1. Text Size Adjuster Button

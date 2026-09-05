@@ -4,6 +4,7 @@ import '../../core/colors/colors.dart';
 import '../../core/constants/constants.dart';
 import '../../core/localization/app_language.dart';
 import '../../core/navigation/app_page_route.dart';
+import '../../core/assets/mock_data.dart';
 import '../register/register_flow.dart';
 
 class HomeScreen extends StatelessWidget {
@@ -25,22 +26,24 @@ class HomeScreen extends StatelessWidget {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  // --- TOP HERO LOGO BANNER ---
-                  SizedBox(
-                    width: double.infinity,
-                    height: 155,
-                    child: Image.asset(
-                      'assets/logo.jpeg',
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return const Center(
-                          child: Icon(
-                            Icons.favorite_rounded,
-                            color: AppColors.primary,
-                            size: 48,
-                          ),
-                        );
-                      },
+                  // --- TOP HERO LOGO (UNCUPPED PNG) ---
+                  Center(
+                    child: SizedBox(
+                      width: 175,
+                      height: 175,
+                      child: Image.asset(
+                        'assets/home-logo.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          return const Center(
+                            child: Icon(
+                              Icons.favorite_rounded,
+                              color: AppColors.primary,
+                              size: 48,
+                            ),
+                          );
+                        },
+                      ),
                     ),
                   ),
 
@@ -111,32 +114,42 @@ class HomeScreen extends StatelessWidget {
 
                   const SizedBox(height: 12),
 
-                  IntrinsicHeight(
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
-                      children: [
-                        Expanded(
-                          child: _buildStatCard(
-                            count: '50K+',
-                            label: AppLanguageController.text('REGISTERED\nMEMBERS'),
-                          ),
+                  ValueListenableBuilder<List<Profile>>(
+                    valueListenable: ProfileDatabase.notifier,
+                    builder: (context, profiles, _) {
+                      final int menCount = profiles.where((p) => p.gender.trim().toLowerCase() == 'male').length;
+                      final int womenCount = profiles.where((p) => p.gender.trim().toLowerCase() == 'female').length;
+
+                      return IntrinsicHeight(
+                        child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.stretch,
+                          children: [
+                            Expanded(
+                              child: _buildStatCard(
+                                count: '$menCount',
+                                label: AppLanguageController.text('MEN HOROSCOPE\nPROFILES'),
+                                onTap: () => onNavigateToTab(1),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _buildStatCard(
+                                count: '$womenCount',
+                                label: AppLanguageController.text('WOMEN HOROSCOPE\nPROFILES'),
+                                onTap: () => onNavigateToTab(1),
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            Expanded(
+                              child: _buildStatCard(
+                                count: '365',
+                                label: AppLanguageController.text('DAYS OF\nSUPPORT'),
+                              ),
+                            ),
+                          ],
                         ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _buildStatCard(
-                            count: '5K+',
-                            label: AppLanguageController.text('SUCCESSFUL\nMATCHES'),
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: _buildStatCard(
-                            count: '365',
-                            label: AppLanguageController.text('DAYS OF\nSUPPORT'),
-                          ),
-                        ),
-                      ],
-                    ),
+                      );
+                    },
                   ),
 
                   const SizedBox(height: 32),
@@ -220,44 +233,51 @@ class HomeScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildStatCard({required String count, required String label}) {
-    return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-      decoration: BoxDecoration(
-        color: Colors.white,
+  Widget _buildStatCard({required String count, required String label, VoidCallback? onTap}) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
         borderRadius: BorderRadius.circular(14),
-        border: Border.all(color: const Color(0xFFEBEBEB)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFEBEBEB)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 10,
+                offset: const Offset(0, 4),
+              ),
+            ],
           ),
-        ],
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Text(
-            count,
-            style: GoogleFonts.roboto(
-              fontSize: 19,
-              fontWeight: FontWeight.w900,
-              color: AppColors.primary,
-            ),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                count,
+                style: GoogleFonts.roboto(
+                  fontSize: 22,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                label,
+                textAlign: TextAlign.center,
+                style: GoogleFonts.roboto(
+                  fontSize: 10.5,
+                  fontWeight: FontWeight.bold,
+                  color: const Color(0xFF666666),
+                  height: 1.2,
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            textAlign: TextAlign.center,
-            style: GoogleFonts.roboto(
-              fontSize: 9.5,
-              fontWeight: FontWeight.bold,
-              color: const Color(0xFF888888),
-              height: 1.2,
-            ),
-          ),
-        ],
+        ),
       ),
     );
   }

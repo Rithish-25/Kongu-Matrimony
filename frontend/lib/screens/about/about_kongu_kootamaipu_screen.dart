@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
-import '../../core/localization/app_language.dart';
 import '../../widgets/appbar/custom_app_bar.dart';
 
 class AboutKonguKootamaipuScreen extends StatelessWidget {
@@ -9,32 +8,27 @@ class AboutKonguKootamaipuScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isTamil = AppLanguageController.isTamil;
-
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
-      appBar: CustomAppBar(
-        title: isTamil ? 'கொங்கு கூட்டமைப்பு பற்றி' : 'About Kongu Kootamaipu',
+      appBar: const CustomAppBar(
+        title: 'About Kongu Kootamaipu',
         isMainScreen: false,
       ),
       body: SingleChildScrollView(
+        physics: const BouncingScrollPhysics(),
         padding: const EdgeInsets.all(16),
         child: Column(
           children: [
-            // Header Card
+            // Header Logo & Title Card in Bright App Orange
             Container(
               width: double.infinity,
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 20),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [AppColors.primary, AppColors.primaryDark],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
+                color: AppColors.primary,
                 borderRadius: BorderRadius.circular(20),
                 boxShadow: [
                   BoxShadow(
-                    color: AppColors.primary.withValues(alpha: 0.25),
+                    color: AppColors.primary.withValues(alpha: 0.3),
                     blurRadius: 15,
                     offset: const Offset(0, 6),
                   ),
@@ -43,88 +37,203 @@ class AboutKonguKootamaipuScreen extends StatelessWidget {
               child: Column(
                 children: [
                   Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: const BoxDecoration(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
                       color: Colors.white,
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(16),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withValues(alpha: 0.12),
+                          blurRadius: 10,
+                          offset: const Offset(0, 4),
+                        ),
+                      ],
                     ),
-                    child: const Icon(
-                      Icons.diversity_3_rounded,
-                      size: 40,
-                      color: AppColors.primary,
+                    child: SizedBox(
+                      width: 130,
+                      height: 130,
+                      child: Image.asset(
+                        'assets/home-logo.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) => Image.asset(
+                          'assets/logo.jpeg',
+                          fit: BoxFit.cover,
+                        ),
+                      ),
                     ),
                   ),
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 16),
                   Text(
-                    isTamil ? 'கொங்கு கூட்டமைப்பு' : 'Kongu Kootamaipu',
-                    style: GoogleFonts.roboto(
-                      fontSize: 22,
+                    'கொங்கு வேளாளர் சங்கங்கள் கூட்டமைப்பு',
+                    textAlign: TextAlign.center,
+                    style: GoogleFonts.poppins(
+                      fontSize: 20,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
+                      height: 1.3,
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    isTamil
-                        ? 'கொங்கு வேளாள கவுண்டர் சமுதாயத் திருமண சேவை அமைப்பு'
-                        : 'Official Matrimonial Trust for Kongu Community',
-                    textAlign: TextAlign.center,
-                    style: GoogleFonts.roboto(
-                      fontSize: 13,
-                      color: Colors.white70,
-                      fontWeight: FontWeight.w500,
-                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Key Association Details Card
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: Column(
+                children: [
+                  _buildOrgDetailRow(
+                    icon: Icons.verified_rounded,
+                    title: 'தொடங்கிய காலம் & அரசு பதிவு எண்',
+                    subtitle: '21.03.2004 | அரசு பதிவு எண் : 194 / 2004',
+                  ),
+                  const Divider(height: 20),
+                  _buildOrgDetailRow(
+                    icon: Icons.groups_rounded,
+                    title: 'அமைப்புத் தன்மை',
+                    subtitle: 'அரசியல் சார்பற்ற அமைப்பு',
+                  ),
+                  const Divider(height: 20),
+                  _buildOrgDetailRow(
+                    icon: Icons.hub_rounded,
+                    title: 'உறுப்பினர் சங்கங்கள்',
+                    subtitle: '37 கொங்கு சமுதாய சங்கங்கள்',
                   ),
                 ],
               ),
             ),
             const SizedBox(height: 20),
 
-            // Mission Card
-            _buildInfoCard(
-              icon: Icons.flag_rounded,
-              title: isTamil ? 'எங்கள் நோக்கம்' : 'Our Mission',
-              content: isTamil
-                  ? 'கொங்கு வேளாள கவுண்டர் சமூகத்தின் பண்பாடு, கலாச்சாரம் மற்றும் பாரம்பரிய மதிப்புகளைப் பாதுகாத்து, உலகம் முழுவதிலும் உள்ள கொங்கு குடும்பங்களை ஒன்றாக இணைப்பதே எங்களின் முதன்மை நோக்கமாகும்.'
-                  : 'To unite Kongu families worldwide by offering a reliable, traditional, and 100% Kootam-verified matrimonial platform preserving our community heritage.',
+            // Service Projects Section Title
+            Row(
+              children: [
+                Container(
+                  width: 4,
+                  height: 22,
+                  decoration: BoxDecoration(
+                    color: AppColors.primary,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'சேவை திட்டங்கள்',
+                  style: GoogleFonts.poppins(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+              ],
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 12),
 
-            // Key Highlights Card
-            _buildInfoCard(
-              icon: Icons.verified_user_rounded,
-              title: isTamil ? 'முக்கிய சிறப்பம்சங்கள்' : 'Key Highlights',
+            // Service Projects List Card
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(18),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(color: AppColors.border),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.03),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
               child: Column(
                 children: [
-                  _buildHighlightRow(
-                    icon: Icons.check_circle_rounded,
-                    title: isTamil ? '100% கூட்டப் பொருத்தம் சரிபார்ப்பு' : '100% Kootam Verification',
-                    subtitle: isTamil ? 'அனைத்து குலதெய்வம் மற்றும் கூட்டம் சரிபார்க்கப்பட்டது' : 'Detailed Kootam & Kuladeivam mapping',
+                  _buildServiceItem(
+                    icon: Icons.celebration_rounded,
+                    text: 'கொங்கு சமுதாய முன்னோடிகள் பிறந்த நாள் மற்றும் நினைவு நாள் விழா நடத்துதல்.',
                   ),
                   const Divider(height: 18),
-                  _buildHighlightRow(
-                    icon: Icons.auto_awesome_rounded,
-                    title: isTamil ? 'துல்லியமான ஜாதகப் பொருத்தம்' : 'Accurate Horoscope Porutham',
-                    subtitle: isTamil ? '10 பொருத்தம் மற்றும் திருக்கணித கணிப்பு' : '10 Porutham calculations & Navamsha charts',
+                  _buildServiceItem(
+                    icon: Icons.school_rounded,
+                    text: 'கலிங்கராயன் கல்வி உதவித்திட்டம்.',
                   ),
                   const Divider(height: 18),
-                  _buildHighlightRow(
-                    icon: Icons.security_rounded,
-                    title: isTamil ? 'பாதுகாப்பான குடும்ப தொடர்புகள்' : 'Family Privacy & Security',
-                    subtitle: isTamil ? 'நேரடி குடும்ப தொடர்பு மற்றும் சரிபார்க்கப்பட்ட எண்கள்' : 'Direct contact details with family consent',
+                  _buildServiceItem(
+                    icon: Icons.card_membership_rounded,
+                    text: 'கொங்குவேளாளர் பாலிடெக்னிக் கல்லூரியில் மாணவர்களுக்கு கொங்கு அறக்கட்டளை கல்லூரி கட்டணம் இன்றி பயில இட ஒதுக்கீடு செய்தல்.',
+                  ),
+                  const Divider(height: 18),
+                  _buildServiceItem(
+                    icon: Icons.savings_rounded,
+                    text: 'பொருளாதாரத்தில் பின் தங்கிய மாணவர்களுக்கு வருடாந்திர கல்வி நிதியுதவி வழங்குதல்.',
+                  ),
+                  const Divider(height: 18),
+                  _buildServiceItem(
+                    icon: Icons.work_rounded,
+                    text: 'இளைஞர்களுக்கு வேலைவாய்ப்பு சேவை.',
+                  ),
+                  const Divider(height: 18),
+                  _buildServiceItem(
+                    icon: Icons.campaign_rounded,
+                    text: 'கொங்கு சமுதாய விழிப்புணர்வு சேவை.',
+                  ),
+                  const Divider(height: 18),
+                  _buildServiceItem(
+                    icon: Icons.favorite_rounded,
+                    text: 'கொங்கு கூட்டமைப்பு திருமணத் தகவல் மையம் சேவை.',
+                  ),
+                  const Divider(height: 18),
+                  _buildServiceItem(
+                    icon: Icons.medical_services_rounded,
+                    text: 'இலவச மருத்துவ சேவை.',
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 14),
+            const SizedBox(height: 16),
 
-            // Contact & Help Card
-            _buildInfoCard(
-              icon: Icons.headset_mic_rounded,
-              title: isTamil ? 'எங்களை தொடர்பு கொள்ள' : 'Contact & Support',
-              content: isTamil
-                  ? 'ஈரோடு, கோயம்புத்தூர், திருப்பூர், சேலம், நாமக்கல் மற்றும் கரூர் மாவட்ட தலைமை அலுவலகங்கள் மூலம் சேவை வழங்கப்படுகிறது.\n\nHelpline: +91 98765 43210\nEmail: support@kongukootamaipu.org'
-                  : 'Serving families across Erode, Coimbatore, Tiruppur, Salem, Namakkal & Karur.\n\nHelpline: +91 98765 43210\nEmail: support@kongukootamaipu.org',
+            // Footer Summary Card in App Primary Orange accent
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(16),
+              decoration: BoxDecoration(
+                color: AppColors.primary.withValues(alpha: 0.08),
+                borderRadius: BorderRadius.circular(14),
+                border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(
+                    Icons.volunteer_activism_rounded,
+                    color: AppColors.primary,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'ஆகிய சேவைத்திட்டங்கள் கொங்கு சமுதாயத்திற்காக செயல்படுத்தி வருகின்றோம்.',
+                      style: GoogleFonts.poppins(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.w600,
+                        color: AppColors.primary,
+                        height: 1.4,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
             ),
             const SizedBox(height: 30),
           ],
@@ -133,90 +242,80 @@ class AboutKonguKootamaipuScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoCard({
-    required IconData icon,
-    required String title,
-    String? content,
-    Widget? child,
-  }) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(18),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppColors.border),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Icon(icon, color: AppColors.primary, size: 22),
-              const SizedBox(width: 10),
-              Text(
-                title,
-                style: GoogleFonts.roboto(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
-                  color: AppColors.textPrimary,
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          if (content != null)
-            Text(
-              content,
-              style: GoogleFonts.roboto(
-                fontSize: 13.5,
-                color: AppColors.textSecondary,
-                height: 1.5,
-              ),
-            ),
-          if (child != null) child,
-        ],
-      ),
-    );
-  }
-
-  Widget _buildHighlightRow({
+  Widget _buildOrgDetailRow({
     required IconData icon,
     required String title,
     required String subtitle,
   }) {
     return Row(
       children: [
-        Icon(icon, color: AppColors.secondary, size: 20),
-        const SizedBox(width: 12),
+        Container(
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.08),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: AppColors.primary, size: 20),
+        ),
+        const SizedBox(width: 14),
         Expanded(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
                 title,
-                style: GoogleFonts.roboto(
-                  fontSize: 13.5,
-                  fontWeight: FontWeight.w700,
-                  color: AppColors.textPrimary,
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  fontWeight: FontWeight.w500,
+                  color: AppColors.textSecondary,
                 ),
               ),
               const SizedBox(height: 2),
               Text(
                 subtitle,
-                style: GoogleFonts.roboto(
-                  fontSize: 11.5,
-                  color: AppColors.textLight,
+                style: GoogleFonts.poppins(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.textPrimary,
                 ),
               ),
             ],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildServiceItem({
+    required IconData icon,
+    required String text,
+  }) {
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Container(
+          margin: const EdgeInsets.only(top: 2),
+          padding: const EdgeInsets.all(6),
+          decoration: BoxDecoration(
+            color: AppColors.primary.withValues(alpha: 0.1),
+            shape: BoxShape.circle,
+          ),
+          child: Icon(
+            icon,
+            color: AppColors.primary,
+            size: 16,
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: Text(
+            text,
+            style: GoogleFonts.poppins(
+              fontSize: 13.5,
+              fontWeight: FontWeight.w500,
+              color: AppColors.textPrimary,
+              height: 1.45,
+            ),
           ),
         ),
       ],

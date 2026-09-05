@@ -30,71 +30,61 @@ class MembershipCard extends StatelessWidget {
     Color textSecondaryColor;
 
     if (plan.contains('diamond')) {
+      // DIAMOND PLAN: Deep Cyan & Royal Blue Sparkle Gradient
       cardGradient = const LinearGradient(
-        colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF2C5364)],
+        colors: [Color(0xFF0F2027), Color(0xFF203A43), Color(0xFF0072FF)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       );
       cardShadow = [
         BoxShadow(
-          color: const Color(0xFF203A43).withValues(alpha: 0.35),
+          color: const Color(0xFF0072FF).withValues(alpha: 0.35),
           blurRadius: 16,
           offset: const Offset(0, 8),
         ),
       ];
       cardIcon = Icons.diamond_rounded;
-      iconColor = const Color(0xFF38BDF8); // Sparkling Diamond Cyan
+      iconColor = const Color(0xFF00E5FF); // Electric Cyan Diamond
       textPrimaryColor = Colors.white;
       textSecondaryColor = const Color(0xFFBAE6FD);
-    } else if (plan.contains('gold')) {
-      cardGradient = const LinearGradient(
-        colors: [Color(0xFF334155), Color(0xFF1E293B), Color(0xFF0F172A)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      );
-      cardShadow = [
-        BoxShadow(
-          color: Colors.black.withValues(alpha: 0.25),
-          blurRadius: 16,
-          offset: const Offset(0, 8),
-        ),
-      ];
-      cardIcon = Icons.workspace_premium;
-      iconColor = const Color(0xFFCBD5E1);
-      textPrimaryColor = Colors.white;
-      textSecondaryColor = const Color(0xFF94A3B8);
     } else if (plan.contains('platinum')) {
+      // PLATINUM PLAN: Metallic Platinum Dark Sheen Gradient
       cardGradient = const LinearGradient(
-        colors: [Color(0xFF1E2429), Color(0xFF384048), Color(0xFF4A525A)],
+        colors: [Color(0xFF141E30), Color(0xFF243B55), Color(0xFF3A4B68)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       );
       cardShadow = [
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.35),
+          color: const Color(0xFF243B55).withValues(alpha: 0.4),
           blurRadius: 16,
           offset: const Offset(0, 8),
         ),
       ];
-      cardIcon = Icons.military_tech_rounded;
-      iconColor = const Color(0xFFE2E8F0); // Platinum silver
+      cardIcon = Icons.workspace_premium_rounded;
+      iconColor = const Color(0xFFF8FAFC); // Platinum Silver
       textPrimaryColor = Colors.white;
-      textSecondaryColor = Colors.white70;
-    } else if (plan.contains('assisted')) {
-      cardGradient = AppColors.primaryGradient;
+      textSecondaryColor = const Color(0xFFE2E8F0);
+    } else if (plan.contains('premium 1') || plan.contains('gold')) {
+      // GOLD PLAN: Rich Amber Gold Gradient
+      cardGradient = const LinearGradient(
+        colors: [Color(0xFF78350F), Color(0xFFB45309), Color(0xFFD97706)],
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+      );
       cardShadow = [
         BoxShadow(
-          color: Colors.black.withValues(alpha: 0.25),
+          color: const Color(0xFFD97706).withValues(alpha: 0.35),
           blurRadius: 16,
           offset: const Offset(0, 8),
         ),
       ];
       cardIcon = Icons.stars_rounded;
-      iconColor = Colors.white;
+      iconColor = const Color(0xFFFDE047);
       textPrimaryColor = Colors.white;
-      textSecondaryColor = const Color(0xFFCBD5E1);
+      textSecondaryColor = const Color(0xFFFEF3C7);
     } else {
-      // Free Member
+      // FREE PLAN: Soft Light Grey/Blue
       cardGradient = const LinearGradient(
         colors: [Color(0xFFF1F5F9), Color(0xFFE2E8F0)],
         begin: Alignment.topLeft,
@@ -106,6 +96,12 @@ class MembershipCard extends StatelessWidget {
       textPrimaryColor = AppColors.textPrimary;
       textSecondaryColor = AppColors.textSecondary;
     }
+
+    final String displayValid = (validUntil.contains(':') ||
+            validUntil.toLowerCase().startsWith('upgrade') ||
+            validUntil.toLowerCase().startsWith('valid'))
+        ? validUntil
+        : 'Valid Till: $validUntil';
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -222,7 +218,7 @@ class MembershipCard extends StatelessWidget {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Valid Till: $validUntil',
+                        displayValid,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: GoogleFonts.poppins(
@@ -248,7 +244,7 @@ class MembershipCard extends StatelessWidget {
                           const SizedBox(width: 12),
                           Flexible(
                             child: Text(
-                              'Valid Till: $validUntil',
+                              displayValid,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               textAlign: TextAlign.end,

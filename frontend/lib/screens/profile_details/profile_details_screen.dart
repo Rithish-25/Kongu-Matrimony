@@ -151,11 +151,11 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                                         ),
                                         _GridItem(
                                           AppLanguageController.text('dob'),
-                                          userState.plan.toLowerCase().contains('free')
-                                              ? '🔒 **-**-${profile.dob.split('-').last}'
-                                              : profile.dob,
-                                          isLocked: userState.plan.toLowerCase().contains('free'),
-                                          onTapLocked: () => _showUpgradePlanModal(context),
+                                          profile.dob,
+                                        ),
+                                        _GridItem(
+                                          AppLanguageController.text('time_of_birth'),
+                                          profile.timeOfBirth,
                                         ),
                                         _GridItem(AppLanguageController.text('age'), '${profile.age} ${AppLanguageController.text('yrs')}'),
                                         _GridItem(
@@ -216,29 +216,17 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                                         _GridItem(AppLanguageController.text('subsect'), AppLanguageController.text(profile.subsect)),
                                         _GridItem(
                                           AppLanguageController.text('father_occupation'),
-                                          userState.plan.toLowerCase().contains('free')
-                                              ? AppLanguageController.text('locked_info')
-                                              : AppLanguageController.text(profile.fatherOccupation),
-                                          isLocked: userState.plan.toLowerCase().contains('free'),
-                                          onTapLocked: () => _showUpgradePlanModal(context),
+                                          AppLanguageController.text(profile.fatherOccupation),
                                         ),
                                         _GridItem(
                                           AppLanguageController.text('mother_occupation'),
-                                          userState.plan.toLowerCase().contains('free')
-                                              ? AppLanguageController.text('locked_info')
-                                              : AppLanguageController.text(profile.motherOccupation),
-                                          isLocked: userState.plan.toLowerCase().contains('free'),
-                                          onTapLocked: () => _showUpgradePlanModal(context),
+                                          AppLanguageController.text(profile.motherOccupation),
                                         ),
                                         _GridItem(AppLanguageController.text('brothers'), AppLanguageController.text(profile.brothersCount)),
                                         _GridItem(AppLanguageController.text('sisters'), AppLanguageController.text(profile.sistersCount)),
                                         _GridItem(
                                           AppLanguageController.text('ancestral_origin'),
-                                          userState.plan.toLowerCase().contains('free')
-                                              ? AppLanguageController.text('locked_info')
-                                              : AppLanguageController.text(profile.ancestralOrigin),
-                                          isLocked: userState.plan.toLowerCase().contains('free'),
-                                          onTapLocked: () => _showUpgradePlanModal(context),
+                                          AppLanguageController.text(profile.ancestralOrigin),
                                         ),
                                       ],
                                     ),
@@ -250,21 +238,13 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                                         _GridItem(AppLanguageController.text('education'), AppLanguageController.text(profile.education)),
                                         _GridItem(
                                           AppLanguageController.text('education_detail'),
-                                          userState.plan.toLowerCase().contains('free')
-                                              ? AppLanguageController.text('locked_info')
-                                              : AppLanguageController.text(profile.educationDetail),
-                                          isLocked: userState.plan.toLowerCase().contains('free'),
-                                          onTapLocked: () => _showUpgradePlanModal(context),
+                                          AppLanguageController.text(profile.educationDetail),
                                         ),
                                         _GridItem(AppLanguageController.text('occupation'), AppLanguageController.text(profile.occupation)),
                                         _GridItem(AppLanguageController.text('employed_in'), AppLanguageController.text(profile.employedIn)),
                                         _GridItem(
                                           AppLanguageController.text('annual_income'),
-                                          userState.plan.toLowerCase().contains('free')
-                                              ? AppLanguageController.text('locked_info')
-                                              : AppLanguageController.text(profile.annualIncome),
-                                          isLocked: userState.plan.toLowerCase().contains('free'),
-                                          onTapLocked: () => _showUpgradePlanModal(context),
+                                          AppLanguageController.text(profile.annualIncome),
                                         ),
                                         _GridItem(AppLanguageController.text('work_location'), AppLanguageController.text(profile.workLocation)),
                                       ],
@@ -274,110 +254,13 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                                       title: AppLanguageController.text('location_contact'),
                                       icon: Icons.location_on_outlined,
                                       items: [
-                                        _GridItem(
-                                          AppLanguageController.text('native_place'),
-                                          userState.plan.toLowerCase().contains('free')
-                                              ? AppLanguageController.text('locked_info')
-                                              : AppLanguageController.text(profile.nativePlace),
-                                          isLocked: userState.plan.toLowerCase().contains('free'),
-                                          onTapLocked: () => _showUpgradePlanModal(context),
-                                        ),
+                                        _GridItem(AppLanguageController.text('native_place'), AppLanguageController.text(profile.nativePlace)),
                                         _GridItem(AppLanguageController.text('city'), AppLanguageController.text(profile.city)),
-                                        _GridItem(
-                                          AppLanguageController.text('district'),
-                                          userState.plan.toLowerCase().contains('free')
-                                              ? AppLanguageController.text('locked_info')
-                                              : AppLanguageController.text(profile.district),
-                                          isLocked: userState.plan.toLowerCase().contains('free'),
-                                          onTapLocked: () => _showUpgradePlanModal(context),
-                                        ),
-                                        _GridItem(
-                                          AppLanguageController.text('state'),
-                                          userState.plan.toLowerCase().contains('free')
-                                              ? AppLanguageController.text('locked_info')
-                                              : AppLanguageController.text(profile.state),
-                                          isLocked: userState.plan.toLowerCase().contains('free'),
-                                          onTapLocked: () => _showUpgradePlanModal(context),
-                                        ),
+                                        _GridItem(AppLanguageController.text('district'), AppLanguageController.text(profile.district)),
+                                        _GridItem(AppLanguageController.text('state'), AppLanguageController.text(profile.state)),
                                         _GridItem(AppLanguageController.text('country'), AppLanguageController.text(profile.country)),
                                       ],
                                     ),
-                                    if (userState.plan.toLowerCase().contains('free')) ...[
-                                      const SizedBox(height: 10),
-                                      Container(
-                                        padding: const EdgeInsets.all(14),
-                                        decoration: BoxDecoration(
-                                          color: Colors.amber.shade50,
-                                          borderRadius: BorderRadius.circular(16),
-                                          border: Border.all(color: Colors.amber.shade400, width: 1.2),
-                                        ),
-                                        child: Column(
-                                          crossAxisAlignment: CrossAxisAlignment.start,
-                                          children: [
-                                            Row(
-                                              children: [
-                                                Icon(Icons.lock_rounded, color: Colors.amber.shade900, size: 20),
-                                                const SizedBox(width: 8),
-                                                Expanded(
-                                                  child: Text(
-                                                    AppLanguageController.text('unlock_contact'),
-                                                    style: GoogleFonts.poppins(
-                                                      fontSize: 13,
-                                                      fontWeight: FontWeight.bold,
-                                                      color: Colors.amber.shade900,
-                                                    ),
-                                                  ),
-                                                ),
-                                              ],
-                                            ),
-                                            const SizedBox(height: 6),
-                                            Text(
-                                              AppLanguageController.text('contact_locked_msg'),
-                                              style: GoogleFonts.poppins(
-                                                fontSize: 11.5,
-                                                color: Colors.brown.shade900,
-                                                height: 1.35,
-                                              ),
-                                            ),
-                                            const SizedBox(height: 12),
-                                            SizedBox(
-                                              width: double.infinity,
-                                              height: 40,
-                                              child: ElevatedButton(
-                                                onPressed: () => _showUpgradePlanModal(context),
-                                                style: ElevatedButton.styleFrom(
-                                                  backgroundColor: Colors.amber.shade800,
-                                                  foregroundColor: Colors.white,
-                                                  elevation: 0,
-                                                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                                                  shape: RoundedRectangleBorder(
-                                                    borderRadius: BorderRadius.circular(10),
-                                                  ),
-                                                ),
-                                                child: Row(
-                                                  mainAxisAlignment: MainAxisAlignment.center,
-                                                  children: [
-                                                    const Icon(Icons.workspace_premium_rounded, size: 18, color: Colors.white),
-                                                    const SizedBox(width: 8),
-                                                    FittedBox(
-                                                      fit: BoxFit.scaleDown,
-                                                      child: Text(
-                                                        AppLanguageController.text('upgrade_now'),
-                                                        style: GoogleFonts.poppins(
-                                                          fontSize: 13,
-                                                          fontWeight: FontWeight.bold,
-                                                          color: Colors.white,
-                                                        ),
-                                                      ),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
                                     const SizedBox(height: AppConstants.spacingL),
                                     _buildSectionCard(
                                       title: AppLanguageController.text('partner_expectations'),
@@ -805,9 +688,6 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
 
   // Horoscope Details Card
   Widget _buildHoroscopeCard(ThemeData theme, Profile profile) {
-    final userState = ProfileDatabase.userProfileNotifier.value;
-    final isFreeUser = userState.plan.toLowerCase().contains('free');
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -844,35 +724,32 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
           ),
           child: Column(
             children: [
-              InkWell(
-                onTap: isFreeUser ? () => _showUpgradePlanModal(context) : null,
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _buildHoroscopeSpec(
-                        AppLanguageController.text('star'),
-                        isFreeUser ? AppLanguageController.text('locked_info') : profile.horoscopeStar,
-                        isLocked: isFreeUser,
-                      ),
+              Row(
+                children: [
+                  Expanded(
+                    child: _buildHoroscopeSpec(
+                      AppLanguageController.text('star'),
+                      profile.horoscopeStar,
+                      isLocked: false,
                     ),
-                    Container(width: 1, height: 40, color: AppColors.border),
-                    Expanded(
-                      child: _buildHoroscopeSpec(
-                        AppLanguageController.text('paatham'),
-                        isFreeUser ? AppLanguageController.text('locked_info') : profile.horoscopePaatham,
-                        isLocked: isFreeUser,
-                      ),
+                  ),
+                  Container(width: 1, height: 40, color: AppColors.border),
+                  Expanded(
+                    child: _buildHoroscopeSpec(
+                      AppLanguageController.text('paatham'),
+                      profile.horoscopePaatham,
+                      isLocked: false,
                     ),
-                    Container(width: 1, height: 40, color: AppColors.border),
-                    Expanded(
-                      child: _buildHoroscopeSpec(
-                        AppLanguageController.text('rasi'),
-                        isFreeUser ? AppLanguageController.text('locked_info') : profile.horoscopeRasi,
-                        isLocked: isFreeUser,
-                      ),
+                  ),
+                  Container(width: 1, height: 40, color: AppColors.border),
+                  Expanded(
+                    child: _buildHoroscopeSpec(
+                      AppLanguageController.text('rasi'),
+                      profile.horoscopeRasi,
+                      isLocked: false,
                     ),
-                  ],
-                ),
+                  ),
+                ],
               ),
               const SizedBox(height: AppConstants.spacingM),
               Divider(color: AppColors.border, height: 1),
@@ -900,6 +777,37 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton.icon(
+                  onPressed: () {
+                    _handleHoroscopeDownload(context, profile);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppColors.primary,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    padding: const EdgeInsets.symmetric(vertical: 10),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(20),
+                    ),
+                  ),
+                  icon: const Icon(
+                    Icons.download_rounded,
+                    size: 18,
+                    color: Colors.white,
+                  ),
+                  label: Text(
+                    AppLanguageController.text('download_horoscope'),
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
                     ),
                   ),
                 ),
@@ -988,7 +896,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                           ),
                         ),
                         Text(
-                          AppLanguageController.text('contact_locked_msg'),
+                          'Upgrade to Diamond or Platinum plan to unlock full phone number, email & horoscope download.',
                           style: GoogleFonts.poppins(
                             fontSize: 11,
                             color: AppColors.textSecondary,
@@ -1000,17 +908,17 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                 ],
               ),
               const SizedBox(height: 20),
-              // Gold Plan Card
+              // Diamond Card
               _buildPlanTile(
                 context: context,
-                title: AppLanguageController.text('gold_membership'),
-                price: '₹ 1,999 / 6 Months',
-                subtitle: 'Unlock 50 Mobile Numbers + Horoscope Download',
+                title: 'Diamond Plan',
+                price: '₹ 1,500.00 / 90 Days',
+                subtitle: '30 Verified Contacts + Unlimited Search + 3 Photos',
                 badge: 'RECOMMENDED',
                 color: Colors.amber.shade800,
                 onTap: () async {
                   Navigator.pop(ctx);
-                  await ProfileDatabase.updateUserProfile(plan: 'Gold Plan');
+                  await ProfileDatabase.updateUserProfile(plan: 'Diamond');
                   if (context.mounted) {
                     setState(() {});
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -1024,17 +932,17 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                 },
               ),
               const SizedBox(height: 12),
-              // Platinum Plan Card
+              // Platinum Card
               _buildPlanTile(
                 context: context,
-                title: AppLanguageController.text('platinum_membership'),
-                price: '₹ 3,499 / 1 Year',
-                subtitle: 'Unlimited Contacts + Direct Family Contact + Priority Ranking',
-                badge: 'BEST VALUE',
+                title: 'Platinum Plan',
+                price: '₹ 2,500.00 / 120 Days',
+                subtitle: '60 Verified Contacts + Unlimited Search + 4 Photos',
+                badge: 'MOST POPULAR',
                 color: AppColors.primary,
                 onTap: () async {
                   Navigator.pop(ctx);
-                  await ProfileDatabase.updateUserProfile(plan: 'Platinum Plan');
+                  await ProfileDatabase.updateUserProfile(plan: 'Platinum');
                   if (context.mounted) {
                     setState(() {});
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -1165,7 +1073,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
       return;
     }
 
-    final limit = plan.contains('gold') ? 10 : 20;
+    final limit = (plan.contains('premium 1') || plan.contains('gold')) ? 40 : 100;
     if (userState.downloadedCount >= limit) {
       showDialog(
         context: context,

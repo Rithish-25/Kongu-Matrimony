@@ -11,7 +11,6 @@ import '../../core/assets/registration_draft.dart';
 import '../register/register_flow.dart';
 
 import '../../core/localization/app_language.dart';
-import '../about/about_kongu_kootamaipu_screen.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
@@ -26,10 +25,10 @@ class ProfileScreen extends StatelessWidget {
         valueListenable: ProfileDatabase.userProfileNotifier,
         builder: (context, userProfile, _) {
           final validString = userProfile.plan.toLowerCase() == 'free'
-              ? 'Upgrade to Download'
-              : userProfile.plan.toLowerCase() == 'gold'
-                  ? 'Downloads: ${userProfile.downloadedCount} / 10'
-                  : 'Downloads: ${userProfile.downloadedCount} / 20';
+              ? 'Upgrade to Bookmark'
+              : userProfile.plan.toLowerCase().contains('diamond')
+                  ? 'Bookmarks: ${userProfile.downloadedCount} / 30'
+                  : 'Bookmarks: ${userProfile.downloadedCount} / 60';
 
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
@@ -113,34 +112,6 @@ class ProfileScreen extends StatelessWidget {
                         );
                       },
                     ),
-                    _ProfileOption(
-                      icon: Icons.info_outline_rounded,
-                      title: isTamil ? 'கொங்கு கூட்டமைப்பு பற்றி' : 'About Kongu Kootamaipu',
-                      subtitle: isTamil ? 'எங்கள் வரலாறு மற்றும் சேவைகள்' : 'Learn about our community trust',
-                      onTap: () {
-                        Navigator.of(context).push(
-                          appPageRoute(const AboutKonguKootamaipuScreen()),
-                        );
-                      },
-                    ),
-                    _ProfileOption(
-                      icon: Icons.privacy_tip_outlined,
-                      title: isTamil ? 'தனியுரிமைக் கொள்கை' : 'Privacy Policy',
-                      subtitle: isTamil ? 'எங்கள் தனியுரிமை கொள்கைகள்' : 'Read our privacy policy and terms',
-                      onTap: () => _showPolicyDialog(context, 'Privacy Policy'),
-                    ),
-                    _ProfileOption(
-                      icon: Icons.gavel_outlined,
-                      title: isTamil ? 'விதிமுறைகள் & நிபந்தனைகள்' : 'Terms & Conditions',
-                      subtitle: isTamil ? 'பயன்பாட்டு விதிமுறைகள்' : 'Terms of service and usage rules',
-                      onTap: () => _showPolicyDialog(context, 'Terms & Conditions'),
-                    ),
-                    _ProfileOption(
-                      icon: Icons.receipt_long_outlined,
-                      title: isTamil ? 'திரும்பப்பெறும் கொள்கை' : 'Refund Policy',
-                      subtitle: isTamil ? 'பணம் திரும்பப் பெறும் விதிமுறைகள்' : 'Refund rules and payment terms',
-                      onTap: () => _showPolicyDialog(context, 'Refund Policy'),
-                    ),
                   ],
                 ),
                 const SizedBox(height: AppConstants.spacingL),
@@ -194,29 +165,6 @@ class ProfileScreen extends StatelessWidget {
             ),
           );
         },
-      ),
-    );
-  }
-
-  void _showPolicyDialog(BuildContext context, String title) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        backgroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        title: Text(title, style: GoogleFonts.poppins(fontWeight: FontWeight.bold)),
-        content: SingleChildScrollView(
-          child: Text(
-            'Official $title for Kongu Kootamaipu™. We are committed to transparency, security, and member satisfaction.',
-            style: GoogleFonts.poppins(fontSize: 13.5, color: AppColors.textSecondary),
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text('Close', style: GoogleFonts.poppins(fontWeight: FontWeight.bold, color: AppColors.primary)),
-          ),
-        ],
       ),
     );
   }

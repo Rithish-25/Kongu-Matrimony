@@ -225,21 +225,65 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
   Widget _buildResultsView(BuildContext context, ThemeData theme, UserProfileState userProfile) {
     final bool showGenderChips = !ProfileDatabase.isLoggedIn;
 
+    final TextEditingController searchController = TextEditingController();
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Results Info header title
+        // Results Info header title with Search & Filter Bar
         Padding(
-          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: 8.0),
-          child: Text(
-            '${_searchResults.length} ${AppLanguageController.text('horoscope_profiles')}',
-            style: GoogleFonts.poppins(
-              fontSize: 14,
-              fontWeight: FontWeight.bold,
-              color: AppColors.primary,
+          padding: const EdgeInsets.fromLTRB(AppConstants.spacingM, 8.0, AppConstants.spacingM, 4.0),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Text(
+                '${_searchResults.length} ${AppLanguageController.text('horoscope_profiles')}',
+                style: GoogleFonts.poppins(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
+              ),
+              IconButton(
+                onPressed: () {
+                  // Filter dialog/sheet UI
+                },
+                icon: const Icon(Icons.tune_rounded, color: AppColors.primary, size: 22),
+                tooltip: 'Filter',
+                padding: EdgeInsets.zero,
+                constraints: const BoxConstraints(),
+              ),
+            ],
+          ),
+        ),
+
+        // Search Input UI
+        Padding(
+          padding: const EdgeInsets.symmetric(horizontal: AppConstants.spacingM, vertical: 4.0),
+          child: Container(
+            height: 42,
+            decoration: BoxDecoration(
+              color: Colors.grey.shade100,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
+            ),
+            child: TextField(
+              controller: searchController,
+              onChanged: (val) {
+                // UI search input - logic handled by user later
+              },
+              style: GoogleFonts.poppins(fontSize: 12.5, color: AppColors.textPrimary),
+              decoration: InputDecoration(
+                hintText: 'Search by Name, Rasi, Star, Koottam...',
+                hintStyle: GoogleFonts.poppins(fontSize: 12, color: AppColors.textSecondary),
+                prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary, size: 20),
+                border: InputBorder.none,
+                contentPadding: const EdgeInsets.symmetric(vertical: 10),
+              ),
             ),
           ),
         ),
+        const SizedBox(height: 4),
 
         // Gender Filter Pills Bar (All, Women, Men) - SHOWN ONLY FOR FREE NON-LOGGED-IN USERS
         if (showGenderChips)

@@ -12,6 +12,7 @@ import 'interests/interests_screen.dart';
 import 'profile/profile_screen.dart';
 
 import '../core/assets/mock_data.dart';
+import '../widgets/drawer/app_drawer.dart';
 import '../widgets/auth_required_dialog.dart';
 
 class MainLayout extends StatefulWidget {
@@ -58,9 +59,24 @@ class _MainLayoutState extends State<MainLayout> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: _currentIndex == 0 ? const AppDrawer() : null,
       appBar: CustomAppBar(
         isMainScreen: _currentIndex == 0,
         showNotification: _currentIndex == 0,
+        showBackButton: false,
+        leading: _currentIndex == 0
+            ? Builder(
+                builder: (context) => IconButton(
+                  tooltip: 'Menu',
+                  icon: const Icon(
+                    Icons.menu_rounded,
+                    size: 24,
+                    color: Colors.white,
+                  ),
+                  onPressed: () => Scaffold.of(context).openDrawer(),
+                ),
+              )
+            : null,
         title: _currentIndex == 0
             ? 'Kongu Kootamaipu'
             : _currentIndex == 1
