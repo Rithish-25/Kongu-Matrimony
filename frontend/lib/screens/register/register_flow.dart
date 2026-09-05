@@ -7,6 +7,8 @@ import '../../core/assets/mock_data.dart';
 import '../../core/localization/app_language.dart';
 import '../main_layout.dart';
 
+import '../auth/login_screen.dart';
+
 // Import the 4 consolidated modular pages
 import 'page_1_astrology_family.dart';
 import 'page_2_education_communication.dart';
@@ -226,6 +228,22 @@ class _RegisterFlowState extends State<RegisterFlow> {
           onPressed: _currentStep > 0 ? _prevStep : () => Navigator.of(context).pop(),
         ),
         actions: [
+          if (!widget.isEditing)
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const LoginScreen()),
+                );
+              },
+              child: Text(
+                'Already a member? Login',
+                style: GoogleFonts.plusJakartaSans(
+                  fontWeight: FontWeight.bold,
+                  fontSize: 12,
+                  color: AppColors.primary,
+                ),
+              ),
+            ),
           TextButton.icon(
             onPressed: _saveAsDraft,
             icon: const Icon(

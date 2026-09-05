@@ -3,6 +3,7 @@ import 'package:google_fonts/google_fonts.dart';
 import '../core/colors/colors.dart';
 import '../core/localization/app_language.dart';
 import '../screens/auth/login_screen.dart';
+import '../screens/auth/quick_register_screen.dart';
 
 class AuthRequiredDialog extends StatelessWidget {
   final String? featureName;
@@ -134,6 +135,38 @@ class AuthRequiredDialog extends StatelessWidget {
               ),
             ),
           ),
+
+          const SizedBox(height: 12),
+
+          // Register Button (Navigates to QuickRegisterScreen - Image 2 Page)
+          SizedBox(
+            width: double.infinity,
+            height: 48,
+            child: OutlinedButton.icon(
+              onPressed: () {
+                Navigator.of(context).pop();
+                Navigator.of(context).push(
+                  MaterialPageRoute(builder: (context) => const QuickRegisterScreen()),
+                );
+              },
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                side: const BorderSide(color: AppColors.primary, width: 1.5),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+              ),
+              icon: const Icon(Icons.person_add_alt_1_rounded, size: 20),
+              label: Text(
+                isTamil ? 'பதிவு செய்யவும்' : 'Register Now',
+                style: GoogleFonts.roboto(
+                  fontSize: 15,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+
           const SizedBox(height: 12),
 
           // Cancel / Dismiss Text Button

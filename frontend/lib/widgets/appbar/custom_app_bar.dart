@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
 import '../../core/localization/app_language.dart';
-import '../../core/theme/theme.dart';
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final String title;
@@ -85,40 +84,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
       titleSpacing: (ModalRoute.of(context)?.canPop ?? false) ? 0 : 16,
       actions: actions ??
           [
-            // 1. Dark Mode / Normal Mode Toggle Switch Button
-            ValueListenableBuilder<ThemeMode>(
-              valueListenable: AppThemeModeController.notifier,
-              builder: (context, themeMode, _) {
-                final isDark = themeMode == ThemeMode.dark;
-                return Tooltip(
-                  message: isDark ? 'Normal Mode / பகல் நிலை' : 'Dark Mode / இரவு நிலை',
-                  child: Transform.scale(
-                    scale: 0.75,
-                    child: Switch(
-                      value: isDark,
-                      onChanged: (val) => AppThemeModeController.setThemeMode(
-                        val ? ThemeMode.dark : ThemeMode.light,
-                      ),
-                      activeThumbColor: Colors.white,
-                      activeTrackColor: const Color(0xFF1E293B),
-                      inactiveThumbColor: Colors.white,
-                      inactiveTrackColor: Colors.white.withValues(alpha: 0.35),
-                      trackOutlineColor: WidgetStateProperty.all(Colors.transparent),
-                      trackOutlineWidth: WidgetStateProperty.all(0.0),
-                      thumbIcon: WidgetStateProperty.resolveWith<Icon?>(
-                        (states) {
-                          if (states.contains(WidgetState.selected)) {
-                            return const Icon(Icons.nightlight_round, color: Color(0xFFF59E0B), size: 14);
-                          }
-                          return const Icon(Icons.wb_sunny_rounded, color: Color(0xFFD35400), size: 14);
-                        },
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ),
-            // 2. Text Size Adjuster Button
+            // 1. Text Size Adjuster Button
             IconButton(
               tooltip: 'Adjust Text Size / எழுத்து அளவு',
               icon: const Icon(
