@@ -106,12 +106,12 @@ flutter_launcher_icons:
 
 flutter_native_splash:
   color: "#FAF8F5"
-  image: assets/home-logo.png
+  image: assets/splash.png
   color_dark: "#FAF8F5"
-  image_dark: assets/home-logo.png
+  image_dark: assets/splash.png
   fullscreen: true
   android_12:
-    image: assets/home-logo.png
+    image: assets/splash.png
     icon_background_color: "#FAF8F5"
   web: false
 
