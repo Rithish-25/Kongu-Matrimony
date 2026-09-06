@@ -148,6 +148,8 @@ class Page5Family extends StatelessWidget {
               formData: formData,
               onChanged: onChanged,
               currentStep: currentStep,
+              maxLines: 3,
+              hint: 'e.g. ₹ 10 - 15 Lakhs / Annum or enter details...',
               validator: (val) {
                 if (val == null || val.trim().isEmpty) return 'Please enter annual income';
                 return null;

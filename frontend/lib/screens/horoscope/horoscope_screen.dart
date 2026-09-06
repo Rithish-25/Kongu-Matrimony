@@ -23,17 +23,73 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
 
   // Form State Values
   String _selectedGender = 'All';
-  final String _selectedMinAge = '18';
-  final String _selectedMaxAge = '40';
-  final String _selectedMinHeight = 'Any';
-  final String _selectedMaxHeight = 'Any';
-  final String _selectedMaritalStatus = 'Any';
-  final String _selectedReligion = 'Hindu';
-  final String _selectedCaste = 'Any';
-  final String _selectedKoottam = 'Any';
-  final String _selectedEducation = 'Any';
-  final String _selectedOccupation = 'Any';
-  final String _selectedLocation = 'Any';
+  String _selectedMinAge = '18';
+  String _selectedMaxAge = '40';
+  String _selectedMinHeight = 'Any';
+  String _selectedMaxHeight = 'Any';
+  String _selectedMaritalStatus = 'Any';
+  String _selectedReligion = 'Hindu';
+  String _selectedCaste = 'Any';
+  String _selectedKoottam = 'Any';
+  String _selectedEducation = 'Any';
+  String _selectedOccupation = 'Any';
+  String _selectedLocation = 'Any';
+  String _selectedCountry = 'Any';
+  String _selectedHoroscopeType = "பொருட்படுத்தவில்லை";
+  String _searchQuery = '';
+
+  static const List<String> horoscopeTypeOptions = [
+    "பொருட்படுத்தவில்லை",
+    'ராகு / கேது',
+    'செவ்வாய்',
+    'Sevvai / Pariharam (2)',
+    'Sevvai / Pariharam (4)',
+    'Sevvai / Pariharam (7)',
+    'Sevvai / Pariharam (8)',
+    'Sevvai / Pariharam (12)',
+    'சுத்த ஜாதகம்',
+    'ராகு / கேது / செவ்வாய்',
+  ];
+
+  static const List<String> kootamOptions = [
+    'Any',
+    'செம்பூத்தன்',
+    'கண்ணந்தை',
+    'பவளன்',
+    'புல்லன்',
+    'பொருளந்தை',
+    'ஓதளன்',
+    'ஆடை',
+    'ஆவனை',
+    'ஆந்தை',
+    'ஆதிரை',
+    'ஆயிரவன்',
+    'ஈசன்',
+    'எண்ணை',
+    'கடை',
+    'காரி',
+    'கிளை',
+    'கொல்லன்',
+    'கோரை',
+    'கோவன்',
+    'மூலன்',
+    'முத்தன்',
+    'நீலன்',
+    'பண்ணை',
+    'பாண்டியன்',
+    'பெரியாண்டி',
+    'பிள்ளன்',
+    'பூசன்',
+    'செங்காணி',
+    'செங்குந்தர்',
+    'சேர்வை',
+    'தாழன்',
+    'தோரட்டான்',
+    'வண்டிக்காரன்',
+    'வெள்ளி',
+    'விளையன்',
+    'இதர',
+  ];
 
   @override
   void initState() {
@@ -92,7 +148,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       case 'Chartered Accountant':
         return education.contains('ca') || education.contains('chartered');
       default:
-        return true;
+        return education.contains(_selectedEducation.toLowerCase());
     }
   }
 
@@ -114,8 +170,43 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       case 'Pediatrician':
         return occupation.contains('pediatrician');
       default:
-        return true;
+        return occupation.contains(_selectedOccupation.toLowerCase());
     }
+  }
+
+  bool _matchesHoroscopeType(Profile profile) {
+    if (_selectedHoroscopeType == "பொருட்படுத்தவில்லை" ||
+        _selectedHoroscopeType == "doesn't matter" ||
+        _selectedHoroscopeType == 'Any') {
+      return true;
+    }
+
+    final dosham = profile.dosham.toLowerCase();
+    final horoType = _selectedHoroscopeType.toLowerCase();
+
+    if (horoType.contains('சுத்த') || horoType.contains('sutha')) {
+      return dosham.contains('no dosham') ||
+          dosham.contains('sutha') ||
+          dosham.contains('none') ||
+          dosham.contains('illai');
+    }
+    if (horoType == 'ராகு / கேது' || horoType == 'raagu / kethu') {
+      return dosham.contains('ragu') || dosham.contains('raagu') || dosham.contains('kethu');
+    }
+    if (horoType == 'செவ்வாய்' || horoType == 'sevvai') {
+      return (dosham.contains('sevvai') || dosham.contains('chevvai')) &&
+          !dosham.contains('illai') &&
+          !dosham.contains('no ');
+    }
+    if (horoType.contains('ராகு / கேது / செவ்வாய்') || horoType.contains('raagu / kethu / sevvai')) {
+      final isRaguKethu = dosham.contains('ragu') || dosham.contains('raagu') || dosham.contains('kethu');
+      final isSevvai = (dosham.contains('sevvai') || dosham.contains('chevvai')) &&
+          !dosham.contains('illai') &&
+          !dosham.contains('no ');
+      return isRaguKethu || isSevvai;
+    }
+
+    return true;
   }
 
   // Trigger Advanced Filter Search
@@ -139,13 +230,10 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       final pGender = profile.gender.trim().toLowerCase();
 
       // ABSOLUTE RULE: When logged in, NEVER show same-gender profiles!
-      // Male login -> Female profiles ONLY
-      // Female login -> Male profiles ONLY
       if (isLoggedIn) {
         if (effectiveUserGender == 'female' || effectiveUserGender.contains('female')) {
           if (pGender != 'male') return false;
         } else {
-          // Defaults to Male user -> show Female profiles ONLY
           if (pGender != 'female') return false;
         }
 
@@ -154,6 +242,21 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       } else {
         if (_selectedGender == 'Female' && pGender != 'female') return false;
         if (_selectedGender == 'Male' && pGender != 'male') return false;
+      }
+
+      // Quick Search Query
+      if (_searchQuery.trim().isNotEmpty) {
+        final q = _searchQuery.trim().toLowerCase();
+        final nameMatch = profile.name.toLowerCase().contains(q);
+        final rasiMatch = profile.horoscopeRasi.toLowerCase().contains(q);
+        final starMatch = profile.horoscopeStar.toLowerCase().contains(q);
+        final kootamMatch = profile.koottam.toLowerCase().contains(q);
+        final locMatch = profile.location.toLowerCase().contains(q);
+        final eduMatch = profile.education.toLowerCase().contains(q);
+        final occMatch = profile.occupation.toLowerCase().contains(q);
+        if (!nameMatch && !rasiMatch && !starMatch && !kootamMatch && !locMatch && !eduMatch && !occMatch) {
+          return false;
+        }
       }
 
       final age = profile.age;
@@ -166,15 +269,17 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
       }
 
       if (_selectedMaritalStatus != 'Any' && _selectedMaritalStatus != 'Never Married') return false;
-
       if (_selectedReligion != 'Any' && _selectedReligion != 'Hindu') return false;
-
       if (_selectedCaste != 'Any' && !profile.subsect.toLowerCase().contains(_selectedCaste.toLowerCase())) return false;
 
-      if (_selectedKoottam != 'Any' && profile.koottam != _selectedKoottam) return false;
-      if (_selectedLocation != 'Any' && profile.location != _selectedLocation) return false;
+      // Avoid to Kootam Rule: If a Kootam is selected, exclude profiles matching that Kootam
+      if (_selectedKoottam != 'Any' && profile.koottam.toLowerCase() == _selectedKoottam.toLowerCase()) return false;
+
+      if (_selectedLocation != 'Any' && !profile.location.toLowerCase().contains(_selectedLocation.toLowerCase())) return false;
+      if (_selectedCountry != 'Any' && !profile.location.toLowerCase().contains(_selectedCountry.toLowerCase())) return false;
       if (!_matchesEducation(profile)) return false;
       if (!_matchesOccupation(profile)) return false;
+      if (!_matchesHoroscopeType(profile)) return false;
 
       return true;
     }).toList()
@@ -192,6 +297,549 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
     } else {
       _searchResults = results;
     }
+  }
+
+  // --- Searchable Dropdown Modal ---
+  void _showSearchableDropdownModal({
+    required String title,
+    required List<String> options,
+    required String currentValue,
+    required ValueChanged<String> onSelected,
+  }) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        String searchQuery = '';
+        return StatefulBuilder(
+          builder: (context, setModalState) {
+            final filteredOptions = options.where((opt) {
+              return opt.toLowerCase().contains(searchQuery.toLowerCase());
+            }).toList();
+
+            return Container(
+              height: MediaQuery.of(context).size.height * 0.65,
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              child: Column(
+                children: [
+                  const SizedBox(height: 12),
+                  Container(
+                    width: 38,
+                    height: 4,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFCBD5E1),
+                      borderRadius: BorderRadius.circular(2),
+                    ),
+                  ),
+                  const SizedBox(height: 14),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 20),
+                    child: Text(
+                      'Select $title',
+                      style: GoogleFonts.roboto(
+                        fontSize: 17,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Container(
+                      height: 44,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFF8FAFC),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFCBD5E1)),
+                      ),
+                      child: TextField(
+                        onChanged: (val) {
+                          setModalState(() {
+                            searchQuery = val;
+                          });
+                        },
+                        style: GoogleFonts.roboto(fontSize: 13.5, color: AppColors.textPrimary),
+                        decoration: InputDecoration(
+                          hintText: 'Search $title...',
+                          hintStyle: GoogleFonts.roboto(fontSize: 13, color: const Color(0xFF94A3B8)),
+                          prefixIcon: const Icon(Icons.search_rounded, color: AppColors.primary, size: 20),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(vertical: 11),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  const Divider(height: 1),
+                  Expanded(
+                    child: filteredOptions.isEmpty
+                        ? Center(
+                            child: Text(
+                              'No matching options found',
+                              style: GoogleFonts.roboto(fontSize: 13, color: AppColors.textSecondary),
+                            ),
+                          )
+                        : ListView.separated(
+                            itemCount: filteredOptions.length,
+                            separatorBuilder: (_, __) => const Divider(height: 1, color: Color(0xFFF1F5F9)),
+                            itemBuilder: (context, index) {
+                              final item = filteredOptions[index];
+                              final isSelected = item == currentValue;
+                              return ListTile(
+                                dense: true,
+                                title: Text(
+                                  item,
+                                  style: GoogleFonts.roboto(
+                                    fontSize: 14,
+                                    fontWeight: isSelected ? FontWeight.bold : FontWeight.w500,
+                                    color: isSelected ? AppColors.primary : AppColors.textPrimary,
+                                  ),
+                                ),
+                                trailing: isSelected
+                                    ? const Icon(Icons.check_circle_rounded, color: AppColors.primary, size: 20)
+                                    : null,
+                                onTap: () {
+                                  onSelected(item);
+                                  Navigator.pop(context);
+                                },
+                              );
+                            },
+                          ),
+                  ),
+                ],
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildDropdownField({
+    required String value,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
+        decoration: BoxDecoration(
+          color: const Color(0xFFFAF9F6),
+          borderRadius: BorderRadius.circular(14),
+          border: Border.all(color: const Color(0xFFE2E8F0)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                value,
+                style: GoogleFonts.roboto(
+                  fontSize: 13.5,
+                  fontWeight: FontWeight.w600,
+                  color: AppColors.textPrimary,
+                ),
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
+            const Icon(Icons.keyboard_arrow_down_rounded, color: AppColors.primary, size: 20),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // --- Filter Modal Sheet ---
+  void _showFilterBottomSheet(BuildContext context) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setFilterState) {
+            return Container(
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.88,
+              ),
+              decoration: const BoxDecoration(
+                color: Color(0xFFFAF8F5),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+              ),
+              child: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(20),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Top Right Cross (Close) Button
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: Container(
+                          width: 36,
+                          height: 36,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: const Color(0xFFE2E8F0)),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.05),
+                                blurRadius: 6,
+                                offset: const Offset(0, 2),
+                              ),
+                            ],
+                          ),
+                          child: IconButton(
+                            onPressed: () => Navigator.pop(context),
+                            icon: const Icon(Icons.close_rounded, color: AppColors.primary, size: 20),
+                            padding: EdgeInsets.zero,
+                            tooltip: 'Close',
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Filter Card
+                      Container(
+                        padding: const EdgeInsets.all(18),
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(color: const Color(0xFFE2E8F0)),
+                          boxShadow: AppConstants.cardShadow,
+                        ),
+                        child: Column(
+                          children: [
+                            // 1. Age Row
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 90,
+                                  child: Text('Age', style: GoogleFonts.roboto(fontSize: 13.5, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                                ),
+                                Expanded(
+                                  child: _buildDropdownField(
+                                    value: _selectedMinAge,
+                                    onTap: () {
+                                      _showSearchableDropdownModal(
+                                        title: 'Min Age',
+                                        options: List.generate(43, (i) => '${18 + i}'),
+                                        currentValue: _selectedMinAge,
+                                        onSelected: (val) {
+                                          setFilterState(() => _selectedMinAge = val);
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Text('To', style: GoogleFonts.roboto(fontSize: 12.5, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                                ),
+                                Expanded(
+                                  child: _buildDropdownField(
+                                    value: _selectedMaxAge,
+                                    onTap: () {
+                                      _showSearchableDropdownModal(
+                                        title: 'Max Age',
+                                        options: List.generate(43, (i) => '${18 + i}'),
+                                        currentValue: _selectedMaxAge,
+                                        onSelected: (val) {
+                                          setFilterState(() => _selectedMaxAge = val);
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 22, color: Color(0xFFF1F5F9)),
+
+                            // 2. Height Row
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 90,
+                                  child: Text('Height', style: GoogleFonts.roboto(fontSize: 13.5, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                                ),
+                                Expanded(
+                                  child: _buildDropdownField(
+                                    value: _selectedMinHeight,
+                                    onTap: () {
+                                      _showSearchableDropdownModal(
+                                        title: 'Min Height',
+                                        options: ['Any', "4'6\"", "4'7\"", "4'8\"", "4'9\"", "4'10\"", "4'11\"", "5'0\"", "5'1\"", "5'2\"", "5'3\"", "5'4\"", "5'5\"", "5'6\"", "5'7\"", "5'8\"", "5'9\"", "5'10\"", "5'11\"", "6'0\"", "6'1\"", "6'2\""],
+                                        currentValue: _selectedMinHeight,
+                                        onSelected: (val) {
+                                          setFilterState(() => _selectedMinHeight = val);
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8),
+                                  child: Text('To', style: GoogleFonts.roboto(fontSize: 12.5, color: AppColors.textSecondary, fontWeight: FontWeight.bold)),
+                                ),
+                                Expanded(
+                                  child: _buildDropdownField(
+                                    value: _selectedMaxHeight,
+                                    onTap: () {
+                                      _showSearchableDropdownModal(
+                                        title: 'Max Height',
+                                        options: ['Any', "4'6\"", "4'7\"", "4'8\"", "4'9\"", "4'10\"", "4'11\"", "5'0\"", "5'1\"", "5'2\"", "5'3\"", "5'4\"", "5'5\"", "5'6\"", "5'7\"", "5'8\"", "5'9\"", "5'10\"", "5'11\"", "6'0\"", "6'1\"", "6'2\""],
+                                        currentValue: _selectedMaxHeight,
+                                        onSelected: (val) {
+                                          setFilterState(() => _selectedMaxHeight = val);
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 22, color: Color(0xFFF1F5F9)),
+
+                              // 3. Avoid to Kootam Row
+                              Row(
+                                children: [
+                                  SizedBox(
+                                    width: 90,
+                                    child: Text('Kootam to avoid', style: GoogleFonts.roboto(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                                  ),
+                                  Expanded(
+                                    child: _buildDropdownField(
+                                      value: _selectedKoottam,
+                                      onTap: () {
+                                        _showSearchableDropdownModal(
+                                          title: 'Kootam to avoid',
+                                          options: kootamOptions,
+                                          currentValue: _selectedKoottam,
+                                          onSelected: (val) {
+                                            setFilterState(() => _selectedKoottam = val);
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Divider(height: 22, color: Color(0xFFF1F5F9)),
+
+                              // Horoscope Type Row
+                              Row(
+                                children: [
+                                  SizedBox(
+                                    width: 90,
+                                    child: Text('Horoscope type', style: GoogleFonts.roboto(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                                  ),
+                                  Expanded(
+                                    child: _buildDropdownField(
+                                      value: _selectedHoroscopeType,
+                                      onTap: () {
+                                        _showSearchableDropdownModal(
+                                          title: 'Horoscope type',
+                                          options: horoscopeTypeOptions,
+                                          currentValue: _selectedHoroscopeType,
+                                          onSelected: (val) {
+                                            setFilterState(() => _selectedHoroscopeType = val);
+                                          },
+                                        );
+                                      },
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const Divider(height: 22, color: Color(0xFFF1F5F9)),
+
+                            // 4. Education Row
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 90,
+                                  child: Text('Education', style: GoogleFonts.roboto(fontSize: 13.5, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                                ),
+                                Expanded(
+                                  child: _buildDropdownField(
+                                    value: _selectedEducation,
+                                    onTap: () {
+                                      _showSearchableDropdownModal(
+                                        title: 'Education',
+                                        options: ['Any', 'Engineering', 'Medicine', 'Management', 'Science/Arts', 'Chartered Accountant', 'Computer Science / IT', 'Law', 'Diploma', 'Other'],
+                                        currentValue: _selectedEducation,
+                                        onSelected: (val) {
+                                          setFilterState(() => _selectedEducation = val);
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 22, color: Color(0xFFF1F5F9)),
+
+                            // 5. Occupation Row
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 90,
+                                  child: Text('Occupation', style: GoogleFonts.roboto(fontSize: 13.5, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                                ),
+                                Expanded(
+                                  child: _buildDropdownField(
+                                    value: _selectedOccupation,
+                                    onTap: () {
+                                      _showSearchableDropdownModal(
+                                        title: 'Occupation',
+                                        options: ['Any', 'Software Professional', 'Data Analytics', 'Business Owner', 'Medical Professional', 'Interior Designer', 'Pediatrician', 'Civil Engineer', 'Banking & Finance', 'Other'],
+                                        currentValue: _selectedOccupation,
+                                        onSelected: (val) {
+                                          setFilterState(() => _selectedOccupation = val);
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 22, color: Color(0xFFF1F5F9)),
+
+                             // 6. Location Row
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 90,
+                                  child: Text('Location', style: GoogleFonts.roboto(fontSize: 13.5, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                                ),
+                                Expanded(
+                                  child: _buildDropdownField(
+                                    value: _selectedLocation,
+                                    onTap: () {
+                                      _showSearchableDropdownModal(
+                                        title: 'Location',
+                                        options: ['Any', 'Erode', 'Coimbatore', 'Salem', 'Tiruppur', 'Namakkal', 'Karur', 'Chennai', 'Madurai', 'Trichy', 'Bangalore', 'Other'],
+                                        currentValue: _selectedLocation,
+                                        onSelected: (val) {
+                                          setFilterState(() => _selectedLocation = val);
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const Divider(height: 22, color: Color(0xFFF1F5F9)),
+
+                            // 7. Country Row
+                            Row(
+                              children: [
+                                SizedBox(
+                                  width: 90,
+                                  child: Text('Country', style: GoogleFonts.roboto(fontSize: 13.5, fontWeight: FontWeight.bold, color: AppColors.textPrimary)),
+                                ),
+                                Expanded(
+                                  child: _buildDropdownField(
+                                    value: _selectedCountry,
+                                    onTap: () {
+                                      _showSearchableDropdownModal(
+                                        title: 'Country',
+                                        options: ['Any', 'India', 'United States', 'United Kingdom', 'Canada', 'Australia', 'United Arab Emirates', 'Singapore', 'Malaysia', 'Germany', 'Qatar', 'Kuwait', 'Saudi Arabia', 'Oman', 'Other'],
+                                        currentValue: _selectedCountry,
+                                        onSelected: (val) {
+                                          setFilterState(() => _selectedCountry = val);
+                                        },
+                                      );
+                                    },
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      // Search Now Button
+                      SizedBox(
+                        width: double.infinity,
+                        height: 50,
+                        child: ElevatedButton.icon(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            _performAdvancedSearch(ProfileDatabase.currentProfiles);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppColors.primary,
+                            foregroundColor: Colors.white,
+                            elevation: 0,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(14),
+                            ),
+                          ),
+                          icon: const Icon(Icons.search_rounded, size: 20),
+                          label: Text(
+                            'Search Now',
+                            style: GoogleFonts.roboto(
+                              fontSize: 15,
+                              fontWeight: FontWeight.bold,
+                              letterSpacing: 0.5,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+
+                      // Bottom Action: Reset Filters
+                      SizedBox(
+                        width: double.infinity,
+                        height: 46,
+                        child: OutlinedButton(
+                          onPressed: () {
+                            setFilterState(() {
+                              _selectedMinAge = '18';
+                              _selectedMaxAge = '40';
+                              _selectedMinHeight = 'Any';
+                              _selectedMaxHeight = 'Any';
+                              _selectedKoottam = 'Any';
+                              _selectedEducation = 'Any';
+                              _selectedOccupation = 'Any';
+                              _selectedLocation = 'Any';
+                              _selectedCountry = 'Any';
+                            });
+                          },
+                          style: OutlinedButton.styleFrom(
+                            foregroundColor: AppColors.primary,
+                            side: const BorderSide(color: AppColors.primary, width: 1.2),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                          ),
+                          child: Text(
+                            'Reset Filters',
+                            style: GoogleFonts.roboto(
+                              fontSize: 13.5,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.primary,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
   }
 
   bool handleBackPress() {
@@ -225,8 +873,6 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
   Widget _buildResultsView(BuildContext context, ThemeData theme, UserProfileState userProfile) {
     final bool showGenderChips = !ProfileDatabase.isLoggedIn;
 
-    final TextEditingController searchController = TextEditingController();
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -245,9 +891,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
                 ),
               ),
               IconButton(
-                onPressed: () {
-                  // Filter dialog/sheet UI
-                },
+                onPressed: () => _showFilterBottomSheet(context),
                 icon: const Icon(Icons.tune_rounded, color: AppColors.primary, size: 22),
                 tooltip: 'Filter',
                 padding: EdgeInsets.zero,
@@ -268,9 +912,9 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
               border: Border.all(color: AppColors.border.withValues(alpha: 0.6)),
             ),
             child: TextField(
-              controller: searchController,
               onChanged: (val) {
-                // UI search input - logic handled by user later
+                _searchQuery = val;
+                _performAdvancedSearch(ProfileDatabase.currentProfiles);
               },
               style: GoogleFonts.poppins(fontSize: 12.5, color: AppColors.textPrimary),
               decoration: InputDecoration(
@@ -421,13 +1065,7 @@ class HoroscopeScreenState extends State<HoroscopeScreen> {
         color: Colors.grey.shade900,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(color: AppColors.border.withValues(alpha: 0.6), width: 0.8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.15),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: AppConstants.cardShadow,
       ),
       clipBehavior: Clip.antiAlias,
       child: Stack(

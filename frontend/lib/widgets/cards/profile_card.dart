@@ -243,28 +243,30 @@ class ProfileCard extends StatelessWidget {
             Expanded(
               child: ElevatedButton.icon(
                 onPressed:
-                    (isSent || isAccepted)
-                        ? null
-                        : () {
-                          ProfileDatabase.updateInterest(profile.id, 'sent');
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text(
-                                'Interest sent to ${profile.name}!',
-                              ),
-                              behavior: SnackBarBehavior.floating,
-                              backgroundColor: AppColors.primary,
-                              duration: const Duration(milliseconds: 1200),
-                            ),
-                          );
-                        },
+                    isAccepted
+                        ? onViewProfile
+                        : (isSent
+                            ? null
+                            : () {
+                              ProfileDatabase.updateInterest(profile.id, 'sent');
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                SnackBar(
+                                  content: Text(
+                                    'Interest sent to ${profile.name}!',
+                                  ),
+                                  behavior: SnackBarBehavior.floating,
+                                  backgroundColor: AppColors.primary,
+                                  duration: const Duration(milliseconds: 1200),
+                                ),
+                              );
+                            }),
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
-                      (isSent || isAccepted)
+                      isSent
                           ? Colors.grey[300]
-                          : AppColors.primary,
+                          : AppColors.expressInterest,
                   foregroundColor:
-                      (isSent || isAccepted) ? Colors.grey[600] : Colors.white,
+                      isSent ? Colors.grey[600] : Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 7.5),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(18),
@@ -272,13 +274,13 @@ class ProfileCard extends StatelessWidget {
                 ),
                 icon: Icon(
                   isAccepted
-                      ? Icons.done_all
+                      ? Icons.visibility_rounded
                       : (isSent ? Icons.check : Icons.favorite),
                   size: 15,
                 ),
                 label: Text(
                   isAccepted
-                      ? 'Interest Accepted'
+                      ? 'View Profile'
                       : (isSent ? 'Interest Sent' : 'Express Interest'),
                   style: const TextStyle(
                     fontSize: 13,

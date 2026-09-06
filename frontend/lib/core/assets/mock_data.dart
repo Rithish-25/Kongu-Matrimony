@@ -8,6 +8,7 @@ class UserProfileState {
   final String plan; // 'Free', 'Gold', 'Platinum'
   final int downloadedCount;
   final String userGender;
+  final DateTime? planStartDate;
 
   UserProfileState({
     required this.displayName,
@@ -15,6 +16,7 @@ class UserProfileState {
     required this.plan,
     required this.downloadedCount,
     this.userGender = '',
+    this.planStartDate,
   });
 
   UserProfileState copyWith({
@@ -23,6 +25,7 @@ class UserProfileState {
     String? plan,
     int? downloadedCount,
     String? userGender,
+    DateTime? planStartDate,
   }) {
     return UserProfileState(
       displayName: displayName ?? this.displayName,
@@ -30,6 +33,7 @@ class UserProfileState {
       plan: plan ?? this.plan,
       downloadedCount: downloadedCount ?? this.downloadedCount,
       userGender: userGender ?? this.userGender,
+      planStartDate: planStartDate ?? this.planStartDate,
     );
   }
 }
@@ -138,7 +142,7 @@ class Profile {
     required this.horoscopeRasi,
     required this.horoscopePaatham,
     this.lagnam = 'Dhanusu',
-    this.dosham = 'No Dosham (Sevvai Dhosham Illai)',
+    this.dosham = 'Sevvai / Pariharam (2)',
     this.gothram = 'Sathandhai Gothram',
     this.eatingHabits = 'Vegetarian',
     this.smokingHabits = 'No',
@@ -316,6 +320,7 @@ class ProfileDatabase {
   static const _kProfileImageUrl = 'user_profile_image_url';
   static const _kPlan = 'user_plan';
   static const _kDownloadedCount = 'user_downloaded_count';
+  static const _kPlanStartDate = 'user_plan_start_date';
   static const _kIsLoggedIn = 'user_is_logged_in';
 
   static bool _isLoggedIn = false;
@@ -332,6 +337,8 @@ class ProfileDatabase {
       final imageUrl = prefs.getString(_kProfileImageUrl);
       final plan = prefs.getString(_kPlan);
       final downloadedCount = prefs.getInt(_kDownloadedCount);
+      final startDateStr = prefs.getString(_kPlanStartDate);
+      final startDate = startDateStr != null ? DateTime.tryParse(startDateStr) : null;
       final isLogged = prefs.getBool(_kIsLoggedIn);
 
       _isLoggedIn = isLogged ?? false;
@@ -351,6 +358,7 @@ class ProfileDatabase {
         plan: (plan != null && plan.isNotEmpty) ? plan : 'Free Plan',
         downloadedCount: downloadedCount ?? userProfileNotifier.value.downloadedCount,
         userGender: effectiveGender,
+        planStartDate: startDate,
       );
 
       // Load persisted favourites & interests
@@ -1271,13 +1279,16 @@ class ProfileDatabase {
     String? plan,
     int? downloadedCount,
     String? gender,
+    DateTime? planStartDate,
   }) async {
+    final effectiveStartDate = planStartDate ?? (plan != null ? DateTime.now() : null);
     userProfileNotifier.value = userProfileNotifier.value.copyWith(
       displayName: displayName,
       profileImageUrl: imageUrl,
       plan: plan,
       downloadedCount: downloadedCount,
       userGender: gender,
+      planStartDate: effectiveStartDate ?? userProfileNotifier.value.planStartDate,
     );
 
     try {
@@ -1287,6 +1298,9 @@ class ProfileDatabase {
       if (plan != null) await prefs.setString(_kPlan, plan);
       if (downloadedCount != null) await prefs.setInt(_kDownloadedCount, downloadedCount);
       if (gender != null) await prefs.setString('user_gender', gender);
+      if (effectiveStartDate != null) {
+        await prefs.setString(_kPlanStartDate, effectiveStartDate.toIso8601String());
+      }
     } catch (_) {}
   }
 
@@ -1298,6 +1312,7 @@ class ProfileDatabase {
       await prefs.remove(_kProfileImageUrl);
       await prefs.remove(_kPlan);
       await prefs.remove(_kDownloadedCount);
+      await prefs.remove(_kPlanStartDate);
       await prefs.remove(_kFavourites);
       await prefs.remove(_kInterests);
       await prefs.setBool(_kIsLoggedIn, false);

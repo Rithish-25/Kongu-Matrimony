@@ -27,7 +27,6 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
   late PageController _pageController;
   late List<Profile> _profiles;
   late int _initialIndex;
-  double _currentPage = 0.0;
   int _lastActivePage = 0;
   final Map<String, double> _pageScrollOffsets = {};
 
@@ -41,7 +40,6 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
       _initialIndex = 0;
     }
     _lastActivePage = _initialIndex;
-    _currentPage = _initialIndex.toDouble();
     _pageController = PageController(initialPage: _initialIndex);
     _pageController.addListener(() {
       int activePage = _pageController.page?.round() ?? _initialIndex;
@@ -51,9 +49,6 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
           _currentImageIndex = 0;
         });
       }
-      setState(() {
-        _currentPage = _pageController.page ?? _initialIndex.toDouble();
-      });
     });
   }
 
@@ -161,7 +156,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                                         _GridItem(
                                           AppLanguageController.text('mobile'),
                                           userState.plan.toLowerCase().contains('free')
-                                              ? (profile.mobile.length >= 8 ? '${profile.mobile.substring(0, 7)} *****' : '+91 98*** *****')
+                                              ? '+91 ***** *****'
                                               : profile.mobile,
                                           isLocked: userState.plan.toLowerCase().contains('free'),
                                           onTapLocked: () => _showUpgradePlanModal(context),
@@ -169,7 +164,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                                         _GridItem(
                                           AppLanguageController.text('email'),
                                           userState.plan.toLowerCase().contains('free')
-                                              ? (profile.email.contains('@') ? '${profile.email.split('@')[0].substring(0, profile.email.split('@')[0].length > 3 ? 3 : 1)}****@${profile.email.split('@')[1]}' : 'user****@gmail.com')
+                                              ? '••••••••••••'
                                               : profile.email,
                                           isLocked: userState.plan.toLowerCase().contains('free'),
                                           onTapLocked: () => _showUpgradePlanModal(context),
@@ -474,16 +469,10 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFFAFAFA),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border, width: 0.8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.015),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: AppConstants.cardShadow,
       ),
       padding: const EdgeInsets.all(AppConstants.spacingM),
       child: Column(
@@ -630,16 +619,10 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
     return Container(
       width: double.infinity,
       decoration: BoxDecoration(
-        color: const Color(0xFFFAFAFA),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.border, width: 0.8),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.015),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
+        boxShadow: AppConstants.cardShadow,
       ),
       padding: const EdgeInsets.all(AppConstants.spacingM),
       child: Column(
@@ -753,35 +736,39 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
               ),
               const SizedBox(height: AppConstants.spacingM),
               Divider(color: AppColors.border, height: 1),
-              const SizedBox(height: AppConstants.spacingS),
-              SizedBox(
-                width: double.infinity,
-                child: OutlinedButton.icon(
-                  onPressed: () {
-                    _handleHoroscopeDownload(context, profile);
-                  },
-                  style: OutlinedButton.styleFrom(
-                    foregroundColor: AppColors.primary,
-                    side: const BorderSide(color: AppColors.primary, width: 1.2),
-                    padding: const EdgeInsets.symmetric(vertical: 10),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                  ),
-                  icon: const Icon(
-                    Icons.visibility_outlined,
-                    size: 18,
-                  ),
-                  label: Text(
-                    AppLanguageController.text('view_horoscope'),
+              const SizedBox(height: AppConstants.spacingS + 4),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'DOSHAM / SEVVAI',
                     style: GoogleFonts.poppins(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                      letterSpacing: 0.5,
                     ),
                   ),
-                ),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      profile.dosham,
+                      style: GoogleFonts.poppins(
+                        fontSize: 12.5,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.primary,
+                      ),
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: AppConstants.spacingS + 4),
+              Divider(color: AppColors.border, height: 1),
+              const SizedBox(height: AppConstants.spacingM),
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton.icon(
@@ -823,14 +810,19 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
     return Column(
       children: [
         Text(
-          label,
-          style: GoogleFonts.poppins(fontSize: 10, color: AppColors.textLight),
+          label.toUpperCase(),
+          style: GoogleFonts.poppins(
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: AppColors.textPrimary,
+            letterSpacing: 0.5,
+          ),
         ),
         const SizedBox(height: 4),
         Text(
           value,
           style: GoogleFonts.poppins(
-            fontSize: isLocked ? 10.5 : 13,
+            fontSize: isLocked ? 11 : 14,
             fontWeight: FontWeight.bold,
             color: isLocked ? Colors.amber.shade900 : AppColors.primary,
           ),
@@ -876,11 +868,11 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                 children: [
                   Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.1),
+                    decoration: const BoxDecoration(
+                      color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.workspace_premium_rounded, color: AppColors.primary, size: 24),
+                    child: const Icon(Icons.workspace_premium_rounded, color: Colors.white, size: 24),
                   ),
                   const SizedBox(width: 12),
                   Expanded(
@@ -1356,8 +1348,8 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                       color: isFav ? AppColors.primary.withValues(alpha: 0.1) : Colors.white,
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(
-                        color: isFav ? AppColors.primary : AppColors.border,
-                        width: 1.2,
+                        color: AppColors.primary,
+                        width: 1.5,
                       ),
                     ),
                     child: Material(
@@ -1392,7 +1384,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                               Icon(
                                 isFav ? Icons.favorite_rounded : Icons.favorite_border_rounded,
                                 size: 18,
-                                color: isFav ? AppColors.primary : AppColors.textPrimary,
+                                color: AppColors.primary,
                               ),
                               const SizedBox(width: 6),
                               Text(
@@ -1402,7 +1394,7 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                                 style: GoogleFonts.roboto(
                                   fontSize: 12.5,
                                   fontWeight: FontWeight.w700,
-                                  color: isFav ? AppColors.primary : AppColors.textPrimary,
+                                  color: AppColors.primary,
                                 ),
                               ),
                             ],
@@ -1418,11 +1410,11 @@ class _ProfileDetailsScreenState extends State<ProfileDetailsScreen> {
                   child: Container(
                     height: 44,
                     decoration: BoxDecoration(
-                      gradient: AppColors.primaryGradient,
+                      gradient: AppColors.expressInterestGradient,
                       borderRadius: BorderRadius.circular(12),
                       boxShadow: [
                         BoxShadow(
-                          color: const Color(0x337A102A),
+                          color: AppColors.expressInterest.withValues(alpha: 0.35),
                           blurRadius: 8,
                           offset: const Offset(0, 3),
                         ),

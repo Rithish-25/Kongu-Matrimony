@@ -17,20 +17,22 @@ class AppConstants {
   static const double borderRadiusSmall = 12.0;
   static const double buttonRadius = 16.0;
 
-  // Shadow styles (Soft, Premium, Neutral)
+  // Shadow styles (Consistent black box shadow across all cards)
   static List<BoxShadow> softShadow = [
     BoxShadow(
-      color: const Color(0x0F000000),
-      blurRadius: 18.0,
-      offset: const Offset(0, 8),
+      color: Colors.black.withValues(alpha: 0.10),
+      blurRadius: 16.0,
+      spreadRadius: 0,
+      offset: const Offset(0, 4),
     ),
   ];
 
   static List<BoxShadow> cardShadow = [
     BoxShadow(
-      color: const Color(0x0A000000),
-      blurRadius: 24.0,
-      offset: const Offset(0, 12),
+      color: Colors.black.withValues(alpha: 0.10),
+      blurRadius: 16.0,
+      spreadRadius: 0,
+      offset: const Offset(0, 4),
     ),
   ];
 

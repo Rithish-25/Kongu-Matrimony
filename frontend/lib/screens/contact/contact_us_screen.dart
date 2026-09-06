@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
+import '../../core/constants/constants.dart';
 import '../../core/localization/app_language.dart';
 import '../../widgets/appbar/custom_app_bar.dart';
 
@@ -25,12 +26,14 @@ class ContactUsScreen extends StatelessWidget {
                   children: [
                     const Icon(Icons.contact_support_rounded, color: AppColors.primary, size: 24),
                     const SizedBox(width: 10),
-                    Text(
-                      title,
-                      style: GoogleFonts.roboto(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                        color: AppColors.textPrimary,
+                    Expanded(
+                      child: Text(
+                        title,
+                        style: GoogleFonts.roboto(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
                       ),
                     ),
                   ],
@@ -39,7 +42,8 @@ class ContactUsScreen extends StatelessWidget {
                 Text(
                   detail,
                   style: GoogleFonts.roboto(
-                    fontSize: 15,
+                    fontSize: 14.5,
+                    height: 1.45,
                     color: AppColors.textSecondary,
                   ),
                 ),
@@ -54,12 +58,14 @@ class ContactUsScreen extends StatelessWidget {
                         SnackBar(
                           content: Text('$title: $detail'),
                           behavior: SnackBarBehavior.floating,
+                          backgroundColor: AppColors.primary,
                         ),
                       );
                     },
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primary,
                       foregroundColor: Colors.white,
+                      elevation: 0,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
@@ -83,101 +89,96 @@ class ContactUsScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isTamil = AppLanguageController.isTamil;
+    return ValueListenableBuilder<AppLanguage>(
+      valueListenable: AppLanguageController.notifier,
+      builder: (context, language, child) {
+        final isTamil = AppLanguageController.isTamil;
 
-    return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
-      appBar: CustomAppBar(
-        title: isTamil ? 'உதவி & ஆதரவு' : 'Help & Support',
-        isMainScreen: false,
-      ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(16),
-        physics: const BouncingScrollPhysics(),
-        child: Column(
-          children: [
-            const SizedBox(height: 8),
+        return Scaffold(
+          backgroundColor: const Color(0xFFF8FAFC),
+          appBar: CustomAppBar(
+            title: isTamil ? 'உதவி & ஆதரவு' : 'Help & Support',
+            isMainScreen: false,
+          ),
+          body: SingleChildScrollView(
+            padding: const EdgeInsets.all(16),
+            physics: const BouncingScrollPhysics(),
+            child: Column(
+              children: [
+                const SizedBox(height: 4),
 
-            // 1. Phone Number Card
-            _buildContactCard(
-              context: context,
-              icon: Icons.phone_in_talk_rounded,
-              iconBgColor: const Color(0xFFEFF6FF),
-              iconColor: const Color(0xFF2563EB),
-              title: isTamil ? 'தொலைபேசி எண்' : 'Phone Number',
-              subtitle: '+91 98765 43210 / 0424 2255889',
-              actionLabel: isTamil ? 'அழைக்கவும்' : 'Call Now',
-              actionColor: const Color(0xFF2563EB),
-              onAction: () => _handleContactAction(
-                context,
-                isTamil ? 'தொலைபேசி அழைப்பு' : 'Call Helpline',
-                '+91 98765 43210',
-              ),
+                // 1. Phone Numbers Card (Both Landline & Cell)
+                _buildContactCard(
+                  context: context,
+                  icon: Icons.phone_in_talk_rounded,
+                  iconBgColor: AppColors.primary,
+                  title: isTamil ? 'தொலைபேசி எண்கள் (Phone Numbers)' : 'Phone Numbers',
+                  subtitle: isTamil ? 'போன் : 0424 - 3553376' : 'Landline: 0424 - 3553376',
+                  secondarySubtitle: isTamil ? 'செல் : +91 94434 - 98799' : 'Mobile: +91 94434 - 98799',
+                  actionLabel: isTamil ? 'அழைக்கவும்' : 'Call Now',
+                  actionColor: const Color(0xFF2563EB),
+                  onAction: () => _handleContactAction(
+                    context,
+                    isTamil ? 'தொலைபேசி எண்கள்' : 'Call Helpline',
+                    '0424 - 3553376 / +91 94434 - 98799',
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // 2. WhatsApp Support Card
+                _buildContactCard(
+                  context: context,
+                  icon: Icons.chat_bubble_rounded,
+                  iconBgColor: const Color(0xFF25D366),
+                  title: isTamil ? 'வாட்ஸ்அப் உதவி (WhatsApp Help)' : 'WhatsApp Help',
+                  subtitle: '+91 94434 - 98799',
+                  actionLabel: isTamil ? 'வாட்ஸ்அப்பில் தொடர்புகொள்ள' : 'Chat on WhatsApp',
+                  actionColor: const Color(0xFF25D366),
+                  onAction: () => _handleContactAction(
+                    context,
+                    isTamil ? 'வாட்ஸ்அப் உதவி' : 'WhatsApp Support',
+                    '+91 94434 - 98799',
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // 3. Email Address Card
+                _buildContactCard(
+                  context: context,
+                  icon: Icons.email_rounded,
+                  iconBgColor: const Color(0xFFEA580C),
+                  title: isTamil ? 'மின்னஞ்சல் முகவரி (Email Address)' : 'Email Address',
+                  subtitle: 'supportkdsk@gmail.com',
+                  actionLabel: isTamil ? 'மின்னஞ்சல் அனுப்ப' : 'Send Email',
+                  actionColor: const Color(0xFFEA580C),
+                  onAction: () => _handleContactAction(
+                    context,
+                    isTamil ? 'மின்னஞ்சல் முகவரி' : 'Email Support',
+                    'supportkdsk@gmail.com',
+                  ),
+                ),
+
+                const SizedBox(height: 16),
+
+                // 4. Main Office Address Card (No Action Button as requested)
+                _buildContactCard(
+                  context: context,
+                  icon: Icons.location_on_rounded,
+                  iconBgColor: const Color(0xFF9333EA),
+                  title: isTamil ? 'தலைமை அலுவலக முகவரி (Office Address)' : 'Main Office Address',
+                  subtitle: isTamil
+                      ? 'பிரைட் காம்ப்ளக்ஸ், 123/1, சஞ்சய் நகர், நசியனூர் ரோடு, கலைமகள் திருமண மண்டபம் அருகில், ஈரோடு - 638 011.'
+                      : 'Bright Complex, 123/1, Sanjay Nagar, Nasiyanur Road, Near Kalaimagal Thirumana Mandapam, Erode - 638 011.',
+                ),
+
+                const SizedBox(height: 32),
+              ],
             ),
-
-            const SizedBox(height: 14),
-
-            // 2. WhatsApp Support Card
-            _buildContactCard(
-              context: context,
-              icon: Icons.chat_bubble_rounded,
-              iconBgColor: const Color(0xFFE8F5E9),
-              iconColor: const Color(0xFF25D366),
-              title: isTamil ? 'வாட்ஸ்அப் உதவி' : 'WhatsApp Help',
-              subtitle: '+91 98765 43210 (Instant Reply)',
-              actionLabel: isTamil ? 'வாட்ஸ்அப்பில் அரட்டையடிக்க' : 'Chat on WhatsApp',
-              actionColor: const Color(0xFF25D366),
-              onAction: () => _handleContactAction(
-                context,
-                isTamil ? 'வாட்ஸ்அப் உதவி' : 'WhatsApp Support',
-                '+91 98765 43210',
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            // 3. Email Address Card
-            _buildContactCard(
-              context: context,
-              icon: Icons.email_rounded,
-              iconBgColor: const Color(0xFFFFF7ED),
-              iconColor: const Color(0xFFEA580C),
-              title: isTamil ? 'மின்னஞ்சல் முகவரி' : 'Email Address',
-              subtitle: 'support@kongukootamaipu.org',
-              actionLabel: isTamil ? 'மின்னஞ்சல் அனுப்ப' : 'Send Email',
-              actionColor: const Color(0xFFEA580C),
-              onAction: () => _handleContactAction(
-                context,
-                isTamil ? 'மின்னஞ்சல் முகவரி' : 'Email Support',
-                'support@kongukootamaipu.org',
-              ),
-            ),
-
-            const SizedBox(height: 14),
-
-            // 4. Office Address Card
-            _buildContactCard(
-              context: context,
-              icon: Icons.location_on_rounded,
-              iconBgColor: const Color(0xFFF3E8FF),
-              iconColor: const Color(0xFF9333EA),
-              title: isTamil ? 'தலைமை அலுவலக முகவரி' : 'Main Office Address',
-              subtitle: isTamil
-                  ? '124, மேட்டூர் ரோடு, மத்திய பேருந்து நிலையம் எதிரில், ஈரோடு - 638011'
-                  : '124, Mettur Road, Opp. Bus Stand, Erode - 638011',
-              actionLabel: isTamil ? 'வரைபடம் பார்க்க' : 'View Location',
-              actionColor: const Color(0xFF9333EA),
-              onAction: () => _handleContactAction(
-                context,
-                isTamil ? 'தலைமை அலுவலகம்' : 'Office Location',
-                '124, Mettur Road, Opp. Bus Stand, Erode - 638011',
-              ),
-            ),
-
-            const SizedBox(height: 30),
-          ],
-        ),
-      ),
+          ),
+        );
+      },
     );
   }
 
@@ -185,83 +186,114 @@ class ContactUsScreen extends StatelessWidget {
     required BuildContext context,
     required IconData icon,
     required Color iconBgColor,
-    required Color iconColor,
     required String title,
     required String subtitle,
-    required String actionLabel,
-    required Color actionColor,
-    required VoidCallback onAction,
+    String? secondarySubtitle,
+    String? actionLabel,
+    Color? actionColor,
+    VoidCallback? onAction,
   }) {
+    final bool hasAction = actionLabel != null && actionLabel.isNotEmpty && onAction != null;
+
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         border: Border.all(color: const Color(0xFFE2E8F0)),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
+        boxShadow: AppConstants.cardShadow,
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: iconBgColor,
-              shape: BoxShape.circle,
-            ),
-            child: Icon(icon, color: iconColor, size: 24),
-          ),
-          const SizedBox(width: 14),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: iconBgColor.withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, color: iconBgColor, size: 22),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Text(
                   title,
                   style: GoogleFonts.roboto(
-                    fontSize: 13,
-                    color: AppColors.textLight,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  subtitle,
-                  style: GoogleFonts.roboto(
-                    fontSize: 14.5,
+                    fontSize: 15,
                     fontWeight: FontWeight.bold,
                     color: AppColors.textPrimary,
                   ),
                 ),
-              ],
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Text(
+            subtitle,
+            style: GoogleFonts.roboto(
+              fontSize: 14,
+              fontWeight: FontWeight.w600,
+              color: AppColors.textPrimary,
+              height: 1.45,
             ),
           ),
-          const SizedBox(width: 8),
-          ElevatedButton(
-            onPressed: onAction,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: actionColor,
-              foregroundColor: Colors.white,
-              elevation: 0,
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(10),
-              ),
-            ),
-            child: Text(
-              actionLabel,
+          if (secondarySubtitle != null && secondarySubtitle.isNotEmpty) ...[
+            const SizedBox(height: 4),
+            Text(
+              secondarySubtitle,
               style: GoogleFonts.roboto(
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppColors.textPrimary,
+                height: 1.45,
               ),
             ),
-          ),
+          ],
+          if (hasAction) ...[
+            const SizedBox(height: 16),
+            SizedBox(
+              width: double.infinity,
+              height: 44,
+              child: ElevatedButton.icon(
+                onPressed: onAction,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: actionColor ?? AppColors.primary,
+                  foregroundColor: Colors.white,
+                  elevation: 0,
+                  padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: Icon(
+                  icon == Icons.phone_in_talk_rounded
+                      ? Icons.call_rounded
+                      : icon == Icons.chat_bubble_rounded
+                          ? Icons.message_rounded
+                          : icon == Icons.email_rounded
+                              ? Icons.send_rounded
+                              : Icons.near_me_rounded,
+                  size: 18,
+                ),
+                label: Flexible(
+                  child: FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text(
+                      actionLabel,
+                      style: GoogleFonts.roboto(
+                        fontSize: 13.5,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 1,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );

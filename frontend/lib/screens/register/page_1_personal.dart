@@ -472,8 +472,8 @@ class _Page1PersonalState extends State<Page1Personal> {
                   if (val == null || val.isEmpty) {
                     return 'Please enter a password';
                   }
-                  if (val.length < 6) {
-                    return 'Password must be at least 6 characters';
+                  if (val.length < 10) {
+                    return 'Password must be minimum 10 characters';
                   }
                   return null;
                 },

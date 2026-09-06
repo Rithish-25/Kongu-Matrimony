@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
+import '../../core/constants/constants.dart';
 import '../../core/assets/mock_data.dart';
 import '../../core/navigation/app_page_route.dart';
 import '../../core/localization/app_language.dart';
@@ -429,13 +430,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
         color: Colors.white,
         borderRadius: BorderRadius.circular(28),
         border: Border.all(color: const Color(0xFFE2E8F0), width: 1.2),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 16,
-            offset: const Offset(0, 6),
-          ),
-        ],
+        boxShadow: AppConstants.cardShadow,
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(26),
@@ -586,7 +581,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
                               }
                             },
                             style: ElevatedButton.styleFrom(
-                              backgroundColor: const Color(0xFFD35400),
+                              backgroundColor: AppColors.expressInterest,
                               foregroundColor: Colors.white,
                               elevation: 2,
                               padding: const EdgeInsets.symmetric(vertical: 11, horizontal: 4),
@@ -663,13 +658,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: AppConstants.cardShadow,
           ),
           child: Column(
             children: [
@@ -734,29 +723,61 @@ class _InterestsScreenState extends State<InterestsScreen> {
               const SizedBox(height: 12),
 
               if (isAccepted)
-                // Full Width Accepted Button (Decline button is hidden)
+                // Full Width View Profile Button when accepted
                 SizedBox(
                   width: double.infinity,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(vertical: 11),
-                    decoration: BoxDecoration(
-                      color: const Color(0xFFE2E8F0),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        const Icon(Icons.check_rounded, size: 18, color: Colors.white),
-                        const SizedBox(width: 6),
-                        Text(
-                          'accepted',
-                          style: GoogleFonts.plusJakartaSans(
-                            fontSize: 14,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
+                  child: ElevatedButton.icon(
+                    onPressed: () {
+                      final targetProfile = item.profile ??
+                          ProfileDatabase.currentProfiles.firstWhere(
+                            (p) => p.id == item.id,
+                            orElse: () => Profile(
+                              id: item.id,
+                              name: item.name,
+                              gender: 'female',
+                              age: 24,
+                              heightText: "5' 4\"",
+                              koottam: 'Sathandhai',
+                              subsect: 'Gounder',
+                              location: 'Coimbatore',
+                              occupation: 'Software Engineer',
+                              education: 'B.E. Computer Science',
+                              maritalStatus: 'Never Married',
+                              profileImageUrl: item.avatarUrl,
+                              horoscopeRasi: 'Mesham',
+                              horoscopeStar: 'Ashwini',
+                              horoscopePaatham: '1',
+                              coverImageUrl: item.avatarUrl,
+                              bio: 'Seeking compatible life partner.',
+                              interestStatus: 'accepted',
+                            ),
+                          );
+                      Navigator.of(context).push(
+                        appPageRoute(
+                          ProfileDetailsScreen(
+                            profile: targetProfile,
+                            heroTag: 'profile-image-${targetProfile.id}-interests',
                           ),
                         ),
-                      ],
+                      );
+                    },
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: AppColors.primary,
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 10),
+                      elevation: 0,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                    ),
+                    icon: const Icon(Icons.visibility_rounded, size: 18, color: Colors.white),
+                    label: Text(
+                      'View Profile',
+                      style: GoogleFonts.plusJakartaSans(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 )
@@ -929,13 +950,7 @@ class _InterestsScreenState extends State<InterestsScreen> {
             color: Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(color: const Color(0xFFE2E8F0), width: 1),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withValues(alpha: 0.04),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
+            boxShadow: AppConstants.cardShadow,
           ),
           child: Column(
             children: [

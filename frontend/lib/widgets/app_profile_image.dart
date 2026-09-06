@@ -1,4 +1,6 @@
 import 'dart:convert';
+import 'dart:io' as io;
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 class AppProfileImage extends StatelessWidget {
@@ -27,6 +29,15 @@ class AppProfileImage extends StatelessWidget {
     if (url.startsWith('assets/')) {
       return AssetImage(url);
     }
+    if (!kIsWeb && (url.startsWith('/') || url.contains(':\\') || url.startsWith('file:'))) {
+      try {
+        final path = url.startsWith('file://') ? url.replaceFirst('file://', '') : url;
+        final file = io.File(path);
+        if (file.existsSync()) {
+          return FileImage(file);
+        }
+      } catch (_) {}
+    }
     return NetworkImage(url);
   }
 
@@ -42,12 +53,7 @@ class AppProfileImage extends StatelessWidget {
           height: height,
           fit: fit,
           alignment: alignment,
-          errorBuilder: (context, error, stackTrace) => Container(
-            width: width,
-            height: height,
-            color: Colors.grey.shade300,
-            child: const Icon(Icons.person, size: 40, color: Colors.grey),
-          ),
+          errorBuilder: (context, error, stackTrace) => _buildFallback(),
         );
       } catch (_) {}
     }
@@ -59,27 +65,44 @@ class AppProfileImage extends StatelessWidget {
         height: height,
         fit: fit,
         alignment: alignment,
-        errorBuilder: (context, error, stackTrace) => Container(
-          width: width,
-          height: height,
-          color: Colors.grey.shade300,
-          child: const Icon(Icons.person, size: 40, color: Colors.grey),
-        ),
-      );
-    } else {
-      return Image.network(
-        imageUrl,
-        width: width,
-        height: height,
-        fit: fit,
-        alignment: alignment,
-        errorBuilder: (context, error, stackTrace) => Container(
-          width: width,
-          height: height,
-          color: Colors.grey.shade300,
-          child: const Icon(Icons.person, size: 40, color: Colors.grey),
-        ),
+        errorBuilder: (context, error, stackTrace) => _buildFallback(),
       );
     }
+
+    if (!kIsWeb && (imageUrl.startsWith('/') || imageUrl.contains(':\\') || imageUrl.startsWith('file:'))) {
+      try {
+        final path = imageUrl.startsWith('file://') ? imageUrl.replaceFirst('file://', '') : imageUrl;
+        final file = io.File(path);
+        if (file.existsSync()) {
+          return Image.file(
+            file,
+            width: width,
+            height: height,
+            fit: fit,
+            alignment: alignment,
+            errorBuilder: (context, error, stackTrace) => _buildFallback(),
+          );
+        }
+      } catch (_) {}
+    }
+
+    return Image.network(
+      imageUrl,
+      width: width,
+      height: height,
+      fit: fit,
+      alignment: alignment,
+      errorBuilder: (context, error, stackTrace) => _buildFallback(),
+    );
+  }
+
+  Widget _buildFallback() {
+    return Container(
+      width: width,
+      height: height,
+      color: Colors.grey.shade300,
+      child: const Icon(Icons.person, size: 40, color: Colors.grey),
+    );
   }
 }
+

@@ -45,7 +45,7 @@ class AppFontSizeController {
 class AppLanguageController {
   static const String _kLanguagePrefKey = 'selected_app_language';
 
-  static final ValueNotifier<AppLanguage> notifier = ValueNotifier<AppLanguage>(AppLanguage.english);
+  static final ValueNotifier<AppLanguage> notifier = ValueNotifier<AppLanguage>(AppLanguage.tamil);
 
   static AppLanguage get current => notifier.value;
   static bool get isTamil => notifier.value == AppLanguage.tamil;
@@ -54,10 +54,10 @@ class AppLanguageController {
     try {
       final prefs = await SharedPreferences.getInstance();
       final savedLang = prefs.getString(_kLanguagePrefKey);
-      if (savedLang == 'tamil') {
-        notifier.value = AppLanguage.tamil;
-      } else {
+      if (savedLang == 'english') {
         notifier.value = AppLanguage.english;
+      } else {
+        notifier.value = AppLanguage.tamil;
       }
     } catch (_) {}
   }
@@ -172,7 +172,7 @@ class AppLanguageController {
     'time_of_birth': 'Time of Birth',
     'mobile': 'Mobile',
     'email': 'Email',
-    'height': 'Height',
+    'height': 'Height / Feet',
     'weight': 'Weight',
     'blood_group': 'Blood Group',
     'complexion': 'Complexion',
@@ -300,7 +300,7 @@ class AppLanguageController {
     'dob': 'பிறந்த தேதி',
     'mobile': 'தொலைபேசி எண்',
     'email': 'மின்னஞ்சல்',
-    'height': 'உயரம்',
+    'height': 'உயரம் / அடி',
     'weight': 'எடை',
     'blood_group': 'இரத்த வகை',
     'complexion': 'நிறம்',

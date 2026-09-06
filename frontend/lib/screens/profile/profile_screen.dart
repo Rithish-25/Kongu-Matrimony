@@ -12,24 +12,36 @@ import '../register/register_flow.dart';
 
 import '../../widgets/app_profile_image.dart';
 import '../../core/localization/app_language.dart';
+import '../../core/utils/device_image_picker.dart';
 
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
     final isTamil = AppLanguageController.isTamil;
 
     return Scaffold(
       body: ValueListenableBuilder<UserProfileState>(
         valueListenable: ProfileDatabase.userProfileNotifier,
         builder: (context, userProfile, _) {
-          final validString = userProfile.plan.toLowerCase() == 'free'
-              ? 'Upgrade to Bookmark'
-              : userProfile.plan.toLowerCase().contains('diamond')
-                  ? 'Bookmarks: ${userProfile.downloadedCount} / 30'
-                  : 'Bookmarks: ${userProfile.downloadedCount} / 60';
+          final planLower = userProfile.plan.toLowerCase();
+          final isFree = planLower.contains('free');
+
+          String validString = '';
+          String bookmarksString = '';
+
+          if (planLower.contains('diamond') || planLower.contains('platinum')) {
+            final isDiamond = planLower.contains('diamond');
+            final totalDays = isDiamond ? 90 : 120;
+            final maxBookmarks = isDiamond ? 30 : 60;
+            final startDate = userProfile.planStartDate ?? DateTime.now();
+            final daysPassed = DateTime.now().difference(startDate).inDays;
+            final remainingDays = (totalDays - daysPassed).clamp(0, totalDays);
+
+            validString = 'Validity: $remainingDays Days Left';
+            bookmarksString = 'Bookmarks: ${userProfile.downloadedCount} / $maxBookmarks';
+          }
 
           return SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
@@ -39,21 +51,58 @@ class ProfileScreen extends StatelessWidget {
               children: [
                 const SizedBox(height: AppConstants.spacingM),
                 Center(
-                  child: Container(
+                  child: SizedBox(
                     width: 120,
-                    height: 150, // 4:5 portrait ratio (120 x 150)
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: AppColors.primary, width: 3),
-                      boxShadow: AppConstants.softShadow,
-                    ),
-                    child: ClipRRect(
-                      borderRadius: BorderRadius.circular(17),
-                      child: AppProfileImage(
-                        imageUrl: userProfile.profileImageUrl,
-                        fit: BoxFit.cover,
-                      ),
+                    height: 150,
+                    child: Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        Container(
+                          width: 120,
+                          height: 150, // 4:5 portrait ratio (120 x 150)
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(20),
+                            border: Border.all(color: AppColors.primary, width: 3),
+                            boxShadow: AppConstants.softShadow,
+                          ),
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(17),
+                            child: AppProfileImage(
+                              imageUrl: userProfile.profileImageUrl,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                        Positioned(
+                          top: -6,
+                          right: -6,
+                          child: InkWell(
+                            onTap: () => _showChangePhotoBottomSheet(context, userProfile.profileImageUrl),
+                            borderRadius: BorderRadius.circular(16),
+                            child: Container(
+                              padding: const EdgeInsets.all(7),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: Colors.white, width: 2),
+                                boxShadow: [
+                                  BoxShadow(
+                                    color: Colors.black.withValues(alpha: 0.2),
+                                    blurRadius: 6,
+                                    offset: const Offset(0, 2),
+                                  ),
+                                ],
+                              ),
+                              child: const Icon(
+                                Icons.edit_rounded,
+                                size: 15,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ),
@@ -66,21 +115,16 @@ class ProfileScreen extends StatelessWidget {
                     color: AppColors.textPrimary,
                   ),
                 ),
-                Text(
-                  'Erode • Kannandhai Koottam',
-                  style: theme.textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
                 const SizedBox(height: AppConstants.spacingL),
                 MembershipCard(
-                  userName: userProfile.displayName,
-                  membershipId: 'KM-998811',
-                  planName: userProfile.plan.toLowerCase() == 'free'
+                  userName: '',
+                  membershipId: '',
+                  planName: isFree
                       ? 'Free Member'
                       : '${userProfile.plan} Premium Member',
                   validUntil: validString,
-                  isPremium: userProfile.plan.toLowerCase() != 'free',
+                  bookmarksInfo: bookmarksString,
+                  isPremium: !isFree,
                 ),
                 const SizedBox(height: AppConstants.spacingL),
                 _buildOptionsGroup(
@@ -193,15 +237,15 @@ class ProfileScreen extends StatelessWidget {
             ),
           ),
         ),
-        Material(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
-          clipBehavior: Clip.antiAlias,
-          child: Container(
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.border),
-              borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
-            ),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge),
+            border: Border.all(color: AppColors.border),
+            boxShadow: AppConstants.cardShadow,
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppConstants.borderRadiusLarge - 1),
             child: ListView.separated(
               padding: EdgeInsets.zero,
               shrinkWrap: true,
@@ -213,11 +257,11 @@ class ProfileScreen extends StatelessWidget {
                 return ListTile(
                   leading: Container(
                     padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: AppColors.primary.withValues(alpha: 0.04),
+                    decoration: const BoxDecoration(
+                      color: AppColors.primary,
                       shape: BoxShape.circle,
                     ),
-                    child: Icon(option.icon, size: 20, color: AppColors.primary),
+                    child: Icon(option.icon, size: 20, color: Colors.white),
                   ),
                   title: Text(
                     option.title,
@@ -295,6 +339,217 @@ class ProfileScreen extends StatelessWidget {
               ),
             ),
           ],
+        );
+      },
+    );
+  }
+
+  void _showChangePhotoBottomSheet(BuildContext context, String currentUrl) {
+    final isTamil = AppLanguageController.isTamil;
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.white,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+      ),
+      builder: (ctx) {
+        return Padding(
+          padding: EdgeInsets.only(
+            left: 20,
+            right: 20,
+            top: 20,
+            bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade300,
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.add_a_photo_rounded, color: AppColors.primary, size: 24),
+                  const SizedBox(width: 10),
+                  Text(
+                    isTamil ? 'சுயவிவரப் புகைப்படத்தை பதிவேற்றவும்' : 'Upload Profile Photo',
+                    style: GoogleFonts.poppins(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 6),
+              Text(
+                isTamil
+                    ? 'உங்கள் சாதனத்திலிருந்து புகைப்படத்தைத் தேர்ந்தெடுக்கவும்'
+                    : 'Choose an image file stored on your device or computer',
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const SizedBox(height: 20),
+
+              // Device Gallery Upload Tile
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    DeviceImagePicker.pickImageFromDevice(
+                      context: context,
+                      onImagePicked: (imageUrl) async {
+                        await ProfileDatabase.updateUserProfile(imageUrl: imageUrl);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Profile photo uploaded from device!'),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: AppColors.primary,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: AppColors.primary.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.primary.withValues(alpha: 0.3), width: 1.5),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: const BoxDecoration(
+                            color: AppColors.primary,
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(Icons.photo_library_rounded, color: Colors.white, size: 22),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                isTamil ? 'சாதனத்திலிருந்து தேர்ந்தெடுக்கவும் (Device Gallery)' : 'Choose from Device / Gallery',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                isTamil ? 'போன் அல்லது கணிப்பொறியிலிருந்து போட்டோ தேர்வு செய்க' : 'Select any image file stored on your device',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.primary),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 12),
+
+              // Camera Option Tile
+              Material(
+                color: Colors.transparent,
+                child: InkWell(
+                  onTap: () {
+                    Navigator.of(ctx).pop();
+                    DeviceImagePicker.pickImageFromDevice(
+                      context: context,
+                      isCamera: true,
+                      onImagePicked: (imageUrl) async {
+                        await ProfileDatabase.updateUserProfile(imageUrl: imageUrl);
+                        if (context.mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Profile photo captured!'),
+                              behavior: SnackBarBehavior.floating,
+                              backgroundColor: AppColors.primary,
+                              duration: Duration(seconds: 2),
+                            ),
+                          );
+                        }
+                      },
+                    );
+                  },
+                  borderRadius: BorderRadius.circular(16),
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+                    decoration: BoxDecoration(
+                      color: Colors.grey.shade50,
+                      borderRadius: BorderRadius.circular(16),
+                      border: Border.all(color: AppColors.border, width: 1),
+                    ),
+                    child: Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(10),
+                          decoration: BoxDecoration(
+                            color: Colors.grey.shade200,
+                            shape: BoxShape.circle,
+                          ),
+                          child: Icon(Icons.camera_alt_rounded, color: AppColors.textPrimary, size: 22),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                isTamil ? 'கேமரா மூலம் படம் எடுக்கவும் (Camera)' : 'Take Photo with Camera',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  color: AppColors.textPrimary,
+                                ),
+                              ),
+                              Text(
+                                isTamil ? 'கேமராவை பயன்படுத்தி படம் எடுக்கவும்' : 'Capture a new picture using camera',
+                                style: GoogleFonts.poppins(
+                                  fontSize: 11,
+                                  color: AppColors.textSecondary,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        Icon(Icons.arrow_forward_ios_rounded, size: 14, color: AppColors.textLight),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 10),
+            ],
+          ),
         );
       },
     );

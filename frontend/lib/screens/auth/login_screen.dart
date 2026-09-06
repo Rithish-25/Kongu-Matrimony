@@ -31,9 +31,10 @@ class _LoginScreenState extends State<LoginScreen> {
   void _handleLogin() async {
     if (!_formKey.currentState!.validate()) return;
 
-    final enteredMobile = _mobileController.text.trim();
+    final enteredInput = _mobileController.text.trim();
     final enteredPassword = _passwordController.text.trim();
-    final enteredDigits = enteredMobile.replaceAll(RegExp(r'\D'), '');
+    final isEmailEntered = enteredInput.contains('@');
+    final enteredDigits = enteredInput.replaceAll(RegExp(r'\D'), '');
 
     setState(() => _isLoading = true);
 
@@ -41,11 +42,26 @@ class _LoginScreenState extends State<LoginScreen> {
 
     final savedProfile = await RegistrationDraft.loadProfileDetails();
     final savedMobileRaw = savedProfile['mobile'] ?? '';
+    final savedEmailRaw = (savedProfile['email'] ?? '').toString().trim().toLowerCase();
     final savedMobileDigits = savedMobileRaw.replaceAll(RegExp(r'\D'), '');
     final savedPassword = savedProfile['password'] ?? '';
 
-    // If a profile was previously registered with a mobile, verify mobile number matches
-    if (savedMobileDigits.isNotEmpty && savedMobileDigits != enteredDigits) {
+    // Verify email or mobile matches saved profile details
+    if (isEmailEntered) {
+      if (savedEmailRaw.isNotEmpty && savedEmailRaw != enteredInput.toLowerCase()) {
+        if (mounted) {
+          setState(() => _isLoading = false);
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Incorrect email ID. Registered email is $savedEmailRaw'),
+              backgroundColor: const Color(0xFFDC2626),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+        return;
+      }
+    } else if (savedMobileDigits.isNotEmpty && savedMobileDigits != enteredDigits) {
       if (mounted) {
         setState(() => _isLoading = false);
         ScaffoldMessenger.of(context).showSnackBar(
@@ -188,10 +204,10 @@ class _LoginScreenState extends State<LoginScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Mobile Field with 10-digit Validation
+                        // Mobile / Email ID Field
                         TextFormField(
                           controller: _mobileController,
-                          keyboardType: TextInputType.phone,
+                          keyboardType: TextInputType.emailAddress,
                           style: GoogleFonts.poppins(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -199,23 +215,31 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           validator: (val) {
                             if (val == null || val.trim().isEmpty) {
-                              return 'Please enter mobile number';
+                              return 'Please enter mobile number or email ID';
                             }
-                            final digitsOnly = val.replaceAll(RegExp(r'\D'), '');
-                            if (digitsOnly.length != 10) {
-                              return 'Please enter a valid 10-digit mobile number';
+                            final trimmed = val.trim();
+                            final isEmail = trimmed.contains('@');
+                            if (isEmail) {
+                              if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$').hasMatch(trimmed.toLowerCase())) {
+                                return 'Please enter a valid email address (e.g. example@gmail.com)';
+                              }
+                            } else {
+                              final digitsOnly = trimmed.replaceAll(RegExp(r'\D'), '');
+                              if (digitsOnly.length != 10) {
+                                return 'Please enter a valid 10-digit mobile number';
+                              }
                             }
                             return null;
                           },
                           decoration: InputDecoration(
                             isDense: true,
-                            hintText: 'Mobile',
+                            hintText: 'Mobile / Email ID',
                             hintStyle: GoogleFonts.poppins(
                               color: const Color(0xFF94A3B8),
                               fontSize: 14,
                             ),
                             prefixIcon: const Icon(
-                              Icons.phone_android_rounded,
+                              Icons.person_outline_rounded,
                               color: AppColors.primary,
                               size: 20,
                             ),
@@ -256,8 +280,8 @@ class _LoginScreenState extends State<LoginScreen> {
                             if (val == null || val.trim().isEmpty) {
                               return 'Please enter password';
                             }
-                            if (val.trim().length < 4) {
-                              return 'Password must be at least 4 characters';
+                            if (val.trim().length < 10) {
+                              return 'Password must be minimum 10 characters';
                             }
                             return null;
                           },

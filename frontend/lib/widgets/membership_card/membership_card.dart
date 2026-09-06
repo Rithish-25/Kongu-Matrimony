@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-import '../../core/colors/colors.dart';
 import '../../core/constants/constants.dart';
 
 class MembershipCard extends StatelessWidget {
@@ -8,14 +7,16 @@ class MembershipCard extends StatelessWidget {
   final String membershipId;
   final String planName;
   final String validUntil;
+  final String bookmarksInfo;
   final bool isPremium;
 
   const MembershipCard({
     super.key,
-    required this.userName,
-    required this.membershipId,
+    this.userName = '',
+    this.membershipId = '',
     required this.planName,
     required this.validUntil,
+    this.bookmarksInfo = '',
     this.isPremium = false,
   });
 
@@ -84,24 +85,32 @@ class MembershipCard extends StatelessWidget {
       textPrimaryColor = Colors.white;
       textSecondaryColor = const Color(0xFFFEF3C7);
     } else {
-      // FREE PLAN: Soft Light Grey/Blue
+      // FREE PLAN: Warm Pastel Coral/Peach Gradient
       cardGradient = const LinearGradient(
-        colors: [Color(0xFFF1F5F9), Color(0xFFE2E8F0)],
+        colors: [Color(0xFFFFF8F0), Color(0xFFFFE6D5), Color(0xFFFED7AA)],
         begin: Alignment.topLeft,
         end: Alignment.bottomRight,
       );
-      cardShadow = AppConstants.softShadow;
+      cardShadow = [
+        BoxShadow(
+          color: const Color(0xFFF97316).withValues(alpha: 0.15),
+          blurRadius: 14,
+          offset: const Offset(0, 6),
+        ),
+      ];
       cardIcon = Icons.stars_rounded;
-      iconColor = AppColors.primary;
-      textPrimaryColor = AppColors.textPrimary;
-      textSecondaryColor = AppColors.textSecondary;
+      iconColor = const Color(0xFFEA580C);
+      textPrimaryColor = const Color(0xFF431407);
+      textSecondaryColor = const Color(0xFF9A3412);
     }
 
-    final String displayValid = (validUntil.contains(':') ||
-            validUntil.toLowerCase().startsWith('upgrade') ||
-            validUntil.toLowerCase().startsWith('valid'))
-        ? validUntil
-        : 'Valid Till: $validUntil';
+    final String displayValid = validUntil.trim().isEmpty
+        ? ''
+        : (validUntil.contains(':') ||
+                validUntil.toLowerCase().startsWith('upgrade') ||
+                validUntil.toLowerCase().startsWith('valid'))
+            ? validUntil
+            : 'Valid Till: $validUntil';
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -192,70 +201,89 @@ class MembershipCard extends StatelessWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: AppConstants.spacingXL),
-                    Text(
-                      userName.toUpperCase(),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: GoogleFonts.poppins(
-                        color: textPrimaryColor,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1.0,
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    if (isCompact) ...[
-                      Text(
-                        'ID: $membershipId',
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.poppins(
-                          color: textSecondaryColor,
-                          fontSize: 11,
-                          letterSpacing: 0.5,
+                    if (userName.isNotEmpty || membershipId.isNotEmpty || displayValid.isNotEmpty || bookmarksInfo.isNotEmpty) ...[
+                      const SizedBox(height: AppConstants.spacingXL),
+                      if (userName.isNotEmpty) ...[
+                        Text(
+                          userName.toUpperCase(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            color: textPrimaryColor,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.0,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        displayValid,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: GoogleFonts.poppins(
-                          color: textSecondaryColor,
-                          fontSize: 11,
+                        const SizedBox(height: 4),
+                      ],
+                      if (membershipId.isNotEmpty) ...[
+                        Text(
+                          'ID: $membershipId',
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            color: textSecondaryColor,
+                            fontSize: 11,
+                            letterSpacing: 0.5,
+                          ),
                         ),
-                      ),
-                    ] else
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              'ID: $membershipId',
+                        const SizedBox(height: 4),
+                      ],
+                      if (displayValid.isNotEmpty && bookmarksInfo.isNotEmpty) ...[
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Text(
+                                displayValid,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                                style: GoogleFonts.poppins(
+                                  color: textSecondaryColor,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              bookmarksInfo,
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
                               style: GoogleFonts.poppins(
                                 color: textSecondaryColor,
                                 fontSize: 11,
-                                letterSpacing: 0.5,
+                                fontWeight: FontWeight.w600,
                               ),
                             ),
+                          ],
+                        ),
+                      ] else if (displayValid.isNotEmpty) ...[
+                        Text(
+                          displayValid,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: GoogleFonts.poppins(
+                            color: textSecondaryColor,
+                            fontSize: 11,
                           ),
-                          const SizedBox(width: 12),
-                          Flexible(
-                            child: Text(
-                              displayValid,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              textAlign: TextAlign.end,
-                              style: GoogleFonts.poppins(
-                                color: textSecondaryColor,
-                                fontSize: 11,
-                              ),
+                        ),
+                      ] else if (bookmarksInfo.isNotEmpty) ...[
+                        Align(
+                          alignment: Alignment.centerRight,
+                          child: Text(
+                            bookmarksInfo,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: GoogleFonts.poppins(
+                              color: textSecondaryColor,
+                              fontSize: 11,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
+                    ],
                   ],
                 ),
               ),

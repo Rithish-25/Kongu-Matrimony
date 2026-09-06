@@ -1,11 +1,9 @@
-// ignore: avoid_web_libraries_in_flutter, deprecated_member_use
-import 'dart:html' as html;
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import '../../core/colors/colors.dart';
 import '../../core/assets/mock_data.dart';
 import '../../core/assets/registration_draft.dart';
+import '../../core/utils/device_image_picker.dart';
 import '../../widgets/app_profile_image.dart';
 import '../main_layout.dart';
 import 'login_screen.dart';
@@ -60,87 +58,87 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
   ];
 
   static const List<String> kootamOptions = [
-    'Sempoothan',
-    'Kannandhai',
-    'Pavalan',
-    'Pullan',
-    'Porulanthai',
-    'Othalan',
-    'Aadai',
-    'Aavanai',
-    'Aandhai',
-    'Adhira',
-    'Aayiravan',
-    'Eesan',
-    'Ennai',
-    'Kadai',
-    'Kari',
-    'Kilai',
-    'Kollan',
-    'Korai',
-    'Kovan',
-    'Moolan',
-    'Mutthan',
-    'Neelan',
-    'Pannai',
-    'Paandian',
-    'Periandi',
-    'Pillan',
-    'Poosan',
-    'Sengaani',
-    'Sengunthar',
-    'Servai',
-    'Thazhan',
-    'Thoratan',
-    'Vandikan',
-    'Velli',
-    'Vilayan',
-    'Other',
+    'செம்பூத்தன்',
+    'கண்ணந்தை',
+    'பவளன்',
+    'புல்லன்',
+    'பொருளந்தை',
+    'ஓதளன்',
+    'ஆடை',
+    'ஆவனை',
+    'ஆந்தை',
+    'ஆதிரை',
+    'ஆயிரவன்',
+    'ஈசன்',
+    'எண்ணை',
+    'கடை',
+    'காரி',
+    'கிளை',
+    'கொல்லன்',
+    'கோரை',
+    'கோவன்',
+    'மூலன்',
+    'முத்தன்',
+    'நீலன்',
+    'பண்ணை',
+    'பாண்டியன்',
+    'பெரியாண்டி',
+    'பிள்ளன்',
+    'பூசன்',
+    'செங்காணி',
+    'செங்குந்தர்',
+    'சேர்வை',
+    'தாழன்',
+    'தோரட்டான்',
+    'வண்டிக்காரன்',
+    'வெள்ளி',
+    'விளையன்',
+    'இதர',
   ];
 
   static const List<String> starOptions = [
-    'Ashwini',
-    'Bharani',
-    'Krittika',
-    'Rohini',
-    'Mrigashirsha',
-    'Ardra',
-    'Punarvasu',
-    'Pushya',
-    'Ashlesha',
-    'Magha',
-    'Purva Phalguni',
-    'Uttara Phalguni',
-    'Hasta',
-    'Chitra',
-    'Swati',
-    'Vishakha',
-    'Anuradha',
-    'Jyeshtha',
-    'Moola',
-    'Purva Ashadha',
-    'Uttara Ashadha',
-    'Shravana',
-    'Dhanishta',
-    'Shatabhisha',
-    'Purva Bhadrapada',
-    'Uttara Bhadrapada',
-    'Revati',
+    'அசுவினி',
+    'பரணி',
+    'கார்த்திகை',
+    'ரோகிணி',
+    'மிருகசீரிஷம்',
+    'திருவாதிரை',
+    'புனர்பூசம்',
+    'பூசம்',
+    'ஆயில்யம்',
+    'மகம்',
+    'பூரம்',
+    'உத்திரம்',
+    'ஹஸ்தம்',
+    'சித்திரை',
+    'சுவாதி',
+    'விசாகம்',
+    'அனுஷம்',
+    'கேட்டை',
+    'மூலம்',
+    'பூராடம்',
+    'உத்திராடம்',
+    'திருவோணம்',
+    'அவிட்டம்',
+    'சதயம்',
+    'பூரட்டாதி',
+    'உத்திரட்டாதி',
+    'ரேவதி',
   ];
 
   static const List<String> rasiOptions = [
-    'Mesham (Aries)',
-    'Rishabam (Taurus)',
-    'Mithunam (Gemini)',
-    'Kadagam (Cancer)',
-    'Simmam (Leo)',
-    'Kanni (Virgo)',
-    'Thulaam (Libra)',
-    'Vrichigam (Scorpio)',
-    'Dhanusu (Sagittarius)',
-    'Magaram (Capricorn)',
-    'Kumbam (Aquarius)',
-    'Meenam (Pisces)',
+    'மேஷம்',
+    'ரிஷபம்',
+    'மிதுனம்',
+    'கடகம்',
+    'சிம்மம்',
+    'கன்னி',
+    'துலாம்',
+    'விருச்சிகம்',
+    'தனுசு',
+    'மகரம்',
+    'கும்பம்',
+    'மீனம்',
   ];
 
   @override
@@ -200,61 +198,38 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
 
   // --- DEVICE FILE PICKERS ---
   void _pickProfilePhotoFromDevice() {
-    if (kIsWeb) {
-      final html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-      uploadInput.accept = 'image/*';
-      uploadInput.click();
-
-      uploadInput.onChange.listen((e) {
-        final files = uploadInput.files;
-        if (files != null && files.isNotEmpty) {
-          final file = files[0];
-          final reader = html.FileReader();
-          reader.readAsDataUrl(file);
-          reader.onLoadEnd.listen((e) {
-            setState(() {
-              _profilePhotoPath = reader.result as String;
-            });
-          });
-        }
-      });
-    }
+    DeviceImagePicker.pickImageFromDevice(
+      context: context,
+      onImagePicked: (imageUrl) {
+        setState(() {
+          _profilePhotoPath = imageUrl;
+        });
+      },
+    );
   }
 
   void _pickCertificateFromDevice({String accept = '.pdf,image/*,.jpg,.jpeg,.png'}) {
-    if (kIsWeb) {
-      final html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-      uploadInput.accept = accept;
-      uploadInput.click();
-
-      uploadInput.onChange.listen((e) {
-        final files = uploadInput.files;
-        if (files != null && files.isNotEmpty) {
-          final file = files[0];
-          setState(() {
-            _communityCertificateName = file.name;
-          });
-        }
-      });
-    }
+    DeviceImagePicker.pickFileFromDevice(
+      context: context,
+      accept: accept,
+      onFilePicked: (fileName, fileDataUrl) {
+        setState(() {
+          _communityCertificateName = fileName;
+        });
+      },
+    );
   }
 
   void _pickHoroscopeFromDevice({String accept = '.pdf,image/*,.jpg,.jpeg,.png'}) {
-    if (kIsWeb) {
-      final html.FileUploadInputElement uploadInput = html.FileUploadInputElement();
-      uploadInput.accept = accept;
-      uploadInput.click();
-
-      uploadInput.onChange.listen((e) {
-        final files = uploadInput.files;
-        if (files != null && files.isNotEmpty) {
-          final file = files[0];
-          setState(() {
-            _horoscopeFileName = file.name;
-          });
-        }
-      });
-    }
+    DeviceImagePicker.pickFileFromDevice(
+      context: context,
+      accept: accept,
+      onFilePicked: (fileName, fileDataUrl) {
+        setState(() {
+          _horoscopeFileName = fileName;
+        });
+      },
+    );
   }
 
   // --- 1st Page Upload Pickers (Device PDF & Photo Uploads Only) ---
@@ -910,13 +885,13 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
                 Container(
                   width: 46,
                   height: 46,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.08),
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.person_outline_rounded,
-                    color: AppColors.primary,
+                    color: Colors.white,
                     size: 26,
                   ),
                 ),
@@ -972,9 +947,10 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
                     behavior: HitTestBehavior.opaque,
                     child: AbsorbPointer(
                       child: _buildTextField(
-                        label: 'DOB',
+                        label: 'DOB *',
                         hint: 'mm/dd/yyyy',
                         controller: _dobController,
+                        validator: (val) => (val == null || val.trim().isEmpty) ? 'Required' : null,
                         suffixIcon: const Padding(
                           padding: EdgeInsets.only(right: 8),
                           child: Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF64748B)),
@@ -987,10 +963,10 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
             ),
             const SizedBox(height: 16),
 
-            // Kulam *
+            // Kootam *
             _buildDropdown(
-              label: 'Kulam *',
-              hint: 'Select Kulam',
+              label: 'Kootam *',
+              hint: 'Select Kootam',
               value: _kootam,
               items: kootamOptions,
               onChanged: (val) => setState(() => _kootam = val),
@@ -1004,21 +980,23 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
               children: [
                 Expanded(
                   child: _buildDropdown(
-                    label: 'Rasi',
+                    label: 'Rasi *',
                     hint: 'Select Rasi',
                     value: _rasi,
                     items: rasiOptions,
                     onChanged: (val) => setState(() => _rasi = val),
+                    validator: (val) => val == null ? 'Required' : null,
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
                   child: _buildDropdown(
-                    label: 'Star',
+                    label: 'Star *',
                     hint: 'Select Star',
                     value: _star,
                     items: starOptions,
                     onChanged: (val) => setState(() => _star = val),
+                    validator: (val) => val == null ? 'Required' : null,
                   ),
                 ),
               ],
@@ -1131,13 +1109,13 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
                 Container(
                   width: 46,
                   height: 46,
-                  decoration: BoxDecoration(
-                    color: AppColors.primary.withValues(alpha: 0.08),
+                  decoration: const BoxDecoration(
+                    color: AppColors.primary,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
                     Icons.lock_outline_rounded,
-                    color: AppColors.primary,
+                    color: Colors.white,
                     size: 26,
                   ),
                 ),
@@ -1174,7 +1152,14 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
               hint: 'Phone Number',
               controller: _phoneController,
               keyboardType: TextInputType.phone,
-              validator: (val) => (val == null || val.trim().isEmpty) ? 'Required' : null,
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) return 'Required';
+                final cleaned = val.trim().replaceAll(RegExp(r'[^0-9]'), '');
+                if (cleaned.length != 10) {
+                  return 'Please enter a valid 10-digit mobile number';
+                }
+                return null;
+              },
             ),
             const SizedBox(height: 16),
 
@@ -1183,7 +1168,14 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
               hint: 'Email Address',
               controller: _emailController,
               keyboardType: TextInputType.emailAddress,
-              validator: (val) => (val == null || val.trim().isEmpty) ? 'Required' : null,
+              validator: (val) {
+                if (val == null || val.trim().isEmpty) return 'Required';
+                final email = val.trim().toLowerCase();
+                if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,}$').hasMatch(email)) {
+                  return 'Please enter a valid email address (e.g. example@gmail.com)';
+                }
+                return null;
+              },
             ),
             const SizedBox(height: 16),
 
@@ -1192,7 +1184,13 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
               hint: 'Password',
               controller: _passwordController,
               obscureText: _obscurePassword,
-              validator: (val) => (val == null || val.trim().isEmpty) ? 'Required' : null,
+              validator: (val) {
+                if (val == null || val.isEmpty) return 'Required';
+                if (val.length < 10) {
+                  return 'Password must be minimum 10 characters';
+                }
+                return null;
+              },
               suffixIcon: IconButton(
                 icon: Icon(
                   _obscurePassword ? Icons.visibility_off_outlined : Icons.visibility_outlined,
@@ -1275,14 +1273,14 @@ class _QuickRegisterScreenState extends State<QuickRegisterScreen> {
                       children: [
                         Container(
                           padding: const EdgeInsets.all(12),
-                          decoration: BoxDecoration(
-                            color: AppColors.primary.withValues(alpha: 0.1),
+                          decoration: const BoxDecoration(
+                            color: AppColors.primary,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(
                             Icons.add_a_photo_outlined,
                             size: 32,
-                            color: AppColors.primary,
+                            color: Colors.white,
                           ),
                         ),
                         const SizedBox(height: 10),

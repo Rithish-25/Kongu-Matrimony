@@ -151,6 +151,7 @@ class _PremiumScreenState extends State<PremiumScreen> {
                 await ProfileDatabase.updateUserProfile(
                   plan: plan.planCode,
                   downloadedCount: 0,
+                  planStartDate: DateTime.now(),
                 );
                 if (mounted) {
                   ScaffoldMessenger.of(context).showSnackBar(
@@ -570,8 +571,8 @@ class _PremiumScreenState extends State<PremiumScreen> {
                                   isCurrentActive
                                       ? AppLanguageController.text('CURRENT PLAN')
                                       : (plan.planCode.toLowerCase().contains('free')
-                                          ? AppLanguageController.text('SELECT FREE PLAN')
-                                          : AppLanguageController.text('Pay Now')),
+                                          ? AppLanguageController.text('SELECT PLAN')
+                                          : AppLanguageController.text('SELECT PLAN')),
                                   style: GoogleFonts.plusJakartaSans(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
