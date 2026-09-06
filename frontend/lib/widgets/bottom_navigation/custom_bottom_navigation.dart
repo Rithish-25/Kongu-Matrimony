@@ -60,7 +60,7 @@ class CustomBottomNavigationBar extends StatelessWidget {
           child: SafeArea(
             top: false,
             child: SizedBox(
-              height: 58,
+              height: 64,
               child: Row(
                 children: List.generate(items.length, (index) {
                   final item = items[index];
@@ -79,17 +79,23 @@ class CustomBottomNavigationBar extends StatelessWidget {
                             Icon(
                               isSelected ? item.activeIcon : item.icon,
                               color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
-                              size: isSelected ? 23 : 21,
+                              size: isSelected ? 22 : 20,
                             ),
-                            const SizedBox(height: 3),
-                            Text(
-                              item.label,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: GoogleFonts.roboto(
-                                fontSize: 11,
-                                fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.75),
+                            const SizedBox(height: 2),
+                            FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(horizontal: 2),
+                                child: Text(
+                                  item.label,
+                                  maxLines: 1,
+                                  style: GoogleFonts.roboto(
+                                    fontSize: 11,
+                                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                                    color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.75),
+                                    height: 1.2,
+                                  ),
+                                ),
                               ),
                             ),
                           ],
