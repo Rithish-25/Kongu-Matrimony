@@ -182,17 +182,21 @@ class HomeScreen extends StatelessWidget {
                               backgroundColor: AppColors.primary,
                               foregroundColor: Colors.white,
                               elevation: 0,
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                               shape: RoundedRectangleBorder(
                                 borderRadius: BorderRadius.circular(22),
                               ),
                             ),
                             icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
-                            label: Text(
-                              AppLanguageController.text('Create Free Profile'),
-                              style: GoogleFonts.roboto(
-                                fontSize: 14,
-                                fontWeight: FontWeight.bold,
+                            label: FittedBox(
+                              fit: BoxFit.scaleDown,
+                              child: Text(
+                                AppLanguageController.text('Create Free Profile'),
+                                style: GoogleFonts.roboto(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.bold,
+                                  height: 1.25,
+                                ),
                               ),
                             ),
                           ),

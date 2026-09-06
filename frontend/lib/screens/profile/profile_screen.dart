@@ -381,12 +381,18 @@ class ProfileScreen extends StatelessWidget {
                 children: [
                   const Icon(Icons.add_a_photo_rounded, color: AppColors.primary, size: 24),
                   const SizedBox(width: 10),
-                  Text(
-                    isTamil ? 'சுயவிவரப் புகைப்படத்தை பதிவேற்றவும்' : 'Upload Profile Photo',
-                    style: GoogleFonts.poppins(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
+                  Expanded(
+                    child: FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        isTamil ? 'சுயவிவரப் புகைப்படத்தை பதிவேற்றவும்' : 'Upload Profile Photo',
+                        style: GoogleFonts.poppins(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
                     ),
                   ),
                 ],
