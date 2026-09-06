@@ -59,8 +59,10 @@ class CustomBottomNavigationBar extends StatelessWidget {
           ),
           child: SafeArea(
             top: false,
-            child: SizedBox(
-              height: 64,
+            bottom: true,
+            child: Container(
+              constraints: const BoxConstraints(minHeight: 68),
+              padding: const EdgeInsets.only(top: 8, bottom: 12),
               child: Row(
                 children: List.generate(items.length, (index) {
                   final item = items[index];
@@ -74,14 +76,15 @@ class CustomBottomNavigationBar extends StatelessWidget {
                         splashColor: Colors.white.withValues(alpha: 0.15),
                         highlightColor: Colors.white.withValues(alpha: 0.08),
                         child: Column(
+                          mainAxisSize: MainAxisSize.min,
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             Icon(
                               isSelected ? item.activeIcon : item.icon,
                               color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.7),
-                              size: isSelected ? 22 : 20,
+                              size: isSelected ? 20 : 18,
                             ),
-                            const SizedBox(height: 2),
+                            const SizedBox(height: 3),
                             FittedBox(
                               fit: BoxFit.scaleDown,
                               child: Padding(
@@ -89,11 +92,11 @@ class CustomBottomNavigationBar extends StatelessWidget {
                                 child: Text(
                                   item.label,
                                   maxLines: 1,
-                                  style: GoogleFonts.roboto(
-                                    fontSize: 11,
+                                  style: GoogleFonts.notoSansTamil(
+                                    fontSize: 10,
                                     fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
-                                    color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.75),
-                                    height: 1.2,
+                                    color: isSelected ? Colors.white : Colors.white.withValues(alpha: 0.85),
+                                    height: 1.1,
                                   ),
                                 ),
                               ),
