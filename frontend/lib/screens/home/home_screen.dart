@@ -4,7 +4,7 @@ import '../../core/colors/colors.dart';
 import '../../core/constants/constants.dart';
 import '../../core/localization/app_language.dart';
 import '../../core/navigation/app_page_route.dart';
-import '../register/register_flow.dart';
+import '../auth/quick_register_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   final ValueChanged<int> onNavigateToTab;
@@ -171,10 +171,7 @@ class HomeScreen extends StatelessWidget {
                             onPressed: () {
                               Navigator.of(context).push(
                                 appPageRoute(
-                                  const RegisterFlow(
-                                    initialStep: 0,
-                                    initialData: {},
-                                  ),
+                                  const QuickRegisterScreen(),
                                 ),
                               );
                             },
